@@ -1,0 +1,15 @@
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\bin\Debug\net10.0\Lintelligent.Reporting.deps.json
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\bin\Debug\net10.0\Lintelligent.Reporting.dll
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\bin\Debug\net10.0\Lintelligent.Reporting.pdb
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\bin\Debug\net10.0\Lintelligent.AnalyzerEngine.dll
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\bin\Debug\net10.0\Lintelligent.AnalyzerEngine.pdb
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\obj\Debug\net10.0\Lintelligent.Reporting.csproj.AssemblyReference.cache
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\obj\Debug\net10.0\Lintelligent.Reporting.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\obj\Debug\net10.0\Lintelligent.Reporting.AssemblyInfoInputs.cache
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\obj\Debug\net10.0\Lintelligent.Reporting.AssemblyInfo.cs
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\obj\Debug\net10.0\Lintelligent.Reporting.csproj.CoreCompileInputs.cache
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\obj\Debug\net10.0\Lintelli.70BE1C6E.Up2Date
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\obj\Debug\net10.0\Lintelligent.Reporting.dll
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\obj\Debug\net10.0\refint\Lintelligent.Reporting.dll
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\obj\Debug\net10.0\Lintelligent.Reporting.pdb
+C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Reporting\obj\Debug\net10.0\ref\Lintelligent.Reporting.dll

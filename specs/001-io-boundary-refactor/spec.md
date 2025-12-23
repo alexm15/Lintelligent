@@ -72,7 +72,7 @@ As an IDE plugin developer, I want to provide syntax trees from the IDE's in-mem
 ### Edge Cases
 
 - What happens when a code provider yields a null or invalid SyntaxTree? (Should be skipped with appropriate logging/error handling in CLI layer)
-- What happens when analyzing a very large collection of syntax trees (100k+ files)? (Should handle gracefully with streaming/yield patterns, not load all into memory)
+- What happens when analyzing a very large collection of syntax trees (10,000+ files)? (Should handle gracefully with streaming/yield patterns, not load all into memory)
 - What happens if a file is deleted between discovery and analysis in FileSystemCodeProvider? (Should handle FileNotFoundException gracefully)
 - What happens when the same file path appears multiple times from a code provider? (Should analyze each instance independently - deduplication is provider's responsibility)
 

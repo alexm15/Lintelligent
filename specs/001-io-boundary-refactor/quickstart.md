@@ -54,12 +54,12 @@ public void TestAnalysis()
 
 ### Step 1: Add ICodeProvider Interface
 
-**File**: `src/Lintelligent.AnalyzerEngine/Abstrations/ICodeProvider.cs`
+**File**: `src/Lintelligent.AnalyzerEngine/Abstractions/ICodeProvider.cs`
 
 ```csharp
 using Microsoft.CodeAnalysis;
 
-namespace Lintelligent.AnalyzerEngine.Abstrations;
+namespace Lintelligent.AnalyzerEngine.Abstractions;
 
 public interface ICodeProvider
 {
@@ -118,7 +118,7 @@ public IEnumerable<DiagnosticResult> Analyze(IEnumerable<SyntaxTree> syntaxTrees
 
 ```csharp
 using Microsoft.CodeAnalysis.CSharp;
-using Lintelligent.AnalyzerEngine.Abstrations;
+using Lintelligent.AnalyzerEngine.Abstractions;
 
 namespace Lintelligent.Cli.Providers;
 

@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace Lintelligent.AnalyzerEngine.Abstrations;
+namespace Lintelligent.AnalyzerEngine.Abstractions;
 
 /// <summary>
 /// Abstraction for discovering and providing source code for analysis.
@@ -9,6 +9,7 @@ namespace Lintelligent.AnalyzerEngine.Abstrations;
 /// <remarks>
 /// Contract Requirements:
 /// - MUST yield only valid, non-null SyntaxTree objects
+///   (Invalid = null reference, tree with parse errors requiring caller action, or tree without FilePath set)
 /// - MUST set meaningful FilePath on each SyntaxTree for diagnostic reporting
 /// - MUST handle errors internally (log and skip problematic sources rather than throwing exceptions)
 /// - MAY filter or transform source code before parsing

@@ -60,7 +60,7 @@ src/
 │   ├── Analysis/
 │   │   ├── AnalyzerEngine.cs        # REFACTORED: Accepts IEnumerable<SyntaxTree> instead of path
 │   │   └── AnalyzerManager.cs       # Unchanged
-│   ├── Abstrations/                 # NEW: ICodeProvider interface added here
+│   ├── Abstractions/                # NEW: ICodeProvider interface added here
 │   │   └── ICodeProvider.cs         # NEW: Abstraction for code discovery
 │   ├── Results/
 │   │   └── DiagnosticResult.cs      # Unchanged
@@ -92,7 +92,7 @@ tests/
 
 ```
 
-**Structure Decision**: Single project structure (Option 1) is used as Lintelligent is a CLI tool with library components. The refactor adds the `Abstrations/` folder to AnalyzerEngine for the ICodeProvider interface and `Providers/` folder to CLI for FileSystemCodeProvider implementation. This maintains the existing layered architecture while enforcing the IO boundary separation required by Constitution Principle I.
+**Structure Decision**: Single project structure (Option 1) is used as Lintelligent is a CLI tool with library components. The refactor adds the `Abstractions/` folder to AnalyzerEngine for the ICodeProvider interface and `Providers/` folder to CLI for FileSystemCodeProvider implementation. This maintains the existing layered architecture while enforcing the IO boundary separation required by Constitution Principle I.
 
 ## Complexity Tracking
 

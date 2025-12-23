@@ -32,7 +32,7 @@ Define the entities, interfaces, and relationships for the IO boundary refactor.
 
 **State**: Stateless - implementations should be instantiable without DI
 
-**Location**: `Lintelligent.AnalyzerEngine/Abstrations/ICodeProvider.cs`
+**Location**: `Lintelligent.AnalyzerEngine/Abstractions/ICodeProvider.cs`
 
 **Relationship**: Used by CLI layer, not by AnalyzerEngine directly
 

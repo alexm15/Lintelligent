@@ -22,7 +22,7 @@
 
 **Purpose**: Project initialization and structural changes
 
-- [ ] T001 Create `src/Lintelligent.AnalyzerEngine/Abstrations/` directory for ICodeProvider interface
+- [ ] T001 Create `src/Lintelligent.AnalyzerEngine/Abstractions/` directory for ICodeProvider interface
 - [ ] T002 Create `src/Lintelligent.Cli/Providers/` directory for concrete provider implementations
 
 ---
@@ -33,7 +33,7 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Create ICodeProvider interface in `src/Lintelligent.AnalyzerEngine/Abstrations/ICodeProvider.cs` with GetSyntaxTrees() method returning IEnumerable<SyntaxTree>
+- [ ] T003 Create ICodeProvider interface in `src/Lintelligent.AnalyzerEngine/Abstractions/ICodeProvider.cs` with GetSyntaxTrees() method returning IEnumerable<SyntaxTree>
 - [ ] T004 Add XML documentation to ICodeProvider specifying contract requirements (valid trees, error handling, lazy evaluation)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel

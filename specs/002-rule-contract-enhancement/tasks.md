@@ -152,32 +152,32 @@
 - **Setup (Phase 1)**: No dependencies - can start immediately
 - **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories
 - **User Stories (Phase 3-5)**: All depend on Foundational phase completion
-  - User Story 1 (Severity Filtering) - P1 priority, can start immediately after foundational
-  - User Story 2 (Multiple Findings) - P1 priority, can start in parallel with US1 after foundational
-  - User Story 3 (Categorization) - P2 priority, can start after foundational (or wait for US1/US2)
+  - User Story 1 - Severity-Based Filtering (P1) - can start immediately after foundational
+  - User Story 2 - Multiple Findings Per File (P1) - can start in parallel with US1 after foundational
+  - User Story 3 - Categorization for Reporting (P2) - can start after foundational (or wait for US1/US2)
 - **Exception Handling (Phase 6)**: Depends on Foundational, can run in parallel with User Stories
 - **Performance Validation (Phase 7)**: Depends on all user stories being complete
 - **Documentation (Phase 8)**: Depends on all implementation being complete
 
 ### User Story Dependencies
 
-- **User Story 1 (P1)**: Depends on Foundational (Phase 2) - No dependencies on other stories
-- **User Story 2 (P1)**: Depends on Foundational (Phase 2) - Can run in parallel with US1
-- **User Story 3 (P2)**: Depends on Foundational (Phase 2) - Can run in parallel with US1/US2, but builds on severity/category metadata
+- **User Story 1 - Severity-Based Filtering (P1)**: Depends on Foundational (Phase 2) - No dependencies on other stories
+- **User Story 2 - Multiple Findings Per File (P1)**: Depends on Foundational (Phase 2) - Can run in parallel with US1
+- **User Story 3 - Categorization for Reporting (P2)**: Depends on Foundational (Phase 2) - Can run in parallel with US1/US2, but builds on severity/category metadata
 
 ### Within Each User Story
 
-**User Story 1** (Severity Filtering):
+**User Story 1 - Severity-Based Filtering**:
 1. Migrate LongMethodRule (T009-T011) - sequential (same file)
 2. Update ScanCommand (T012-T014) - sequential (same file)
 3. Update tests (T015-T020) - all [P], can run in parallel
 
-**User Story 2** (Multiple Findings):
+**User Story 2 - Multiple Findings Per File**:
 1. Create RuleContractTests (T021-T024) - all [P], can run in parallel
 2. Update AnalyzerEngine (T025) - depends on Foundational
 3. Update AnalyzerEngine tests (T026) - depends on T025
 
-**User Story 3** (Categorization):
+**User Story 3 - Categorization for Reporting**:
 1. Update ScanCommand (T027-T028) - sequential (same file)
 2. Update ReportGenerator (T029-T030) - sequential (same file)
 3. Add tests (T031-T032) - [P], can run in parallel
@@ -236,8 +236,8 @@ Task: "Add integration test for filtering by Warning severity"
 
 With 2-3 developers (after Foundational complete):
 
-- **Developer A**: User Story 1 (Severity Filtering) - T009-T020
-- **Developer B**: User Story 2 (Multiple Findings) - T021-T026
+- **Developer A**: User Story 1 - Severity-Based Filtering - T009-T020
+- **Developer B**: User Story 2 - Multiple Findings Per File - T021-T026
 - **Developer C**: Exception Handling (Phase 6) - T033-T038
 
 Once stories complete:

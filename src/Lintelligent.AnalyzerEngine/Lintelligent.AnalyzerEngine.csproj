@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Abstrations\" />
     <Folder Include="Configuration\" />
     <Folder Include="Utilities\" />
   </ItemGroup>

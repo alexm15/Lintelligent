@@ -38,12 +38,6 @@ public class AnalyzerEngine(AnalyzerManager manager)
     /// </remarks>
     public IEnumerable<DiagnosticResult> Analyze(IEnumerable<SyntaxTree> syntaxTrees)
     {
-        foreach (var tree in syntaxTrees)
-        {
-            foreach (var diagnostic in manager.Analyze(tree))
-            {
-                yield return diagnostic;
-            }
-        }
+        return syntaxTrees.SelectMany(manager.Analyze);
     }
 }

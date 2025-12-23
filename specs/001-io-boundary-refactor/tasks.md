@@ -118,17 +118,17 @@
 
 ### Implementation for User Story 3
 
-- [ ] T033 [P] [US3] Create InMemoryCodeProvider class in `tests/Lintelligent.AnalyzerEngine.Tests/TestUtilities/InMemoryCodeProvider.cs` implementing ICodeProvider (for testing/demonstration)
-- [ ] T034 [US3] Implement InMemoryCodeProvider constructor accepting Dictionary<string, string> (filePath → sourceCode) in `tests/Lintelligent.AnalyzerEngine.Tests/TestUtilities/InMemoryCodeProvider.cs`
-- [ ] T035 [US3] Implement InMemoryCodeProvider.GetSyntaxTrees() yielding CSharpSyntaxTree.ParseText(source, path: filePath) for each entry in `tests/Lintelligent.AnalyzerEngine.Tests/TestUtilities/InMemoryCodeProvider.cs`
-- [ ] T036 [P] [US3] Create FilteringCodeProvider class in `tests/Lintelligent.AnalyzerEngine.Tests/TestUtilities/FilteringCodeProvider.cs` demonstrating predicate-based filtering
-- [ ] T037 [US3] Implement FilteringCodeProvider wrapping another ICodeProvider with filter predicate (e.g., modified files only) in `tests/Lintelligent.AnalyzerEngine.Tests/TestUtilities/FilteringCodeProvider.cs`
+- [X] T033 [P] [US3] Create InMemoryCodeProvider class in `tests/Lintelligent.AnalyzerEngine.Tests/TestUtilities/InMemoryCodeProvider.cs` implementing ICodeProvider (for testing/demonstration)
+- [X] T034 [US3] Implement InMemoryCodeProvider constructor accepting Dictionary<string, string> (filePath → sourceCode) in `tests/Lintelligent.AnalyzerEngine.Tests/TestUtilities/InMemoryCodeProvider.cs`
+- [X] T035 [US3] Implement InMemoryCodeProvider.GetSyntaxTrees() yielding CSharpSyntaxTree.ParseText(source, path: filePath) for each entry in `tests/Lintelligent.AnalyzerEngine.Tests/TestUtilities/InMemoryCodeProvider.cs`
+- [X] T036 [P] [US3] Create FilteringCodeProvider class in `tests/Lintelligent.AnalyzerEngine.Tests/TestUtilities/FilteringCodeProvider.cs` demonstrating predicate-based filtering
+- [X] T037 [US3] Implement FilteringCodeProvider wrapping another ICodeProvider with filter predicate (e.g., modified files only) in `tests/Lintelligent.AnalyzerEngine.Tests/TestUtilities/FilteringCodeProvider.cs`
 
 ### Integration Tests for User Story 3
 
-- [ ] T038 [P] [US3] Create InMemoryCodeProvider test: verify analysis results reflect in-memory content, not saved file content in `tests/Lintelligent.AnalyzerEngine.Tests/InMemoryCodeProviderTests.cs`
-- [ ] T039 [P] [US3] Create FilteringCodeProvider test: verify only filtered files analyzed in `tests/Lintelligent.AnalyzerEngine.Tests/FilteringCodeProviderTests.cs`
-- [ ] T040 [P] [US3] Create provider swapping test: different ICodeProvider implementations yield consistent AnalyzerEngine behavior in `tests/Lintelligent.AnalyzerEngine.Tests/CodeProviderIntegrationTests.cs`
+- [X] T038 [P] [US3] Create InMemoryCodeProvider test: verify analysis results reflect in-memory content, not saved file content in `tests/Lintelligent.AnalyzerEngine.Tests/InMemoryCodeProviderTests.cs`
+- [X] T039 [P] [US3] Create FilteringCodeProvider test: verify only filtered files analyzed in `tests/Lintelligent.AnalyzerEngine.Tests/FilteringCodeProviderTests.cs`
+- [X] T040 [P] [US3] Create provider swapping test: different ICodeProvider implementations yield consistent AnalyzerEngine behavior in `tests/Lintelligent.AnalyzerEngine.Tests/CodeProviderIntegrationTests.cs`
 
 **Checkpoint**: At this point, extensibility is proven with multiple ICodeProvider implementations. Future IDE plugins can implement ICodeProvider to analyze unsaved editor buffers.
 
@@ -138,14 +138,14 @@
 
 **Purpose**: Documentation, performance validation, and final quality checks
 
-- [ ] T041 [P] Add XML documentation to AnalyzerEngine.Analyze() explaining new signature and usage in `src/Lintelligent.AnalyzerEngine/Analysis/AnalyzerEngine.cs`
-- [ ] T042 [P] Add XML documentation to FileSystemCodeProvider class in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
-- [ ] T043 [P] Update README or project documentation with ICodeProvider usage examples and migration guide
-- [ ] T044 Verify all existing integration tests pass with refactored architecture (characterization tests → regression validation)
-- [ ] T045 Measure and validate code coverage ≥90% for AnalyzerEngine core (SC-003)
-- [ ] T046 Performance benchmark: analyze 10,000+ file project, verify no memory exhaustion and ±5% execution time (SC-002, SC-004)
-- [ ] T047 Validate Constitution Principle I compliance: zero System.IO dependencies in AnalyzerEngine project references (SC-006)
-- [ ] T048 Final constitution check: verify all 7 principles pass with refactored architecture
+- [X] T041 [P] Add XML documentation to AnalyzerEngine.Analyze() explaining new signature and usage in `src/Lintelligent.AnalyzerEngine/Analysis/AnalyzerEngine.cs`
+- [X] T042 [P] Add XML documentation to FileSystemCodeProvider class in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
+- [X] T043 [P] Update README or project documentation with ICodeProvider usage examples and migration guide
+- [X] T044 Verify all existing integration tests pass with refactored architecture (characterization tests → regression validation)
+- [X] T045 Measure and validate code coverage ≥90% for AnalyzerEngine core (SC-003)
+- [X] T046 Performance benchmark: analyze 10,000+ file project, verify no memory exhaustion and ±5% execution time (SC-002, SC-004)
+- [X] T047 Validate Constitution Principle I compliance: zero System.IO dependencies in AnalyzerEngine project references (SC-006)
+- [X] T048 Final constitution check: verify all 7 principles pass with refactored architecture
 
 ---
 

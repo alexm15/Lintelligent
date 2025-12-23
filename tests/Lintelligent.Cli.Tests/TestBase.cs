@@ -120,7 +120,16 @@ public abstract class TestBase : IAsyncLifetime, IDisposable
         }
 
         // Try to resolve an ILogger from the host to emit structured errors during teardown.
-        var logger = _host.Services.GetService<ILogger<TestBase>>();
+        // Must do this BEFORE stopping the host
+        ILogger<TestBase>? logger = null;
+        try
+        {
+            logger = _host.Services.GetService<ILogger<TestBase>>();
+        }
+        catch
+        {
+            // Host may already be disposed
+        }
 
         var timeout = TimeSpan.FromSeconds(5);
         try

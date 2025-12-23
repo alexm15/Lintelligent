@@ -22,8 +22,8 @@
 
 **Purpose**: Project initialization and structural changes
 
-- [ ] T001 Create `src/Lintelligent.AnalyzerEngine/Abstractions/` directory for ICodeProvider interface
-- [ ] T002 Create `src/Lintelligent.Cli/Providers/` directory for concrete provider implementations
+- [X] T001 Create `src/Lintelligent.AnalyzerEngine/Abstractions/` directory for ICodeProvider interface
+- [X] T002 Create `src/Lintelligent.Cli/Providers/` directory for concrete provider implementations
 
 ---
 
@@ -33,8 +33,8 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Create ICodeProvider interface in `src/Lintelligent.AnalyzerEngine/Abstractions/ICodeProvider.cs` with GetSyntaxTrees() method returning IEnumerable<SyntaxTree>
-- [ ] T004 Add XML documentation to ICodeProvider specifying contract requirements (valid trees, error handling, lazy evaluation)
+- [X] T003 Create ICodeProvider interface in `src/Lintelligent.AnalyzerEngine/Abstractions/ICodeProvider.cs` with GetSyntaxTrees() method returning IEnumerable<SyntaxTree>
+- [X] T004 Add XML documentation to ICodeProvider specifying contract requirements (valid trees, error handling, lazy evaluation)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -55,19 +55,19 @@
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Refactor AnalyzerEngine.Analyze() signature from `Analyze(string projectPath)` to `Analyze(IEnumerable<SyntaxTree> syntaxTrees)` in `src/Lintelligent.AnalyzerEngine/Analysis/AnalyzerEngine.cs`
-- [ ] T008 [US1] Remove all file system IO operations from AnalyzerEngine.Analyze() (Directory.GetFiles, File.ReadAllText, CSharpSyntaxTree parsing)
-- [ ] T009 [US1] Implement streaming analysis logic: foreach syntax tree → manager.Analyze(tree) → yield results in `src/Lintelligent.AnalyzerEngine/Analysis/AnalyzerEngine.cs`
-- [ ] T010 [US1] Update AnalyzerEngine constructor to remove any file path or IO configuration parameters in `src/Lintelligent.AnalyzerEngine/Analysis/AnalyzerEngine.cs`
+- [X] T007 [US1] Refactor AnalyzerEngine.Analyze() signature from `Analyze(string projectPath)` to `Analyze(IEnumerable<SyntaxTree> syntaxTrees)` in `src/Lintelligent.AnalyzerEngine/Analysis/AnalyzerEngine.cs`
+- [X] T008 [US1] Remove all file system IO operations from AnalyzerEngine.Analyze() (Directory.GetFiles, File.ReadAllText, CSharpSyntaxTree parsing)
+- [X] T009 [US1] Implement streaming analysis logic: foreach syntax tree → manager.Analyze(tree) → yield results in `src/Lintelligent.AnalyzerEngine/Analysis/AnalyzerEngine.cs`
+- [X] T010 [US1] Update AnalyzerEngine constructor to remove any file path or IO configuration parameters in `src/Lintelligent.AnalyzerEngine/Analysis/AnalyzerEngine.cs`
 
 ### Unit Tests for User Story 1
 
 > **NOTE: Write these AFTER refactoring to validate in-memory capability**
 
-- [ ] T011 [P] [US1] Create in-memory unit test: parse in-memory syntax tree, pass to Analyze(), verify diagnostics without file system in `tests/Lintelligent.AnalyzerEngine.Tests/AnalyzerEngineTests.cs`
-- [ ] T012 [P] [US1] Create empty collection test: pass empty IEnumerable<SyntaxTree>, verify empty results in `tests/Lintelligent.AnalyzerEngine.Tests/AnalyzerEngineTests.cs`
-- [ ] T013 [P] [US1] Create determinism test: same in-memory trees yield identical results regardless of source in `tests/Lintelligent.AnalyzerEngine.Tests/AnalyzerEngineTests.cs`
-- [ ] T014 [P] [US1] Create rule violation test: in-memory trees with known violations, verify diagnostics match expectations in `tests/Lintelligent.AnalyzerEngine.Tests/AnalyzerEngineTests.cs`
+- [X] T011 [P] [US1] Create in-memory unit test: parse in-memory syntax tree, pass to Analyze(), verify diagnostics without file system in `tests/Lintelligent.AnalyzerEngine.Tests/Analysis/AnalyzerEngineTests.cs`
+- [X] T012 [P] [US1] Create empty collection test: pass empty IEnumerable<SyntaxTree>, verify empty results in `tests/Lintelligent.AnalyzerEngine.Tests/Analysis/AnalyzerEngineTests.cs`
+- [X] T013 [P] [US1] Create determinism test: same in-memory trees yield identical results regardless of source in `tests/Lintelligent.AnalyzerEngine.Tests/Analysis/AnalyzerEngineTests.cs`
+- [X] T014 [P] [US1] Create rule violation test: in-memory trees with known violations, verify diagnostics match expectations in `tests/Lintelligent.AnalyzerEngine.Tests/Analysis/AnalyzerEngineTests.cs`
 
 **Checkpoint**: At this point, AnalyzerEngine has zero file system dependencies and can be fully unit tested with in-memory syntax trees. Constitution Principle I violation is resolved.
 
@@ -81,30 +81,30 @@
 
 ### Implementation for User Story 2
 
-- [ ] T015 [P] [US2] Create FileSystemCodeProvider class in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs` implementing ICodeProvider
-- [ ] T016 [US2] Implement constructor accepting string rootPath parameter with validation (ArgumentException for null/empty) in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
-- [ ] T017 [US2] Implement GetSyntaxTrees() with file discovery logic: detect directory vs file path in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
-- [ ] T018 [US2] Add directory enumeration: Directory.EnumerateFiles(rootPath, "*.cs", SearchOption.AllDirectories) for lazy evaluation in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
-- [ ] T019 [US2] Add single file handling: return single SyntaxTree if rootPath is file in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
-- [ ] T020 [US2] Implement file reading and parsing: File.ReadAllText → CSharpSyntaxTree.ParseText with file path in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
-- [ ] T021 [US2] Add error handling: try-catch for FileNotFoundException, UnauthorizedAccessException, PathTooLongException - log and skip problematic files in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
-- [ ] T022 [US2] Add yield return for each successfully parsed SyntaxTree in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
-- [ ] T023 [US2] Refactor ScanCommand to instantiate FileSystemCodeProvider, call GetSyntaxTrees(), pass to AnalyzerEngine.Analyze() in `src/Lintelligent.Cli/Commands/ScanCommand.cs`
-- [ ] T024 [US2] Update ScanCommand to remove direct file system operations (moved to provider) in `src/Lintelligent.Cli/Commands/ScanCommand.cs`
+- [X] T015 [P] [US2] Create FileSystemCodeProvider class in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs` implementing ICodeProvider
+- [X] T016 [US2] Implement constructor accepting string rootPath parameter with validation (ArgumentException for null/empty) in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
+- [X] T017 [US2] Implement GetSyntaxTrees() with file discovery logic: detect directory vs file path in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
+- [X] T018 [US2] Add directory enumeration: Directory.EnumerateFiles(rootPath, "*.cs", SearchOption.AllDirectories) for lazy evaluation in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
+- [X] T019 [US2] Add single file handling: return single SyntaxTree if rootPath is file in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
+- [X] T020 [US2] Implement file reading and parsing: File.ReadAllText → CSharpSyntaxTree.ParseText with file path in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
+- [X] T021 [US2] Add error handling: try-catch for FileNotFoundException, UnauthorizedAccessException, PathTooLongException - log and skip problematic files in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
+- [X] T022 [US2] Add yield return for each successfully parsed SyntaxTree in `src/Lintelligent.Cli/Providers/FileSystemCodeProvider.cs`
+- [X] T023 [US2] Refactor ScanCommand to instantiate FileSystemCodeProvider, call GetSyntaxTrees(), pass to AnalyzerEngine.Analyze() in `src/Lintelligent.Cli/Commands/ScanCommand.cs`
+- [X] T024 [US2] Update ScanCommand to remove direct file system operations (moved to provider) in `src/Lintelligent.Cli/Commands/ScanCommand.cs`
 
 ### Unit Tests for User Story 2
 
-- [ ] T025 [P] [US2] Create FileSystemCodeProvider directory test: verify recursive .cs file discovery in `tests/Lintelligent.Cli.Tests/Providers/FileSystemCodeProviderTests.cs`
-- [ ] T026 [P] [US2] Create FileSystemCodeProvider single file test: verify single SyntaxTree returned for file path in `tests/Lintelligent.Cli.Tests/Providers/FileSystemCodeProviderTests.cs`
-- [ ] T027 [P] [US2] Create FileSystemCodeProvider empty directory test: verify empty collection for directory without .cs files in `tests/Lintelligent.Cli.Tests/Providers/FileSystemCodeProviderTests.cs`
-- [ ] T028 [P] [US2] Create FileSystemCodeProvider mixed files test: verify only .cs files processed, others ignored in `tests/Lintelligent.Cli.Tests/Providers/FileSystemCodeProviderTests.cs`
-- [ ] T029 [P] [US2] Create FileSystemCodeProvider error handling test: verify FileNotFoundException logged and skipped in `tests/Lintelligent.Cli.Tests/Providers/FileSystemCodeProviderTests.cs`
+- [X] T025 [P] [US2] Create FileSystemCodeProvider directory test: verify recursive .cs file discovery in `tests/Lintelligent.Cli.Tests/Providers/FileSystemCodeProviderTests.cs`
+- [X] T026 [P] [US2] Create FileSystemCodeProvider single file test: verify single SyntaxTree returned for file path in `tests/Lintelligent.Cli.Tests/Providers/FileSystemCodeProviderTests.cs`
+- [X] T027 [P] [US2] Create FileSystemCodeProvider empty directory test: verify empty collection for directory without .cs files in `tests/Lintelligent.Cli.Tests/Providers/FileSystemCodeProviderTests.cs`
+- [X] T028 [P] [US2] Create FileSystemCodeProvider mixed files test: verify only .cs files processed, others ignored in `tests/Lintelligent.Cli.Tests/Providers/FileSystemCodeProviderTests.cs`
+- [X] T029 [P] [US2] Create FileSystemCodeProvider error handling test: verify FileNotFoundException logged and skipped in `tests/Lintelligent.Cli.Tests/Providers/FileSystemCodeProviderTests.cs`
 
 ### Integration Tests for User Story 2
 
-- [ ] T030 [US2] Create CLI integration test: scan real project directory, verify all .cs files analyzed in `tests/Lintelligent.Cli.Tests/ScanCommandTests.cs`
-- [ ] T031 [US2] Create CLI integration test: verify existing CLI behavior preserved (backward compatibility) in `tests/Lintelligent.Cli.Tests/ScanCommandTests.cs`
-- [ ] T032 [US2] Create CLI integration test: scan large codebase (1000+ files), verify no memory exhaustion in `tests/Lintelligent.Cli.Tests/ScanCommandTests.cs`
+- [X] T030 [US2] Create CLI integration test: scan real project directory, verify all .cs files analyzed in `tests/Lintelligent.Cli.Tests/ScanCommandTests.cs`
+- [X] T031 [US2] Create CLI integration test: verify existing CLI behavior preserved (backward compatibility) in `tests/Lintelligent.Cli.Tests/ScanCommandTests.cs`
+- [X] T032 [US2] Create CLI integration test: scan large codebase (1000+ files), verify no memory exhaustion in `tests/Lintelligent.Cli.Tests/ScanCommandTests.cs`
 
 **Checkpoint**: At this point, CLI functionality is fully restored with FileSystemCodeProvider. Users can scan projects from command line exactly as before, but core engine is now decoupled from IO.
 

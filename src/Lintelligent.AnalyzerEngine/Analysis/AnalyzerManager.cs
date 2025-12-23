@@ -13,6 +13,15 @@ public sealed class AnalyzerManager
     {
         ArgumentNullException.ThrowIfNull(rule);
 
+        // Validate rule metadata at registration time (fail-fast)
+        ArgumentException.ThrowIfNullOrWhiteSpace(rule.Id, nameof(rule.Id));
+        ArgumentException.ThrowIfNullOrWhiteSpace(rule.Category, nameof(rule.Category));
+
+        if (!Enum.IsDefined(rule.Severity))
+            throw new ArgumentException(
+                $"Rule '{rule.Id}' has undefined severity value: {rule.Severity}",
+                nameof(rule.Severity));
+
         _rules.Add(rule);
     }
 
@@ -26,6 +35,6 @@ public sealed class AnalyzerManager
 
     public IEnumerable<DiagnosticResult> Analyze(SyntaxTree syntaxTree)
     {
-        return _rules.Select(rule => rule.Analyze(syntaxTree)).OfType<DiagnosticResult>();
+        return _rules.SelectMany(rule => rule.Analyze(syntaxTree));
     }
 }

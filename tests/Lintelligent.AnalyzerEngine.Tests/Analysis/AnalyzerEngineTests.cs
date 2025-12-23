@@ -1,4 +1,5 @@
 using Lintelligent.AnalyzerEngine.Analysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
 
@@ -14,41 +15,43 @@ public class AnalyzerEngineTests
     public void Analyze_WithInMemorySyntaxTree_ReturnsDiagnosticsWithoutFileSystem()
     {
         // Arrange: Create in-memory syntax tree with a long method (>20 lines)
-        var sourceCode = @"
-class TestClass
-{
-    void LongMethod()
-    {
-        var line1 = 1;
-        var line2 = 2;
-        var line3 = 3;
-        var line4 = 4;
-        var line5 = 5;
-        var line6 = 6;
-        var line7 = 7;
-        var line8 = 8;
-        var line9 = 9;
-        var line10 = 10;
-        var line11 = 11;
-        var line12 = 12;
-        var line13 = 13;
-        var line14 = 14;
-        var line15 = 15;
-        var line16 = 16;
-        var line17 = 17;
-        var line18 = 18;
-        var line19 = 19;
-        var line20 = 20;
-        var line21 = 21;
-    }
-}";
+        var sourceCode = """
+
+                         class TestClass
+                         {
+                             void LongMethod()
+                             {
+                                 var line1 = 1;
+                                 var line2 = 2;
+                                 var line3 = 3;
+                                 var line4 = 4;
+                                 var line5 = 5;
+                                 var line6 = 6;
+                                 var line7 = 7;
+                                 var line8 = 8;
+                                 var line9 = 9;
+                                 var line10 = 10;
+                                 var line11 = 11;
+                                 var line12 = 12;
+                                 var line13 = 13;
+                                 var line14 = 14;
+                                 var line15 = 15;
+                                 var line16 = 16;
+                                 var line17 = 17;
+                                 var line18 = 18;
+                                 var line19 = 19;
+                                 var line20 = 20;
+                                 var line21 = 21;
+                             }
+                         }
+                         """;
         var tree = CSharpSyntaxTree.ParseText(sourceCode, path: "InMemoryTest.cs");
         var trees = new[] { tree };
 
         var rule = new Rules.LongMethodRule();
         var manager = new AnalyzerManager();
         manager.RegisterRule(rule);
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act: Analyze in-memory tree (NO file system IO)
         var results = engine.Analyze(trees).ToList();
@@ -62,7 +65,7 @@ class TestClass
     public void Analyze_WithEmptyCollection_ReturnsEmptyResults()
     {
         // Arrange: Empty syntax tree collection
-        var trees = Array.Empty<Microsoft.CodeAnalysis.SyntaxTree>();
+        var trees = Array.Empty<SyntaxTree>();
         var manager = new AnalyzerManager();
         var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
@@ -87,8 +90,8 @@ class TestClass
         var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act: Analyze same source code multiple times
-        var results1 = engine.Analyze(new[] { tree1 }).ToList();
-        var results2 = engine.Analyze(new[] { tree2 }).ToList();
+        var results1 = engine.Analyze([tree1]).ToList();
+        var results2 = engine.Analyze([tree2]).ToList();
 
         // Assert: Same code produces same number of diagnostics (deterministic)
         Assert.Equal(results1.Count, results2.Count);
@@ -110,7 +113,7 @@ class TestClass
         var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act
-        var results = engine.Analyze(new[] { tree1, tree2 }).ToList();
+        var results = engine.Analyze([tree1, tree2]).ToList();
 
         // Assert: Both trees were analyzed
         Assert.True(results.Count >= 2); // At least one diagnostic per tree
@@ -120,13 +123,15 @@ class TestClass
 
     private static string GenerateLongMethodSource(string className, string methodName)
     {
-        return $@"
-class {className}
-{{
-    void {methodName}()
-    {{
-        {string.Join("\n        ", Enumerable.Range(1, 25).Select(i => $"var line{i} = {i};"))}
-    }}
-}}";
+        return $$"""
+
+                 class {{className}}
+                 {
+                     void {{methodName}}()
+                     {
+                         {{string.Join("\n        ", Enumerable.Range(1, 25).Select(i => $"var line{i} = {i};"))}}
+                     }
+                 }
+                 """;
     }
 }

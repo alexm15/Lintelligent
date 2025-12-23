@@ -8,7 +8,7 @@ namespace Lintelligent.Cli.Tests.Providers;
 public class FileSystemCodeProviderTests : IDisposable
 {
     private readonly string _tempDir;
-    private readonly List<string> _createdFiles = new();
+    private readonly List<string> _createdFiles = [];
 
     public FileSystemCodeProviderTests()
     {
@@ -279,19 +279,21 @@ public class FileSystemCodeProviderTests : IDisposable
     public void GetSyntaxTrees_ValidCSharpCode_ParsesCorrectly()
     {
         // Arrange
-        var code = @"
-using System;
+        var code = """
 
-namespace TestNamespace
-{
-    public class TestClass
-    {
-        public void TestMethod()
-        {
-            Console.WriteLine(""Hello"");
-        }
-    }
-}";
+                   using System;
+
+                   namespace TestNamespace
+                   {
+                       public class TestClass
+                       {
+                           public void TestMethod()
+                           {
+                               Console.WriteLine("Hello");
+                           }
+                       }
+                   }
+                   """;
         CreateTestFile("Valid.cs", code);
         var provider = new FileSystemCodeProvider(_tempDir);
 

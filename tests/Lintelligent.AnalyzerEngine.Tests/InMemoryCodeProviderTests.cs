@@ -1,5 +1,6 @@
 using Xunit;
 using FluentAssertions;
+using Lintelligent.AnalyzerEngine.Abstractions;
 using Lintelligent.AnalyzerEngine.Tests.TestUtilities;
 using Lintelligent.AnalyzerEngine.Analysis;
 using Lintelligent.AnalyzerEngine.Rules;
@@ -14,10 +15,12 @@ public class InMemoryCodeProviderTests
     {
         public string Id => "TEST001";
         public string Description => "Always reports for testing";
+        public Severity Severity => Severity.Warning;
+        public string Category => DiagnosticCategories.General;
 
-        public DiagnosticResult Analyze(SyntaxTree tree)
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
         {
-            return new DiagnosticResult(tree.FilePath, Id, Description, 1);
+            yield return new DiagnosticResult(tree.FilePath, Id, Description, 1, Severity, Category);
         }
     }
 
@@ -107,19 +110,21 @@ public class InMemoryCodeProviderTests
         // Arrange
         var sources = new Dictionary<string, string>
         {
-            ["Complex.cs"] = @"
-using System;
+            ["Complex.cs"] = """
 
-namespace TestNamespace
-{
-    public class ComplexClass
-    {
-        public void Method()
-        {
-            Console.WriteLine(""Hello"");
-        }
-    }
-}"
+                             using System;
+
+                             namespace TestNamespace
+                             {
+                                 public class ComplexClass
+                                 {
+                                     public void Method()
+                                     {
+                                         Console.WriteLine("Hello");
+                                     }
+                                 }
+                             }
+                             """
         };
         var provider = new InMemoryCodeProvider(sources);
 

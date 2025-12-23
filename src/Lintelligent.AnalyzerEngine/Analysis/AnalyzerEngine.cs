@@ -14,9 +14,17 @@ namespace Lintelligent.AnalyzerEngine.Analysis;
 /// - Stateless: No mutable state, same trees always yield identical results
 /// - Streaming: Uses yield to process large codebases without memory exhaustion
 /// - Deterministic: Analysis results depend only on input syntax trees, not environment
+/// - Resilient: Continues analysis when individual rules throw exceptions
 /// </remarks>
 public class AnalyzerEngine(AnalyzerManager manager)
 {
+    private readonly List<RuleException> _exceptions = [];
+
+    /// <summary>
+    /// Gets the collection of exceptions thrown by rules during the last analysis.
+    /// </summary>
+    public IReadOnlyList<RuleException> Exceptions => _exceptions.AsReadOnly();
+
     /// <summary>
     /// Analyzes a collection of syntax trees and yields diagnostic results.
     /// </summary>
@@ -35,9 +43,43 @@ public class AnalyzerEngine(AnalyzerManager manager)
     /// 
     /// Implementation is deterministic: same syntax trees will always produce
     /// identical diagnostic results regardless of execution environment.
+    /// 
+    /// If a rule throws an exception, the engine catches it, records it in the Exceptions
+    /// collection, and continues analyzing with the remaining rules. This ensures that
+    /// one faulty rule doesn't prevent analysis of the entire codebase.
     /// </remarks>
     public IEnumerable<DiagnosticResult> Analyze(IEnumerable<SyntaxTree> syntaxTrees)
     {
-        return syntaxTrees.SelectMany(manager.Analyze);
+        _exceptions.Clear();
+        
+        foreach (var tree in syntaxTrees)
+        {
+            foreach (var result in AnalyzeTree(tree))
+            {
+                yield return result;
+            }
+        }
+    }
+
+    private IEnumerable<DiagnosticResult> AnalyzeTree(SyntaxTree tree)
+    {
+        foreach (var rule in manager.Rules)
+        {
+            IEnumerable<DiagnosticResult> results;
+            try
+            {
+                results = rule.Analyze(tree);
+            }
+            catch (Exception ex)
+            {
+                _exceptions.Add(new RuleException(rule.Id, tree.FilePath, ex));
+                continue;
+            }
+
+            foreach (var result in results)
+            {
+                yield return result;
+            }
+        }
     }
 }

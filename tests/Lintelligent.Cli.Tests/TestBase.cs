@@ -30,7 +30,7 @@ public abstract class TestBase : IAsyncLifetime, IDisposable
         if (_host is not null)
             throw new InvalidOperationException("A host has already been created for this test. Dispose the test or use a fresh test instance.");
 
-        var builder = Host.CreateDefaultBuilder(Array.Empty<string>());
+        var builder = Host.CreateDefaultBuilder([]);
 
         builder.ConfigureServices(services =>
         {

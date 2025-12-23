@@ -1,4 +1,5 @@
 ﻿using Xunit;
+using Lintelligent.AnalyzerEngine.Abstractions;
 using Lintelligent.AnalyzerEngine.Analysis;
 using Lintelligent.AnalyzerEngine.Rules;
 using Lintelligent.AnalyzerEngine.Results;
@@ -14,10 +15,12 @@ public class ScanCommandTests : TestBase
     {
         public string Id => "TEST001";
         public string Description => "Always reports a diagnostic";
+        public Severity Severity => Severity.Warning;
+        public string Category => DiagnosticCategories.General;
 
-        public DiagnosticResult Analyze(SyntaxTree tree)
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
         {
-            return new DiagnosticResult(tree.FilePath, Id, Description, 1);
+            yield return new DiagnosticResult(tree.FilePath, Id, Description, 1, Severity, Category);
         }
     }
 
@@ -47,7 +50,7 @@ public class ScanCommandTests : TestBase
 
             try
             {
-                await command.ExecuteAsync(new[] { temp });
+                await command.ExecuteAsync([temp]);
             }
             finally
             {
@@ -93,7 +96,7 @@ public class ScanCommandTests : TestBase
 
             try
             {
-                await command.ExecuteAsync(new[] { temp });
+                await command.ExecuteAsync([temp]);
             }
             finally
             {
@@ -102,7 +105,7 @@ public class ScanCommandTests : TestBase
 
             var output = sw.ToString();
 
-            Assert.Equal(2, output.Split(new[] { "- **File:**" }, StringSplitOptions.None).Length - 1);
+            Assert.Equal(2, output.Split(["- **File:**"], StringSplitOptions.None).Length - 1);
         }
         finally
         {
@@ -130,7 +133,7 @@ public class ScanCommandTests : TestBase
 
             try
             {
-                await command.ExecuteAsync(new[] { temp });
+                await command.ExecuteAsync([temp]);
             }
             finally
             {
@@ -181,7 +184,7 @@ public class ScanCommandTests : TestBase
             try
             {
                 // Act
-                await command.ExecuteAsync(new[] { temp });
+                await command.ExecuteAsync([temp]);
             }
             finally
             {
@@ -194,7 +197,7 @@ public class ScanCommandTests : TestBase
             Assert.Contains("Program.cs", output);
             Assert.Contains("Helper.cs", output);
             Assert.DoesNotContain("readme.txt", output);
-            Assert.Equal(2, output.Split(new[] { "TEST001" }, StringSplitOptions.None).Length - 1);
+            Assert.Equal(2, output.Split(["TEST001"], StringSplitOptions.None).Length - 1);
         }
         finally
         {
@@ -229,7 +232,7 @@ public class ScanCommandTests : TestBase
             try
             {
                 // Act - should work exactly as before the refactor
-                await command.ExecuteAsync(new[] { temp });
+                await command.ExecuteAsync([temp]);
             }
             finally
             {
@@ -260,7 +263,7 @@ public class ScanCommandTests : TestBase
         {
             // Create 100 files (simulating a large codebase, scaled down for test speed)
             // In production, this pattern handles 1000+ files via streaming
-            for (int i = 0; i < 100; i++)
+            for (var i = 0; i < 100; i++)
             {
                 var content = $"class Class{i} {{ }}";
                 await File.WriteAllTextAsync(Path.Combine(temp, $"File{i}.cs"), content);
@@ -282,7 +285,7 @@ public class ScanCommandTests : TestBase
             try
             {
                 // Act
-                await command.ExecuteAsync(new[] { temp });
+                await command.ExecuteAsync([temp]);
             }
             finally
             {
@@ -303,6 +306,138 @@ public class ScanCommandTests : TestBase
         finally
         {
             try { Directory.Delete(temp, true); } catch { }
+        }
+    }
+
+    [Fact]
+    public async Task GroupByCategory_GroupsResultsByCategory()
+    {
+        // Arrange
+        var temp = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(temp);
+        try
+        {
+            await File.WriteAllTextAsync(Path.Combine(temp, "Test.cs"), "class Test { }");
+
+            var host = CreateHost(configure: services =>
+            {
+                services.AddSingleton<IAnalyzerRule, SecurityRule>();
+                services.AddSingleton<IAnalyzerRule, PerformanceRule>();
+            });
+
+            var manager = host.Services.GetRequiredService<AnalyzerManager>();
+            manager.RegisterRules(host.Services.GetServices<IAnalyzerRule>());
+
+            var command = host.Services.GetRequiredService<ScanCommand>();
+            using var sw = new StringWriter();
+            var originalOut = Console.Out;
+            Console.SetOut(sw);
+
+            try
+            {
+                // Act - with --group-by category
+                await command.ExecuteAsync([temp, "--group-by", "category"]);
+            }
+            finally
+            {
+                Console.SetOut(originalOut);
+            }
+
+            var output = sw.ToString();
+
+            // Assert - should have category headers
+            Assert.Contains("## Performance", output);
+            Assert.Contains("## Security", output);
+            
+            // Security findings should appear under Security header
+            var securityIndex = output.IndexOf("## Security");
+            var performanceIndex = output.IndexOf("## Performance");
+            var securityFindingIndex = output.IndexOf("SECURITY001");
+            var performanceFindingIndex = output.IndexOf("PERF001");
+
+            Assert.True(securityIndex < securityFindingIndex, "Security findings should appear after Security header");
+            Assert.True(performanceIndex < performanceFindingIndex, "Performance findings should appear after Performance header");
+        }
+        finally
+        {
+            try { Directory.Delete(temp, true); } catch { }
+        }
+    }
+
+    [Fact]
+    public async Task NoGroupBy_DefaultUngroupedOutput()
+    {
+        // Arrange
+        var temp = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(temp);
+        try
+        {
+            await File.WriteAllTextAsync(Path.Combine(temp, "Test.cs"), "class Test { }");
+
+            var host = CreateHost(configure: services =>
+            {
+                services.AddSingleton<IAnalyzerRule, SecurityRule>();
+                services.AddSingleton<IAnalyzerRule, PerformanceRule>();
+            });
+
+            var manager = host.Services.GetRequiredService<AnalyzerManager>();
+            manager.RegisterRules(host.Services.GetServices<IAnalyzerRule>());
+
+            var command = host.Services.GetRequiredService<ScanCommand>();
+            using var sw = new StringWriter();
+            var originalOut = Console.Out;
+            Console.SetOut(sw);
+
+            try
+            {
+                // Act - without --group-by
+                await command.ExecuteAsync([temp]);
+            }
+            finally
+            {
+                Console.SetOut(originalOut);
+            }
+
+            var output = sw.ToString();
+
+            // Assert - should NOT have category headers
+            Assert.DoesNotContain("## Performance", output);
+            Assert.DoesNotContain("## Security", output);
+            
+            // But should still have findings
+            Assert.Contains("SECURITY001", output);
+            Assert.Contains("PERF001", output);
+        }
+        finally
+        {
+            try { Directory.Delete(temp, true); } catch { }
+        }
+    }
+
+    // Test helper rules with different categories
+    private sealed class SecurityRule : IAnalyzerRule
+    {
+        public string Id => "SECURITY001";
+        public string Description => "Security rule";
+        public Severity Severity => Severity.Error;
+        public string Category => DiagnosticCategories.Security;
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            yield return new DiagnosticResult(tree.FilePath, Id, "Security finding", 1, Severity, Category);
+        }
+    }
+
+    private sealed class PerformanceRule : IAnalyzerRule
+    {
+        public string Id => "PERF001";
+        public string Description => "Performance rule";
+        public Severity Severity => Severity.Warning;
+        public string Category => DiagnosticCategories.Performance;
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            yield return new DiagnosticResult(tree.FilePath, Id, "Performance finding", 1, Severity, Category);
         }
     }
 }

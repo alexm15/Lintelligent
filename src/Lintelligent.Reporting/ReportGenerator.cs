@@ -21,10 +21,28 @@ public class ReportGenerator
         return string.Concat(results.Select(result => $"""
                                                        - **File:** {result.FilePath}
                                                          - **Rule:** {result.RuleId}
+                                                         - **Severity:** {result.Severity}
+                                                         - **Category:** {result.Category}
                                                          - **Message:** {result.Message}
                                                          - **Line:** {result.LineNumber}
 
                                                        """
         ));
+    }
+
+    public string GenerateMarkdownGroupedByCategory(IEnumerable<DiagnosticResult> results)
+    {
+        var grouped = results.GroupBy(r => r.Category)
+                            .OrderBy(g => g.Key);
+
+        var output = "# Lintelligent Report\n\n";
+
+        foreach (var group in grouped)
+        {
+            output += $"## {group.Key}\n\n";
+            output += CollectOutput(group);
+        }
+
+        return output;
     }
 }

@@ -1,5 +1,6 @@
 using Xunit;
 using FluentAssertions;
+using Lintelligent.AnalyzerEngine.Abstractions;
 using Lintelligent.AnalyzerEngine.Tests.TestUtilities;
 using Lintelligent.AnalyzerEngine.Analysis;
 using Lintelligent.AnalyzerEngine.Rules;
@@ -14,10 +15,12 @@ public class FilteringCodeProviderTests
     {
         public string Id => "TEST001";
         public string Description => "Always reports for testing";
+        public Severity Severity => Severity.Warning;
+        public string Category => DiagnosticCategories.General;
 
-        public DiagnosticResult Analyze(SyntaxTree tree)
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
         {
-            return new DiagnosticResult(tree.FilePath, Id, Description, 1);
+            yield return new DiagnosticResult(tree.FilePath, Id, Description, 1, Severity, Category);
         }
     }
 
@@ -26,7 +29,7 @@ public class FilteringCodeProviderTests
     {
         // Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(
-            () => new FilteringCodeProvider(null!, tree => true));
+            () => new FilteringCodeProvider(null!, _ => true));
         exception.ParamName.Should().Be("innerProvider");
     }
 
@@ -54,7 +57,7 @@ public class FilteringCodeProviderTests
             ["File3.cs"] = "class File3 { }"
         };
         var innerProvider = new InMemoryCodeProvider(sources);
-        var filter = new FilteringCodeProvider(innerProvider, tree => true);
+        var filter = new FilteringCodeProvider(innerProvider, _ => true);
 
         // Act
         var trees = filter.GetSyntaxTrees().ToList();
@@ -73,7 +76,7 @@ public class FilteringCodeProviderTests
             ["File2.cs"] = "class File2 { }"
         };
         var innerProvider = new InMemoryCodeProvider(sources);
-        var filter = new FilteringCodeProvider(innerProvider, tree => false);
+        var filter = new FilteringCodeProvider(innerProvider, _ => false);
 
         // Act
         var trees = filter.GetSyntaxTrees().ToList();
@@ -202,7 +205,7 @@ public class FilteringCodeProviderTests
             ["Test.cs"] = "class Test { }"
         };
         var innerProvider = new InMemoryCodeProvider(sources);
-        var filter = new FilteringCodeProvider(innerProvider, tree => true);
+        var filter = new FilteringCodeProvider(innerProvider, _ => true);
 
         // Act - Call GetSyntaxTrees but don't enumerate
         var enumerable = filter.GetSyntaxTrees();

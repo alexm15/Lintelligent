@@ -1,5 +1,6 @@
 using Xunit;
 using FluentAssertions;
+using Lintelligent.AnalyzerEngine.Abstractions;
 using Lintelligent.AnalyzerEngine.Tests.TestUtilities;
 using Lintelligent.AnalyzerEngine.Analysis;
 using Lintelligent.AnalyzerEngine.Rules;
@@ -18,15 +19,16 @@ public class CodeProviderIntegrationTests
     {
         public string Id => "INTEGRATION001";
         public string Description => "Test rule for integration testing";
+        public Severity Severity => Severity.Warning;
+        public string Category => DiagnosticCategories.General;
 
-        public DiagnosticResult Analyze(SyntaxTree tree)
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
         {
             // Report diagnostic for any class named "Problem"
             if (tree.ToString().Contains("class Problem"))
             {
-                return new DiagnosticResult(tree.FilePath, Id, Description, 1);
+                yield return new DiagnosticResult(tree.FilePath, Id, Description, 1, Severity, Category);
             }
-            return null!;
         }
     }
 
@@ -181,12 +183,14 @@ public class CodeProviderIntegrationTests
     public void AnalyzerEngine_MultipleProviderTypes_ProduceConsistentBehavior()
     {
         // Arrange
-        const string sourceCode = @"
-class GoodClass
-{
-    void Method1() { }
-    void Method2() { }
-}";
+        const string sourceCode = """
+
+                                  class GoodClass
+                                  {
+                                      void Method1() { }
+                                      void Method2() { }
+                                  }
+                                  """;
 
         var provider1 = new InMemoryCodeProvider(new Dictionary<string, string>
         {

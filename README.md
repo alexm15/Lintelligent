@@ -12,12 +12,31 @@ A static code analysis CLI tool for C# projects that detects code quality issues
 - 🧪 **Testable Core**: Framework-agnostic engine with no file system dependencies
 - 🔌 **Extensible**: Plugin-friendly architecture for IDE integration and custom frontends
 - 🛡️ **Resilient**: Exception handling ensures one faulty rule doesn't crash entire analysis
+- 🔬 **Roslyn Analyzer**: Build-time analysis with instant IDE feedback (zero additional tools)
 
 ## Installation
+
+### CLI Tool
 
 ```bash
 dotnet build
 ```
+
+### Roslyn Analyzer (NuGet Package)
+
+For instant IDE feedback and build-time analysis:
+
+```bash
+dotnet add package Lintelligent.Analyzers
+```
+
+The Roslyn analyzer automatically integrates with your IDE (Visual Studio, Rider, VS Code) and provides:
+- Real-time diagnostics as you type
+- Code navigation (F8 to jump between issues)
+- EditorConfig support for per-project rule configuration
+- Zero build overhead (<2s for 100-file solutions)
+
+See the [Analyzer Guide](./specs/019-roslyn-analyzer-bridge/ANALYZER_GUIDE.md) for configuration options.
 
 ## Quick Start
 

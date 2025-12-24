@@ -1,0 +1,9 @@
+root = true
+
+[*.cs]
+# Relax code quality rules in test projects
+# Test classes can be longer and have more methods
+dotnet_diagnostic.LNT001.severity = none  # Long methods OK in tests
+dotnet_diagnostic.LNT005.severity = none  # Large test classes OK
+dotnet_diagnostic.LNT007.severity = none  # Empty catch blocks OK in test setup
+dotnet_diagnostic.LNT002.severity = none  # Many parameters OK in test cases

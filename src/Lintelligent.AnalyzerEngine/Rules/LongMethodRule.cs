@@ -8,7 +8,7 @@ public class LongMethodRule : IAnalyzerRule
     public string Id => "LNT001";
     public string Description => "Method exceeds recommended length";
     public Severity Severity => Severity.Warning;
-    public string Category => DiagnosticCategories.Maintainability;
+    public string Category => DiagnosticCategories.CodeSmell;
 
     public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
     {
@@ -20,10 +20,14 @@ public class LongMethodRule : IAnalyzerRule
         foreach (var method in longMethods)
         {
             var line = method.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+            var methodName = method.Identifier.Text;
+            var statementCount = method.Body!.Statements.Count;
+            var message = $"Method '{methodName}' has {statementCount} statements (max: 20). Consider extracting logical blocks into separate methods.";
+            
             yield return new DiagnosticResult(
                 tree.FilePath,
                 Id,
-                "Method is too long",
+                message,
                 line,
                 Severity,
                 Category

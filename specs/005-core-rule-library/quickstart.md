@@ -1,0 +1,720 @@
+# Quickstart: Core Rule Library
+
+**Feature**: [spec.md](spec.md) | **Plan**: [plan.md](plan.md) | **Research**: [research.md](research.md)  
+**Audience**: Developers implementing Feature 005  
+**Time to Complete**: ~8-12 hours for all 8 rules
+
+## Overview
+
+This feature adds 7 new code quality rules and enhances 1 existing rule. Each rule is an independent, stateless class implementing IAnalyzerRule. All rules integrate seamlessly with existing AnalyzerEngine infrastructure.
+
+**Deliverables**:
+- 7 new rule classes in `src/Lintelligent.AnalyzerEngine/Rules/`
+- 1 enhanced rule (LongMethodRule category and message updates)
+- 2 new constants in DiagnosticCategories
+- 8 comprehensive test suites in `tests/Lintelligent.AnalyzerEngine.Tests/Rules/`
+
+---
+
+## Prerequisites
+
+- ✅ .NET 10.0 SDK installed
+- ✅ Feature branch `005-core-rule-library` checked out
+- ✅ Solution builds successfully: `dotnet build`
+- ✅ Existing tests pass: `dotnet test`
+- ✅ Familiarwith with Roslyn syntax tree APIs (review [research.md](research.md))
+
+---
+
+## Implementation Workflow
+
+### Step 1: Add New Diagnostic Categories (5 minutes)
+
+**File**: `src/Lintelligent.AnalyzerEngine/Results/DiagnosticCategories.cs`
+
+**Add two new constants**:
+
+```csharp
+/// <summary>
+///     Code smells that indicate potential maintainability issues.
+///     Examples: long parameter lists, deep nesting, exception swallowing.
+/// </summary>
+public const string CodeSmell = "Code Smell";
+
+/// <summary>
+///     Documentation quality issues.
+///     Examples: missing XML docs, incomplete summaries.
+/// </summary>
+public const string Documentation = "Documentation";
+```
+
+**Verification**:
+- `dotnet build` succeeds
+- No compilation errors
+
+---
+
+### Step 2: Enhance Existing LongMethodRule (10 minutes)
+
+**File**: `src/Lintelligent.AnalyzerEngine/Rules/LongMethodRule.cs`
+
+**Changes**:
+
+1. Update Category property:
+```csharp
+public string Category => DiagnosticCategories.CodeSmell;  // Was: Maintainability
+```
+
+2. Update diagnostic message in Analyze method:
+```csharp
+// Old:
+yield return new DiagnosticResult(
+    tree.FilePath,
+    Id,
+    "Method is too long",  // <-- Update this
+    line,
+    Severity,
+    Category
+);
+
+// New:
+var methodName = method.Identifier.Text;
+var statementCount = method.Body.Statements.Count;
+var message = $"Method '{methodName}' has {statementCount} statements (max: 20). " +
+              "Consider extracting logical blocks into separate methods.";
+
+yield return new DiagnosticResult(
+    tree.FilePath,
+    Id,
+    message,
+    line,
+    Severity,
+    Category
+);
+```
+
+**Verification**:
+- Existing tests in `LongMethodRuleTests.cs` still pass
+- Category is now "Code Smell"
+- Message includes method name and statement count
+
+---
+
+### Step 3: Implement LNT007 - Exception Swallowing (Priority P1, ~30 minutes)
+
+**Why first**: Simplest rule, purely syntactic, validates workflow end-to-end.
+
+#### 3a. Create Rule Class
+
+**File**: `src/Lintelligent.AnalyzerEngine/Rules/ExceptionSwallowingRule.cs`
+
+```csharp
+using Lintelligent.AnalyzerEngine.Abstractions;
+using Lintelligent.AnalyzerEngine.Results;
+
+namespace Lintelligent.AnalyzerEngine.Rules;
+
+public class ExceptionSwallowingRule : IAnalyzerRule
+{
+    public string Id => "LNT007";
+    public string Description => "Avoid empty catch blocks that suppress exceptions";
+    public Severity Severity => Severity.Warning;
+    public string Category => DiagnosticCategories.CodeSmell;
+
+    public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+    {
+        if (IsGeneratedCode(tree))
+            return Enumerable.Empty<DiagnosticResult>();
+
+        var root = tree.GetRoot();
+        var emptyCatches = root.DescendantNodes()
+            .OfType<CatchClauseSyntax>()
+            .Where(c => c.Block.Statements.Count == 0);
+
+        foreach (var catchClause in emptyCatches)
+        {
+            var line = catchClause.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+            var message = "Empty catch block suppresses exceptions. " +
+                         "Consider logging the exception or removing the try-catch if error handling is not needed.";
+
+            yield return new DiagnosticResult(
+                tree.FilePath,
+                Id,
+                message,
+                line,
+                Severity,
+                Category
+            );
+        }
+    }
+
+    private static bool IsGeneratedCode(SyntaxTree tree)
+    {
+        string fileName = Path.GetFileName(tree.FilePath);
+        if (fileName.EndsWith(".Designer.cs") || 
+            fileName.EndsWith(".g.cs") || 
+            fileName.Contains(".Generated."))
+            return true;
+
+        var root = tree.GetRoot();
+        var leadingTrivia = root.GetLeadingTrivia().Take(10);
+        return leadingTrivia.Any(t => 
+            t.ToString().Contains("<auto-generated>") ||
+            t.ToString().Contains("<auto-generated />"));
+    }
+}
+```
+
+#### 3b. Create Test Suite
+
+**File**: `tests/Lintelligent.AnalyzerEngine.Tests/Rules/ExceptionSwallowingRuleTests.cs`
+
+```csharp
+using Lintelligent.AnalyzerEngine.Abstractions;
+using Lintelligent.AnalyzerEngine.Rules;
+using Microsoft.CodeAnalysis.CSharp;
+
+namespace Lintelligent.AnalyzerEngine.Tests.Rules;
+
+public class ExceptionSwallowingRuleTests
+{
+    private static SyntaxTree CreateSyntaxTree(string code)
+    {
+        return CSharpSyntaxTree.ParseText(code, path: "TestFile.cs");
+    }
+
+    [Fact]
+    public void Analyze_EmptyCatchBlock_ReturnsDiagnostic()
+    {
+        // Arrange
+        var code = @"
+            public class TestClass
+            {
+                public void Method()
+                {
+                    try { }
+                    catch { }
+                }
+            }";
+        var tree = CreateSyntaxTree(code);
+        var rule = new ExceptionSwallowingRule();
+
+        // Act
+        var results = rule.Analyze(tree).ToList();
+
+        // Assert
+        results.Should().ContainSingle();
+        results[0].RuleId.Should().Be("LNT007");
+        results[0].Severity.Should().Be(Severity.Warning);
+        results[0].Category.Should().Be(DiagnosticCategories.CodeSmell);
+        results[0].Message.Should().Contain("Empty catch block");
+    }
+
+    [Fact]
+    public void Analyze_CatchWithThrow_ReturnsNoDiagnostic()
+    {
+        // Arrange
+        var code = @"
+            public class TestClass
+            {
+                public void Method()
+                {
+                    try { }
+                    catch { throw; }
+                }
+            }";
+        var tree = CreateSyntaxTree(code);
+        var rule = new ExceptionSwallowingRule();
+
+        // Act
+        var results = rule.Analyze(tree).ToList();
+
+        // Assert
+        results.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Analyze_CatchWithLogging_ReturnsNoDiagnostic()
+    {
+        // Arrange
+        var code = @"
+            public class TestClass
+            {
+                public void Method()
+                {
+                    try { }
+                    catch (Exception ex) 
+                    { 
+                        Logger.Error(ex);
+                    }
+                }
+            }";
+        var tree = CreateSyntaxTree(code);
+        var rule = new ExceptionSwallowingRule();
+
+        // Act
+        var results = rule.Analyze(tree).ToList();
+
+        // Assert
+        results.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Analyze_CatchWithCommentOnly_ReturnsDiagnostic()
+    {
+        // Arrange
+        var code = @"
+            public class TestClass
+            {
+                public void Method()
+                {
+                    try { }
+                    catch 
+                    {
+                        // TODO: handle this
+                    }
+                }
+            }";
+        var tree = CreateSyntaxTree(code);
+        var rule = new ExceptionSwallowingRule();
+
+        // Act
+        var results = rule.Analyze(tree).ToList();
+
+        // Assert
+        results.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void Analyze_GeneratedCode_ReturnsNoDiagnostic()
+    {
+        // Arrange
+        var code = @"
+            // <auto-generated />
+            public class TestClass
+            {
+                public void Method()
+                {
+                    try { }
+                    catch { }
+                }
+            }";
+        var tree = CreateSyntaxTree(code);
+        var rule = new ExceptionSwallowingRule();
+
+        // Act
+        var results = rule.Analyze(tree).ToList();
+
+        // Assert
+        results.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void RuleMetadata_ReturnsExpectedProperties()
+    {
+        // Arrange
+        var rule = new ExceptionSwallowingRule();
+
+        // Assert
+        rule.Id.Should().Be("LNT007");
+        rule.Description.Should().NotBeNullOrWhiteSpace();
+        rule.Severity.Should().Be(Severity.Warning);
+        rule.Category.Should().Be(DiagnosticCategories.CodeSmell);
+    }
+}
+```
+
+#### 3c. Verify
+
+```bash
+dotnet test --filter "FullyQualifiedName~ExceptionSwallowingRuleTests"
+```
+
+All 6 tests should pass ✅
+
+---
+
+### Step 4: Implement Remaining P1 Rules (~2 hours)
+
+**Priority P1 (High Impact, Simple)**:
+1. ✅ LNT007 - Exception Swallowing (completed above)
+2. LNT002 - Long Parameter List
+3. LNT003 - Complex Conditional
+
+Follow the same pattern as Step 3:
+- Create rule class in `src/Lintelligent.AnalyzerEngine/Rules/`
+- Use contracts from [contracts/rule-contracts.md](contracts/rule-contracts.md)
+- Use Roslyn patterns from [research.md](research.md)
+- Create test suite with minimum 5 test cases per acceptance scenario
+- Verify tests pass before moving to next rule
+
+**Estimated time**:
+- LNT002: 45 minutes
+- LNT003: 1 hour (recursive nesting logic)
+
+---
+
+### Step 5: Implement P2 Rules (~3 hours)
+
+**Priority P2 (Moderate Complexity)**:
+1. LNT004 - Magic Number Rule
+2. LNT005 - God Class Rule
+
+**Estimated time**:
+- LNT004: 1.5 hours (exclusion logic for 0, 1, -1 and const declarations)
+- LNT005: 1 hour (line counting and method counting)
+
+---
+
+### Step 6: Implement P3 Rules (~3 hours)
+
+**Priority P3 (Lower Priority or More Complex)**:
+1. LNT008 - Missing XML Documentation Rule
+2. LNT006 - Dead Code Rule
+
+**Estimated time**:
+- LNT008: 1.5 hours (trivia inspection for XML docs, inheritdoc handling)
+- LNT006: 1.5 hours (syntax-based reference finding within class)
+
+---
+
+### Step 7: Integration Testing (30 minutes)
+
+**Verify all rules work together**:
+
+```bash
+# Run all rule tests
+dotnet test --filter "FullyQualifiedName~Rules"
+
+# Expected: 40-50 tests pass (5-8 tests per rule × 8 rules)
+```
+
+**Create integration test** (optional, recommended):
+
+**File**: `tests/Lintelligent.AnalyzerEngine.Tests/RulesIntegrationTests.cs`
+
+```csharp
+public class RulesIntegrationTests
+{
+    [Fact]
+    public void AllRules_AnalyzeComplexFile_ProduceExpectedDiagnostics()
+    {
+        // Arrange: File with multiple violations
+        var code = @"
+            public class GodClass  // Missing doc (LNT008)
+            {
+                private int _unused;  // Dead code (LNT006)
+                
+                public void LongMethod(int a, int b, int c, int d, int e, int f)  // 6 params (LNT002)
+                {
+                    // 25 statements here (LNT001)
+                    int timeout = 5000;  // Magic number (LNT004)
+                    
+                    if (a > 0)
+                    {
+                        if (b > 0)
+                        {
+                            if (c > 0)
+                            {
+                                if (d > 0)  // Depth 4 (LNT003)
+                                {
+                                    try { }
+                                    catch { }  // Empty catch (LNT007)
+                                }
+                            }
+                        }
+                    }
+                }
+            }";
+        
+        var tree = CSharpSyntaxTree.ParseText(code, path: "TestFile.cs");
+        var allRules = new IAnalyzerRule[]
+        {
+            new LongMethodRule(),
+            new LongParameterListRule(),
+            new ComplexConditionalRule(),
+            new MagicNumberRule(),
+            new GodClassRule(),
+            new DeadCodeRule(),
+            new ExceptionSwallowingRule(),
+            new MissingXmlDocumentationRule()
+        };
+        
+        // Act
+        var allResults = allRules
+            .SelectMany(rule => rule.Analyze(tree))
+            .ToList();
+        
+        // Assert
+        allResults.Should().NotBeEmpty();
+        allResults.Should().Contain(r => r.RuleId == "LNT001");  // Long method
+        allResults.Should().Contain(r => r.RuleId == "LNT002");  // Long param list
+        allResults.Should().Contain(r => r.RuleId == "LNT003");  // Complex conditional
+        allResults.Should().Contain(r => r.RuleId == "LNT004");  // Magic number
+        allResults.Should().Contain(r => r.RuleId == "LNT006");  // Dead code
+        allResults.Should().Contain(r => r.RuleId == "LNT007");  // Exception swallowing
+        allResults.Should().Contain(r => r.RuleId == "LNT008");  // Missing doc
+    }
+}
+```
+
+---
+
+### Step 8: Performance Validation (15 minutes)
+
+**Add performance test** (similar to Feature 004 pattern):
+
+**File**: `tests/Lintelligent.AnalyzerEngine.Tests/RulesPerformanceTests.cs`
+
+```csharp
+public class RulesPerformanceTests
+{
+    [Fact]
+    public void AllRules_Analyze1000LineFile_CompletesUnder500ms()
+    {
+        // Arrange: Generate 1000-line test file
+        var codeBuilder = new StringBuilder();
+        codeBuilder.AppendLine("public class TestClass {");
+        for (int i = 0; i < 990; i++)
+        {
+            codeBuilder.AppendLine($"    public void Method{i}() {{ }}");
+        }
+        codeBuilder.AppendLine("}");
+        
+        var tree = CSharpSyntaxTree.ParseText(codeBuilder.ToString(), path: "Large.cs");
+        var allRules = new IAnalyzerRule[]
+        {
+            new LongMethodRule(),
+            new LongParameterListRule(),
+            new ComplexConditionalRule(),
+            new MagicNumberRule(),
+            new GodClassRule(),
+            new DeadCodeRule(),
+            new ExceptionSwallowingRule(),
+            new MissingXmlDocumentationRule()
+        };
+        
+        // Act
+        var sw = Stopwatch.StartNew();
+        foreach (var rule in allRules)
+        {
+            var results = rule.Analyze(tree).ToList();  // Force evaluation
+        }
+        sw.Stop();
+        
+        // Assert
+        sw.ElapsedMilliseconds.Should().BeLessThan(500,
+            "All rules combined should analyze 1000-line file in <500ms");
+    }
+}
+```
+
+---
+
+### Step 9: Documentation (30 minutes)
+
+**Create rule documentation file**:
+
+**File**: `specs/005-core-rule-library/rules-documentation.md`
+
+For each rule, document:
+1. **What**: What the rule detects
+2. **Why**: Why it matters (code quality impact)
+3. **How to Fix**: Concrete refactoring patterns
+
+Example template:
+
+```markdown
+## LNT007 - Exception Swallowing
+
+### What
+Detects empty catch blocks that suppress exceptions without handling them.
+
+### Why
+Empty catch blocks hide errors, making bugs difficult to diagnose. Silent failures
+in production can lead to data corruption, security issues, or unexpected behavior.
+
+### How to Fix
+
+**Option 1 - Log the exception**:
+```csharp
+try
+{
+    RiskyOperation();
+}
+catch (Exception ex)
+{
+    Logger.Error("Operation failed", ex);
+    throw;  // Re-throw after logging
+}
+```
+
+**Option 2 - Handle gracefully**:
+```csharp
+try
+{
+    ParseUserInput(input);
+}
+catch (FormatException ex)
+{
+    ShowErrorMessage("Invalid input format");
+    return defaultValue;
+}
+```
+
+**Option 3 - Remove try-catch if not needed**:
+```csharp
+// If you're swallowing because you don't care about errors,
+// remove the try-catch entirely and let exceptions propagate
+DoSomething();  // Let it throw if it fails
+```
+```
+
+---
+
+## Testing Checklist
+
+For each rule, verify:
+
+- [ ] Implements IAnalyzerRule interface
+- [ ] Has correct RuleId (LNT002-LNT008 for new, LNT001 for enhanced)
+- [ ] Uses correct category (CodeSmell, Design, Maintainability, Documentation)
+- [ ] Skips auto-generated files
+- [ ] Handles empty files/null nodes gracefully
+- [ ] Messages include concrete values (e.g., "6 parameters")
+- [ ] Messages include fix guidance
+- [ ] All acceptance scenarios from spec have test coverage
+- [ ] Boundary cases tested (exactly at threshold, one above)
+- [ ] Metadata tests verify RuleId, Severity, Category
+- [ ] Performance tests pass (<500ms for 1000-line file)
+
+---
+
+## Common Pitfalls
+
+### 1. Forgetting to Check for Auto-Generated Code
+
+❌ **Wrong**:
+```csharp
+public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+{
+    var root = tree.GetRoot();
+    // ... analysis logic
+}
+```
+
+✅ **Right**:
+```csharp
+public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+{
+    if (IsGeneratedCode(tree))
+        return Enumerable.Empty<DiagnosticResult>();
+    
+    var root = tree.GetRoot();
+    // ... analysis logic
+}
+```
+
+### 2. Returning Null Instead of Empty Enumerable
+
+❌ **Wrong**:
+```csharp
+if (noViolations)
+    return null;  // Contract violation!
+```
+
+✅ **Right**:
+```csharp
+if (noViolations)
+    return Enumerable.Empty<DiagnosticResult>();
+```
+
+### 3. Not Including Fix Guidance in Message
+
+❌ **Wrong**:
+```csharp
+var message = "Method has too many parameters";
+```
+
+✅ **Right**:
+```csharp
+var message = $"Method '{methodName}' has {paramCount} parameters (max: 5). " +
+              "Consider using a parameter object or builder pattern.";
+```
+
+### 4. Inefficient Tree Traversal
+
+❌ **Wrong** (multiple traversals):
+```csharp
+var methods = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
+var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
+```
+
+✅ **Right** (single traversal or lazy evaluation):
+```csharp
+foreach (var method in root.DescendantNodes().OfType<MethodDeclarationSyntax>())
+{
+    // yield return as you go
+}
+```
+
+---
+
+## Success Criteria
+
+Feature complete when:
+
+- ✅ All 8 rules implemented and tested
+- ✅ 40+ tests pass (minimum 5 per rule)
+- ✅ Test coverage ≥95% for new rules
+- ✅ Performance test passes (<500ms for 1000 lines)
+- ✅ Integration test verifies all rules work together
+- ✅ Documentation complete (what/why/how for each rule)
+- ✅ Existing LongMethodRule tests still pass
+- ✅ No breaking changes to IAnalyzerRule or AnalyzerEngine
+
+---
+
+## Next Steps After Implementation
+
+1. **Code Review**: Submit PR with all changes
+2. **CI Validation**: Ensure GitHub Actions workflow passes
+3. **Update README**: Add new rules to rule catalog
+4. **Performance Baseline**: Document actual performance metrics
+5. **Plan Future Enhancements**: Track semantic analysis for Dead Code Rule, configurable thresholds
+
+---
+
+## Getting Help
+
+- **Roslyn API**: [Microsoft.CodeAnalysis documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis)
+- **Syntax Visualizer**: Use Roslyn Syntax Visualizer in Visual Studio to explore syntax trees
+- **Research**: See [research.md](research.md) for detailed Roslyn patterns
+- **Contracts**: See [contracts/rule-contracts.md](contracts/rule-contracts.md) for exact API specifications
+- **Existing Example**: Review `LongMethodRule.cs` and `LongMethodRuleTests.cs` for working pattern
+
+---
+
+## Estimated Timeline
+
+| Phase | Time | Cumulative |
+|-------|------|------------|
+| Step 1: Add Categories | 5 min | 5 min |
+| Step 2: Enhance LongMethodRule | 10 min | 15 min |
+| Step 3: LNT007 (Exception Swallowing) | 30 min | 45 min |
+| Step 4: P1 Rules (LNT002, LNT003) | 2 hours | 2h 45m |
+| Step 5: P2 Rules (LNT004, LNT005) | 3 hours | 5h 45m |
+| Step 6: P3 Rules (LNT008, LNT006) | 3 hours | 8h 45m |
+| Step 7: Integration Testing | 30 min | 9h 15m |
+| Step 8: Performance Testing | 15 min | 9h 30m |
+| Step 9: Documentation | 30 min | 10h |
+
+**Total: ~10 hours** for experienced developer familiar with Roslyn
+
+**Buffer: +2 hours** for debugging, unexpected issues
+
+**Final Estimate: 8-12 hours** to complete Feature 005
+
+---
+
+Ready to start? Begin with **Step 1** and work sequentially through the steps. Each step builds on the previous, validating progress incrementally.

@@ -46,6 +46,18 @@ public static class DiagnosticCategories
     public const string Design = "Design";
 
     /// <summary>
+    ///     Code smells that indicate potential maintainability issues.
+    ///     Examples: long parameter lists, deep nesting, exception swallowing.
+    /// </summary>
+    public const string CodeSmell = "Code Smell";
+
+    /// <summary>
+    ///     Documentation quality issues.
+    ///     Examples: missing XML docs, incomplete summaries.
+    /// </summary>
+    public const string Documentation = "Documentation";
+
+    /// <summary>
     ///     General issues not fitting other categories.
     ///     Use sparingly - prefer specific categories when applicable.
     /// </summary>

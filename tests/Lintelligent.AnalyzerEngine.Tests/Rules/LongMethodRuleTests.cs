@@ -55,10 +55,14 @@ public class LongMethodRuleTests
             .Which.Should().BeEquivalentTo(new
             {
                 RuleId = "LNT001",
-                Message = "Method is too long",
                 Severity = Severity.Warning,
-                Category = DiagnosticCategories.Maintainability
+                Category = DiagnosticCategories.CodeSmell
             }, options => options.ExcludingMissingMembers());
+        
+        // Verify enhanced message format includes method name and statement count
+        diagnostics.First().Message.Should().Contain("LongMethod");
+        diagnostics.First().Message.Should().Contain("21 statements");
+        diagnostics.First().Message.Should().Contain("Consider extracting logical blocks into separate methods");
     }
 
     [Fact]
@@ -232,7 +236,7 @@ public class LongMethodRuleTests
         _rule.Id.Should().Be("LNT001");
         _rule.Description.Should().Be("Method exceeds recommended length");
         _rule.Severity.Should().Be(Severity.Warning);
-        _rule.Category.Should().Be(DiagnosticCategories.Maintainability);
+        _rule.Category.Should().Be(DiagnosticCategories.CodeSmell);
     }
 
     [Fact]

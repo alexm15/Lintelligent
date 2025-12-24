@@ -63,6 +63,10 @@ bld/
 *.coveragexml
 TestResults/
 
+# Coverage Reports
+coverage/
+coveragereport/
+
 # .NET Profiler
 *.psess
 *.vsp

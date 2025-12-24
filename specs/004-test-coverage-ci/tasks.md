@@ -17,9 +17,9 @@
 
 **Purpose**: Verify project infrastructure and prepare for test implementation
 
-- [ ] T001 Verify coverlet.collector v6.0.4 is installed in both test projects
-- [ ] T002 Verify xUnit 2.9.3 and FluentAssertions 6.8.0 are installed in test projects
-- [ ] T003 [P] Install ReportGenerator global tool: `dotnet tool install -g dotnet-reportgenerator-globaltool`
+- [X] T001 Verify coverlet.collector v6.0.4 is installed in both test projects
+- [X] T002 Verify xUnit 2.9.3 and FluentAssertions 6.8.0 are installed in test projects
+- [X] T003 [P] Install ReportGenerator global tool: `dotnet tool install -g dotnet-reportgenerator-globaltool`
 
 **Checkpoint**: Dependencies verified - test implementation can begin
 
@@ -31,9 +31,9 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Delete placeholder file tests/Lintelligent.AnalyzerEngine.Tests/UnitTest1.cs
-- [ ] T005 Verify solution builds successfully: `dotnet build --configuration Release`
-- [ ] T006 Verify existing CLI tests run successfully: `dotnet test tests/Lintelligent.Cli.Tests/`
+- [X] T004 Delete placeholder file tests/Lintelligent.AnalyzerEngine.Tests/UnitTest1.cs
+- [X] T005 Verify solution builds successfully: `dotnet build --configuration Release`
+- [X] T006 Verify existing CLI tests run successfully: `dotnet test tests/Lintelligent.Cli.Tests/`
 
 **Checkpoint**: Foundation clean - user story implementation can now begin in parallel
 
@@ -47,15 +47,15 @@
 
 ### Implementation for User Story 1
 
-- [ ] T007 [P] [US1] Create test file tests/Lintelligent.AnalyzerEngine.Tests/Rules/LongMethodRuleTests.cs
-- [ ] T008 [US1] Write test: Analyze_MethodExceeds20Lines_ReturnsDiagnostic in LongMethodRuleTests.cs
-- [ ] T009 [US1] Write test: Analyze_MethodUnder20Lines_ReturnsNoDiagnostics in LongMethodRuleTests.cs
-- [ ] T010 [US1] Write test: Analyze_EmptyMethodBody_ReturnsNoDiagnostics in LongMethodRuleTests.cs
-- [ ] T011 [US1] Write test: Analyze_NullMethodBody_ReturnsNoDiagnostics in LongMethodRuleTests.cs
-- [ ] T012 [US1] Write test: Analyze_BoundaryCase_Exactly20Lines_ReturnsNoDiagnostics in LongMethodRuleTests.cs
-- [ ] T013 [US1] Write test: Analyze_BoundaryCase_Exactly21Lines_ReturnsDiagnostic in LongMethodRuleTests.cs
-- [ ] T014 [US1] Run coverage for rule tests: `dotnet test tests/Lintelligent.AnalyzerEngine.Tests/ --collect:"XPlat Code Coverage"`
-- [ ] T015 [US1] Verify LongMethodRule has 100% coverage in coverage report
+- [X] T007 [P] [US1] Create test file tests/Lintelligent.AnalyzerEngine.Tests/Rules/LongMethodRuleTests.cs
+- [X] T008 [US1] Write test: Analyze_MethodExceeds20Lines_ReturnsDiagnostic in LongMethodRuleTests.cs
+- [X] T009 [US1] Write test: Analyze_MethodUnder20Lines_ReturnsNoDiagnostics in LongMethodRuleTests.cs
+- [X] T010 [US1] Write test: Analyze_EmptyMethodBody_ReturnsNoDiagnostics in LongMethodRuleTests.cs
+- [X] T011 [US1] Write test: Analyze_NullMethodBody_ReturnsNoDiagnostics in LongMethodRuleTests.cs
+- [X] T012 [US1] Write test: Analyze_BoundaryCase_Exactly20Lines_ReturnsNoDiagnostics in LongMethodRuleTests.cs
+- [X] T013 [US1] Write test: Analyze_BoundaryCase_Exactly21Lines_ReturnsDiagnostic in LongMethodRuleTests.cs
+- [X] T014 [US1] Run coverage for rule tests: `dotnet test tests/Lintelligent.AnalyzerEngine.Tests/ --collect:"XPlat Code Coverage"`
+- [X] T015 [US1] Verify LongMethodRule has 100% coverage in coverage report
 
 **Checkpoint**: User Story 1 complete - All analyzer rules have 100% test coverage
 
@@ -69,16 +69,16 @@
 
 ### Implementation for User Story 2
 
-- [ ] T016 [P] [US2] Create test file tests/Lintelligent.AnalyzerEngine.Tests/Analysis/AnalyzerEngineTests.cs
-- [ ] T017 [P] [US2] Create test file tests/Lintelligent.AnalyzerEngine.Tests/Analysis/AnalyzerManagerTests.cs
-- [ ] T018 [US2] Write test: Analyze_MultipleRulesRegistered_ExecutesAllRules in AnalyzerEngineTests.cs
-- [ ] T019 [US2] Write test: Analyze_OneRuleThrowsException_OtherRulesContinue in AnalyzerEngineTests.cs
-- [ ] T020 [US2] Write test: Analyze_MultipleFiles_ResultsAttributedCorrectly in AnalyzerEngineTests.cs
-- [ ] T021 [US2] Write test: Analyze_NoRulesRegistered_ReturnsEmptyResults in AnalyzerEngineTests.cs
-- [ ] T022 [US2] Write test: RegisterRules_ValidRules_AddsToCollection in AnalyzerManagerTests.cs
-- [ ] T023 [US2] Write test: GetRegisteredRules_AfterRegistration_ReturnsAllRules in AnalyzerManagerTests.cs
-- [ ] T024 [US2] Run integration tests: `dotnet test tests/Lintelligent.AnalyzerEngine.Tests/Analysis/`
-- [ ] T025 [US2] Verify all integration tests pass
+- [X] T016 [P] [US2] Create test file tests/Lintelligent.AnalyzerEngine.Tests/Analysis/AnalyzerEngineTests.cs
+- [X] T017 [P] [US2] Create test file tests/Lintelligent.AnalyzerEngine.Tests/Analysis/AnalyzerManagerTests.cs
+- [X] T018 [US2] Write test: Analyze_MultipleRulesRegistered_ExecutesAllRules in AnalyzerEngineTests.cs
+- [X] T019 [US2] Write test: Analyze_OneRuleThrowsException_OtherRulesContinue in AnalyzerEngineTests.cs
+- [X] T020 [US2] Write test: Analyze_MultipleFiles_ResultsAttributedCorrectly in AnalyzerEngineTests.cs
+- [X] T021 [US2] Write test: Analyze_NoRulesRegistered_ReturnsEmptyResults in AnalyzerEngineTests.cs
+- [X] T022 [US2] Write test: RegisterRules_ValidRules_AddsToCollection in AnalyzerManagerTests.cs
+- [X] T023 [US2] Write test: GetRegisteredRules_AfterRegistration_ReturnsAllRules in AnalyzerManagerTests.cs
+- [X] T024 [US2] Run integration tests: `dotnet test tests/Lintelligent.AnalyzerEngine.Tests/Analysis/`
+- [X] T025 [US2] Verify all integration tests pass
 
 **Checkpoint**: User Story 2 complete - AnalyzerEngine orchestration verified with multi-rule scenarios
 
@@ -92,21 +92,21 @@
 
 ### Implementation for User Story 4
 
-- [ ] T026 [P] [US4] Create directory .github/workflows/
-- [ ] T027 [US4] Create GitHub Actions workflow file .github/workflows/ci.yml
-- [ ] T028 [US4] Add workflow trigger: on push to all branches and pull requests
-- [ ] T029 [US4] Add job step: Checkout code using actions/checkout@v4
-- [ ] T030 [US4] Add job step: Setup .NET 10.0.x using actions/setup-dotnet@v4
-- [ ] T031 [US4] Add job step: dotnet restore
-- [ ] T032 [US4] Add job step: dotnet build --no-restore --configuration Release
-- [ ] T033 [US4] Add job step: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
-- [ ] T034 [US4] Add job step: Install ReportGenerator global tool
-- [ ] T035 [US4] Add job step: reportgenerator with --failonminimumcoverage:90
-- [ ] T036 [US4] Add job step: Publish coverage report as artifact (retention-days: 90, if: always())
-- [ ] T037 [US4] Set job timeout-minutes: 10
-- [ ] T038 [US4] Commit and push .github/workflows/ci.yml to trigger first CI run
-- [ ] T039 [US4] Verify CI workflow executes successfully on GitHub Actions
-- [ ] T040 [US4] Verify build passes all stages (checkout, setup, restore, build, test, coverage, publish)
+- [X] T026 [P] [US4] Create directory .github/workflows/
+- [X] T027 [US4] Create GitHub Actions workflow file .github/workflows/ci.yml
+- [X] T028 [US4] Add workflow trigger: on push to all branches and pull requests
+- [X] T029 [US4] Add job step: Checkout code using actions/checkout@v4
+- [X] T030 [US4] Add job step: Setup .NET 10.0.x using actions/setup-dotnet@v4
+- [X] T031 [US4] Add job step: dotnet restore
+- [X] T032 [US4] Add job step: dotnet build --no-restore --configuration Release
+- [X] T033 [US4] Add job step: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+- [X] T034 [US4] Add job step: Install ReportGenerator global tool
+- [X] T035 [US4] Add job step: reportgenerator with --failonminimumcoverage:90
+- [X] T036 [US4] Add job step: Publish coverage report as artifact (retention-days: 90, if: always())
+- [X] T037 [US4] Set job timeout-minutes: 10
+- [X] T038 [US4] Commit and push .github/workflows/ci.yml to trigger first CI run
+- [X] T039 [US4] Verify CI workflow executes successfully on GitHub Actions
+- [X] T040 [US4] Verify build passes all stages (checkout, setup, restore, build, test, coverage, publish)
 
 **Checkpoint**: User Story 4 complete - CI pipeline validates every commit with 90% coverage enforcement
 
@@ -120,14 +120,14 @@
 
 ### Implementation for User Story 3
 
-- [ ] T041 [US3] Enhance tests/Lintelligent.Cli.Tests/Commands/ScanCommandTests.cs with exit code verification
-- [ ] T042 [US3] Write test: Execute_ValidArguments_ReturnsExitCode0 in ScanCommandTests.cs
-- [ ] T043 [US3] Write test: Execute_InvalidArguments_ReturnsExitCode2 in ScanCommandTests.cs
-- [ ] T044 [US3] Write test: Execute_CommandThrowsException_ReturnsExitCode1 in ScanCommandTests.cs
-- [ ] T045 [US3] Write test: Execute_NoCommandSpecified_ReturnsExitCode2 in ScanCommandTests.cs
-- [ ] T046 [US3] Write test: ConfigureServices_RegistersAllRequiredServices in ScanCommandTests.cs
-- [ ] T047 [US3] Run CLI tests: `dotnet test tests/Lintelligent.Cli.Tests/`
-- [ ] T048 [US3] Verify all CLI orchestration tests pass
+- [X] T041 [US3] Enhance tests/Lintelligent.Cli.Tests/Commands/ScanCommandTests.cs with exit code verification
+- [X] T042 [US3] Write test: Execute_ValidArguments_ReturnsExitCode0 in ScanCommandTests.cs
+- [X] T043 [US3] Write test: Execute_InvalidArguments_ReturnsExitCode2 in ScanCommandTests.cs
+- [X] T044 [US3] Write test: Execute_CommandThrowsException_ReturnsExitCode1 in ScanCommandTests.cs
+- [X] T045 [US3] Write test: Execute_NoCommandSpecified_ReturnsExitCode2 in ScanCommandTests.cs
+- [X] T046 [US3] Write test: ConfigureServices_RegistersAllRequiredServices in ScanCommandTests.cs
+- [X] T047 [US3] Run CLI tests: `dotnet test tests/Lintelligent.Cli.Tests/`
+- [X] T048 [US3] Verify all CLI orchestration tests pass
 
 **Checkpoint**: User Story 3 complete - CLI orchestration and exit code handling verified
 
@@ -141,14 +141,14 @@
 
 ### Implementation for User Story 5
 
-- [ ] T049 [US5] Run local coverage with HTML report: `dotnet test --collect:"XPlat Code Coverage" --results-directory ./coverage`
-- [ ] T050 [US5] Generate HTML coverage report locally using ReportGenerator with -reporttypes:"Html;Cobertura"
-- [ ] T051 [US5] Open coveragereport/index.html and verify line coverage, branch coverage, method coverage visible
-- [ ] T052 [US5] Verify per-file coverage breakdown shows uncovered line numbers
-- [ ] T053 [US5] Test threshold enforcement: Run reportgenerator with --failonminimumcoverage:90 and verify exit code 0 if coverage ≥90%
-- [ ] T054 [US5] Test threshold failure: Temporarily comment out a test, verify coverage drops and reportgenerator returns non-zero exit code
-- [ ] T055 [US5] Restore commented test and verify coverage returns to ≥90%
-- [ ] T056 [US5] Verify CI artifact published: Check GitHub Actions artifacts for coverage-report.zip
+- [X] T049 [US5] Run local coverage with HTML report: `dotnet test --collect:"XPlat Code Coverage" --results-directory ./coverage`
+- [X] T050 [US5] Generate HTML coverage report locally using ReportGenerator with -reporttypes:"Html;Cobertura"
+- [X] T051 [US5] Open coveragereport/index.html and verify line coverage, branch coverage, method coverage visible
+- [X] T052 [US5] Verify per-file coverage breakdown shows uncovered line numbers
+- [X] T053 [US5] Test threshold enforcement: Run reportgenerator with --failonminimumcoverage:90 and verify exit code 0 if coverage ≥90%
+- [X] T054 [US5] Test threshold failure: Temporarily comment out a test, verify coverage drops and reportgenerator returns non-zero exit code
+- [X] T055 [US5] Restore commented test and verify coverage returns to ≥90%
+- [X] T056 [US5] Verify CI artifact published: Check GitHub Actions artifacts for coverage-report.zip
 
 **Checkpoint**: User Story 5 complete - Coverage reporting and enforcement fully functional locally and in CI
 
@@ -158,15 +158,15 @@
 
 **Purpose**: Improvements that affect multiple user stories and final validation
 
-- [ ] T057 [P] Verify overall test coverage meets 90% threshold: Run full coverage report
-- [ ] T058 [P] Verify all tests pass: `dotnet test` (should show 0 Failed)
-- [ ] T059 [P] Verify local test execution time <5 seconds (NFR-001)
-- [ ] T060 [P] Verify CI pipeline execution time <5 minutes (NFR-002 target)
-- [ ] T061 [P] Validate quickstart.md commands work as documented
-- [ ] T062 Code cleanup: Remove any commented-out code or debug statements
-- [ ] T063 Verify no flaky tests: Run test suite 3 times consecutively, all should pass
-- [ ] T064 Final validation: Push commit and verify CI passes with green build
-- [ ] T065 Document coverage results in PR description: Include line/branch/method percentages
+- [X] T057 [P] Verify overall test coverage meets 90% threshold: Run full coverage report
+- [X] T058 [P] Verify all tests pass: `dotnet test` (should show 0 Failed)
+- [X] T059 [P] Verify local test execution time <5 seconds (NFR-001)
+- [X] T060 [P] Verify CI pipeline execution time <5 minutes (NFR-002 target)
+- [X] T061 [P] Validate quickstart.md commands work as documented
+- [X] T062 Code cleanup: Remove any commented-out code or debug statements
+- [X] T063 Verify no flaky tests: Run test suite 3 times consecutively, all should pass
+- [X] T064 Final validation: Push commit and verify CI passes with green build
+- [X] T065 Document coverage results in PR description: Include line/branch/method percentages
 
 **Checkpoint**: Feature 004 complete - All success criteria met, ready for code review
 

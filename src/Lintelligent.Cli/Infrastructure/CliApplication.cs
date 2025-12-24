@@ -28,11 +28,9 @@ public sealed class CliApplication : IDisposable
     /// </summary>
     public void Dispose()
     {
-        if (!_disposed)
-        {
-            if (_serviceProvider is IDisposable disposable) disposable.Dispose();
-            _disposed = true;
-        }
+        if (_disposed) return;
+        if (_serviceProvider is IDisposable disposable) disposable.Dispose();
+        _disposed = true;
     }
 
     /// <summary>
@@ -51,8 +49,7 @@ public sealed class CliApplication : IDisposable
     /// </remarks>
     public CommandResult Execute(string[] args)
     {
-        if (args == null)
-            throw new ArgumentNullException(nameof(args));
+        ArgumentNullException.ThrowIfNull(args);
 
         // Handle empty args[] - no command specified
         if (args.Length == 0 || _commandTypes.Count == 0)
@@ -72,17 +69,16 @@ public sealed class CliApplication : IDisposable
 
             // Resolve command instance from DI
             var commandInstance = _serviceProvider.GetService(commandType);
-            if (commandInstance == null)
-                return CommandResult.Failure(1, $"Failed to resolve command: {commandType.Name}");
-
-            // Execute command (async or sync)
-            if (commandInstance is IAsyncCommand asyncCommand)
+            return commandInstance switch
+            {
+                null => CommandResult.Failure(1, $"Failed to resolve command: {commandType.Name}"),
+                // Execute command (async or sync)
                 // GetAwaiter().GetResult() unwraps AggregateException automatically
-                return asyncCommand.ExecuteAsync(args).GetAwaiter().GetResult();
-
-            if (commandInstance is ICommand syncCommand) return syncCommand.Execute(args);
-
-            return CommandResult.Failure(1, $"Command {commandType.Name} does not implement ICommand or IAsyncCommand");
+                IAsyncCommand asyncCommand => asyncCommand.ExecuteAsync(args).GetAwaiter().GetResult(),
+                ICommand syncCommand => syncCommand.Execute(args),
+                _ => CommandResult.Failure(1,
+                    $"Command {commandType.Name} does not implement ICommand or IAsyncCommand")
+            };
         }
         catch (ArgumentException ex)
         {

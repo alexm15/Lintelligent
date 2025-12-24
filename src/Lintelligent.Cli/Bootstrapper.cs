@@ -8,18 +8,19 @@ namespace Lintelligent.Cli;
 
 public static class Bootstrapper
 {
-    public static void Configure(IServiceCollection sp)
+    public static void Configure(IServiceCollection services)
     {
-        // Core services
         // Core services used by both Program and tests. Rules are intentionally not registered here
         // so callers (Program or tests) can register explicit, deterministic rules as needed.
-        sp.AddSingleton<AnalyzerManager>();
-        sp.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
-        sp.AddSingleton<ReportGenerator>();
-        sp.AddSingleton<ScanCommand>();
+        services.AddSingleton<AnalyzerManager>();
+        services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
+        services.AddSingleton<ReportGenerator>();
+        
+        // Commands (transient lifetime - new instance per execution to avoid state leakage)
+        services.AddTransient<ScanCommand>();
 
         // Rules (explicit, deterministic)
-        sp.AddSingleton<IAnalyzerRule, LongMethodRule>();
+        services.AddSingleton<IAnalyzerRule, LongMethodRule>();
         // services.AddSingleton<IAnalyzerRule, AvoidEmptyCatchRule>();
     }
 }

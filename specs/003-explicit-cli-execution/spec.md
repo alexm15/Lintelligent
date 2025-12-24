@@ -71,10 +71,18 @@ As a CLI developer, I want to eliminate all implicit async hosting patterns so t
 
 ### Edge Cases
 
-- What happens when a command throws an unhandled exception during execution? (Must catch and convert to exit code)
-- How does the system handle commands that attempt to use async I/O internally? (Commands can be async internally, but Execute() returns synchronously)
-- What if CliApplicationBuilder is built multiple times? (Each build creates a new independent instance)
-- How are dependencies shared between commands? (Explicitly registered in builder, no implicit DI resolution)
+1. **Builder Reuse**: What if CliApplicationBuilder.Build() is called multiple times on the same instance? → Throws InvalidOperationException after first Build() call (builder transitions to Built state)
+2. **Duplicate Commands**: What if AddCommand<T>() is called multiple times for the same command type? → Last registration wins (standard ServiceCollection behavior)
+3. **ConfigureServices Exceptions**: What if the ConfigureServices delegate throws an exception? → Exception propagates to caller (no try-catch in builder)
+4. **Unrecognized Command**: What if Execute(args) is called with args[0] not matching any registered command? → Returns CommandResult with exit code 2 (invalid arguments)
+5. **Zero Commands Registered**: What if Build() is called without any AddCommand<T>() calls? → Allowed; Execute() returns exit code 2 for any args
+6. **Empty Arguments**: What if Execute() is called with empty array (Execute([]))? → Returns CommandResult with exit code 2 (invalid arguments - no command specified)
+7. **Null Arguments**: What if Execute(null) is called? → Throws ArgumentNullException immediately
+8. **Command Execution Exceptions**: What happens when a command throws an unhandled exception? → Caught and converted to exit code per FR-009 (ArgumentException/derived → 2, others → 1), exception.Message stored in CommandResult.Error
+9. **DI Resolution Failures**: What if command constructor dependencies cannot be resolved? → Exception caught during Execute(), maps to exit code 1, error details in CommandResult.Error
+10. **Build() Exceptions**: What if CliApplicationBuilder.Build() throws during service provider construction? → Exception propagates to caller (validation errors, service registration issues)
+11. **Exit Code Validation**: What if command attempts to return exit code >255? → CommandResult constructor validates 0-255 range, throws ArgumentOutOfRangeException
+12. **Async Command Execution**: How does the system handle commands that use async I/O internally? → IAsyncCommand.ExecuteAsync() is awaited using GetAwaiter().GetResult(); AggregateException automatically unwrapped to first inner exception
 
 ## Requirements *(mandatory)*
 
@@ -88,7 +96,7 @@ As a CLI developer, I want to eliminate all implicit async hosting patterns so t
 - **FR-006**: Command execution MUST be synchronous from the caller's perspective (Execute() returns immediately with result, awaiting any async command execution internally)
 - **FR-007**: System MUST NOT depend on Microsoft.Extensions.Hosting or any hosting framework
 - **FR-008**: CliApplicationBuilder MUST support registering commands via AddCommand<TCommand>() where TCommand : ICommand (generic method, no auto-discovery)
-- **FR-009**: Unhandled exceptions during command execution MUST be caught and converted to exit codes (ArgumentException → 2, all others → 1) with exception message stored in CommandResult.Error
+- **FR-009**: Unhandled exceptions during command execution MUST be caught and converted to exit codes (ArgumentException and all derived types → 2, all other exceptions → 1) with exception.Message stored in CommandResult.Error property (stack traces excluded)
 - **FR-010**: CommandResult MUST contain string Output and Error properties for in-memory test verification (separate stdout/stderr streams, no process spawning required)
 
 ### Key Entities

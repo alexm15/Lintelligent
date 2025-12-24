@@ -60,6 +60,50 @@ Analyze a single file:
 dotnet run -- scan /path/to/file.cs
 ```
 
+### CLI Execution Model
+
+Lintelligent uses an explicit build → execute → exit pattern based on Constitutional Principle IV:
+
+```csharp
+using Lintelligent.Cli.Infrastructure;
+using Lintelligent.Cli.Commands;
+
+// 1. Create builder
+var builder = new CliApplicationBuilder();
+
+// 2. Configure services (dependency injection)
+builder.ConfigureServices(services =>
+{
+    services.AddSingleton<AnalyzerManager>();
+    services.AddTransient<ScanCommand>();  // Commands are transient
+});
+
+// 3. Register commands
+builder.AddCommand<ScanCommand>();
+
+// 4. Build application
+using var app = builder.Build();
+
+// 5. Execute command synchronously
+var result = app.Execute(args);
+
+// 6. Output results
+if (!string.IsNullOrEmpty(result.Output))
+    Console.WriteLine(result.Output);
+
+if (!string.IsNullOrEmpty(result.Error))
+    Console.Error.WriteLine(result.Error);
+
+// 7. Exit with result code
+return result.ExitCode;
+```
+
+**Key Benefits:**
+- ✅ **Explicit Execution**: No hidden background tasks or async hosting
+- ✅ **Testable**: CommandResult enables in-memory testing without process spawning
+- ✅ **Synchronous**: Main() exits immediately after command completes
+- ✅ **Clear Error Handling**: Exceptions map to standard exit codes (2 = invalid args, 1 = error)
+
 ### Programmatic Usage
 
 #### CLI Integration (File System)

@@ -149,13 +149,14 @@ var builder = new CliApplicationBuilder();
 // Configure services (DI)
 builder.ConfigureServices(services =>
 {
-    // Core services
+    // Core services (singleton lifetime - shared state)
     services.AddSingleton<AnalyzerManager>();
     services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
     services.AddSingleton<ReportGenerator>();
     
-    // Commands
-    services.AddSingleton<ScanCommand>();
+    // Commands (transient lifetime - new instance per execution)
+    // Note: Commands should be registered as Transient to avoid state leakage between executions
+    services.AddTransient<ScanCommand>();
     
     // Rules
     services.AddSingleton<IAnalyzerRule, LongMethodRule>();
@@ -185,6 +186,7 @@ return result.ExitCode;
 3. Removed `await host.RunAsync()` → use `app.Execute(args)`
 4. Explicitly output CommandResult.Output and Error to console
 5. Return exit code directly
+6. **Commands registered as Transient** (new instance per execution to avoid state issues)
 
 ---
 

@@ -138,6 +138,10 @@ public sealed class CliApplication
         // If command is async, await it synchronously
         if (command is IAsyncCommand asyncCmd)
         {
+            // GetAwaiter().GetResult() unwraps AggregateException automatically
+            // This means the first inner exception is thrown directly (not wrapped)
+            // Example: async command throws ArgumentNullException → caught as ArgumentNullException (exit code 2)
+            //          not caught as AggregateException (which would be exit code 1)
             return asyncCmd.ExecuteAsync(args).GetAwaiter().GetResult();
         }
         
@@ -147,10 +151,18 @@ public sealed class CliApplication
 }
 ```
 
+**Exception Unwrapping Behavior**:
+- `GetAwaiter().GetResult()` automatically unwraps the first exception from `AggregateException`
+- This means exception-to-exit-code mapping (FR-009) works correctly for async commands
+- Example: Async command throws `ArgumentException` → maps to exit code 2 (not exit code 1)
+- Alternative `.Result` property would throw `AggregateException`, breaking exit code mapping
+- **No ConfigureAwait(false) needed in commands**: Console apps have no SynchronizationContext to deadlock on
+
 **Alternatives Considered**:
 - **Force commands to be synchronous** - Rejected: Unrealistic for I/O-bound operations
 - **Make Execute() async** - Rejected: Leaks async to Program.Main(), violates explicit execution principle
 - **Use Task.Run()** - Rejected: Unnecessary overhead, doesn't change blocking behavior
+- **Use .Result property** - Rejected: Wraps exceptions in AggregateException, breaks exit code mapping
 
 **References**:
 - Stephen Cleary's "Don't Block on Async Code" (doesn't apply to console apps without SyncContext)

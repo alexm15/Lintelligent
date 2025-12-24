@@ -1,17 +1,28 @@
 ﻿using Lintelligent.Cli;
 using Lintelligent.Cli.Commands;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Lintelligent.Cli.Infrastructure;
 
-using var host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices(Bootstrapper.Configure)
-    .Build();
+// Build CLI application
+var builder = new CliApplicationBuilder();
+
+// Configure services (DI)
+builder.ConfigureServices(Bootstrapper.Configure);
+
+// Register commands
+builder.AddCommand<ScanCommand>();
+
+// Build and execute
+using var app = builder.Build();
 
 Console.WriteLine("Lintelligent CLI (NET 10)");
-await host.Services
-    .GetRequiredService<ScanCommand>()
-    .ExecuteAsync(args);
+var result = app.Execute(args);
 
+// Output results to console
+if (!string.IsNullOrEmpty(result.Output))
+    Console.WriteLine(result.Output);
 
-// Graceful shutdown
-await host.StopAsync();
+if (!string.IsNullOrEmpty(result.Error))
+    Console.Error.WriteLine(result.Error);
+
+// Return exit code to shell
+return result.ExitCode;

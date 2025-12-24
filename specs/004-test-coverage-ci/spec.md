@@ -6,6 +6,15 @@
 **Priority**: P0  
 **Constitutional Principle**: V (Testing Discipline)
 
+## Clarifications
+
+### Session 2025-12-24
+
+- Q: Which coverage tool should be used (coverlet vs dotnet-coverage)? → A: Coverlet - Popular open-source tool, excellent xUnit integration, widely used in CI/CD
+- Q: How should flaky tests be handled in CI? → A: Fail immediately - No retries; flaky tests must be fixed manually
+- Q: What should happen when NuGet package downloads fail in CI? → A: Fail build immediately - Surface the error clearly, require manual intervention
+- Q: What level of logging detail should CI provide when failures occur? → A: Standard logs + failed test details - Build output, test results, failed test details with stack traces
+
 ## User Scenarios & Testing
 
 ### User Story 1 - Comprehensive Rule Coverage (Priority: P1) 🎯 MVP
@@ -96,11 +105,13 @@ Developers need visibility into test coverage metrics and automated enforcement 
 ### Edge Cases
 
 - What happens when a test project fails to build? **The CI pipeline should fail immediately and report the build error before attempting to run tests**
-- What happens when coverage tools cannot be installed in CI? **The pipeline should fail with a clear error message indicating the missing dependency**
+- What happens when coverage tools cannot be installed in CI? **The pipeline should fail immediately with a clear error message indicating the missing dependency - no retries or fallbacks**
+- What happens when NuGet package downloads fail? **The build should fail immediately and surface the error clearly, requiring manual intervention to resolve infrastructure issues**
 - What happens when test execution times out? **CI should fail the build after a reasonable timeout (e.g., 10 minutes) and report which tests were running**
 - What happens when coverage is exactly 90%? **Build should pass - threshold is inclusive (>= 90%)**
 - What happens when no tests exist at all? **Coverage should be 0%, build should fail, and report should clearly indicate no tests were found**
 - What happens when tests pass but coverage calculation fails? **Build should fail - coverage enforcement is a required quality gate**
+- What happens when a test fails intermittently (flaky test)? **The build should fail immediately with no automatic retries - flaky tests must be investigated and fixed manually to maintain strict quality standards**
 
 ## Requirements
 
@@ -120,6 +131,8 @@ Developers need visibility into test coverage metrics and automated enforcement 
 - **FR-012**: CLI orchestration tests MUST use in-memory execution (CliApplication) rather than process spawning
 - **FR-013**: Test execution in CI MUST complete within 10 minutes or fail with timeout error
 - **FR-014**: Coverage threshold enforcement MUST fail builds below 90% with clear indication of uncovered areas
+- **FR-015**: CI pipeline MUST NOT implement automatic retry logic for failed tests - all test failures require manual investigation
+- **FR-016**: CI pipeline MUST fail immediately when NuGet package downloads fail, with no retry or fallback mechanisms
 
 ### Non-Functional Requirements
 
@@ -127,6 +140,7 @@ Developers need visibility into test coverage metrics and automated enforcement 
 - **NFR-002**: CI pipeline total execution time SHOULD be under 5 minutes for fast feedback
 - **NFR-003**: Coverage reports MUST be human-readable (HTML format) for easy review
 - **NFR-004**: CI workflow MUST use GitHub Actions native runners (no custom infrastructure required)
+- **NFR-005**: CI failure logs MUST include standard build output, all test results, and full stack traces for failed tests to enable efficient debugging
 
 ### Key Entities
 
@@ -152,9 +166,10 @@ Developers need visibility into test coverage metrics and automated enforcement 
 
 - GitHub repository is configured to allow GitHub Actions workflows
 - Developers have local .NET 10 SDK installed for local test execution
-- Coverage tool (e.g., coverlet, dotnet-coverage) is available as a NuGet package
+- Coverlet is used as the coverage tool (available as NuGet package: coverlet.collector)
 - Test projects use xUnit framework (already established in codebase)
 - CI runners have internet access to download NuGet packages
+- NuGet package sources are reliable and accessible during CI builds
 
 ### Out of Scope
 

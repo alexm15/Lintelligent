@@ -29,10 +29,10 @@ public record DiagnosticResult
         Severity severity,
         string category)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
-        ArgumentException.ThrowIfNullOrWhiteSpace(ruleId);
-        ArgumentException.ThrowIfNullOrWhiteSpace(message);
-        ArgumentException.ThrowIfNullOrWhiteSpace(category);
+        ArgumentExceptionPolyfills.ThrowIfNullOrWhiteSpace(filePath, nameof(filePath));
+        ArgumentExceptionPolyfills.ThrowIfNullOrWhiteSpace(ruleId, nameof(ruleId));
+        ArgumentExceptionPolyfills.ThrowIfNullOrWhiteSpace(message, nameof(message));
+        ArgumentExceptionPolyfills.ThrowIfNullOrWhiteSpace(category, nameof(category));
 
         if (lineNumber < 1)
             throw new ArgumentOutOfRangeException(

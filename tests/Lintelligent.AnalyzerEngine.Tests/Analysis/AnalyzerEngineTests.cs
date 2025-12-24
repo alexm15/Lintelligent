@@ -1,4 +1,5 @@
 using Lintelligent.AnalyzerEngine.Analysis;
+using Lintelligent.AnalyzerEngine.Rules;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
@@ -6,8 +7,8 @@ using Xunit;
 namespace Lintelligent.AnalyzerEngine.Tests.Analysis;
 
 /// <summary>
-/// Unit tests for AnalyzerEngine demonstrating in-memory testing capability.
-/// These tests prove Constitution Principle I compliance: zero file system dependencies.
+///     Unit tests for AnalyzerEngine demonstrating in-memory testing capability.
+///     These tests prove Constitution Principle I compliance: zero file system dependencies.
 /// </summary>
 public class AnalyzerEngineTests
 {
@@ -46,9 +47,9 @@ public class AnalyzerEngineTests
                          }
                          """;
         var tree = CSharpSyntaxTree.ParseText(sourceCode, path: "InMemoryTest.cs");
-        var trees = new[] { tree };
+        var trees = new[] {tree};
 
-        var rule = new Rules.LongMethodRule();
+        var rule = new LongMethodRule();
         var manager = new AnalyzerManager();
         manager.RegisterRule(rule);
         var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
@@ -67,7 +68,7 @@ public class AnalyzerEngineTests
         // Arrange: Empty syntax tree collection
         var trees = Array.Empty<SyntaxTree>();
         var manager = new AnalyzerManager();
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act
         var results = engine.Analyze(trees).ToList();
@@ -84,10 +85,10 @@ public class AnalyzerEngineTests
         var tree1 = CSharpSyntaxTree.ParseText(sourceCode, path: "Test1.cs");
         var tree2 = CSharpSyntaxTree.ParseText(sourceCode, path: "Test2.cs");
 
-        var rule = new Rules.LongMethodRule();
+        var rule = new LongMethodRule();
         var manager = new AnalyzerManager();
         manager.RegisterRule(rule);
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act: Analyze same source code multiple times
         var results1 = engine.Analyze([tree1]).ToList();
@@ -103,14 +104,14 @@ public class AnalyzerEngineTests
         // Arrange: Multiple in-memory trees with violations
         var source1 = GenerateLongMethodSource("Class1", "Method1");
         var source2 = GenerateLongMethodSource("Class2", "Method2");
-        
+
         var tree1 = CSharpSyntaxTree.ParseText(source1, path: "File1.cs");
         var tree2 = CSharpSyntaxTree.ParseText(source2, path: "File2.cs");
 
-        var rule = new Rules.LongMethodRule();
+        var rule = new LongMethodRule();
         var manager = new AnalyzerManager();
         manager.RegisterRule(rule);
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act
         var results = engine.Analyze([tree1, tree2]).ToList();

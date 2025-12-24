@@ -27,10 +27,7 @@ public sealed class AnalyzerManager
 
     public void RegisterRules(IEnumerable<IAnalyzerRule> rules)
     {
-        foreach (var rule in rules)
-        {
-            RegisterRule(rule);
-        }
+        foreach (var rule in rules) RegisterRule(rule);
     }
 
     public IEnumerable<DiagnosticResult> Analyze(SyntaxTree syntaxTree)

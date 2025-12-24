@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using Lintelligent.AnalyzerEngine;
-using Lintelligent.AnalyzerEngine.Results;
+﻿using Lintelligent.AnalyzerEngine.Results;
 
 namespace Lintelligent.Reporting;
 
@@ -33,7 +31,7 @@ public class ReportGenerator
     public string GenerateMarkdownGroupedByCategory(IEnumerable<DiagnosticResult> results)
     {
         var grouped = results.GroupBy(r => r.Category)
-                            .OrderBy(g => g.Key);
+            .OrderBy(g => g.Key);
 
         var output = "# Lintelligent Report\n\n";
 

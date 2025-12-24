@@ -1,16 +1,15 @@
-using Xunit;
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.Abstractions;
 using Lintelligent.AnalyzerEngine.Analysis;
 using Lintelligent.AnalyzerEngine.Results;
 using Lintelligent.AnalyzerEngine.Rules;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+using Xunit;
 
 namespace Lintelligent.AnalyzerEngine.Tests;
 
 /// <summary>
-/// Tests for AnalyzerManager validation and rule registration.
+///     Tests for AnalyzerManager validation and rule registration.
 /// </summary>
 public class AnalyzerManagerTests
 {
@@ -107,7 +106,11 @@ public class AnalyzerManagerTests
         public string Description => "Invalid rule with empty ID";
         public Severity Severity => Severity.Warning;
         public string Category => DiagnosticCategories.General;
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree) => Enumerable.Empty<DiagnosticResult>();
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            return Enumerable.Empty<DiagnosticResult>();
+        }
     }
 
     private sealed class InvalidRuleNullId : IAnalyzerRule
@@ -116,16 +119,24 @@ public class AnalyzerManagerTests
         public string Description => "Invalid rule with null ID";
         public Severity Severity => Severity.Warning;
         public string Category => DiagnosticCategories.General;
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree) => Enumerable.Empty<DiagnosticResult>();
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            return Enumerable.Empty<DiagnosticResult>();
+        }
     }
 
     private sealed class InvalidRuleUndefinedSeverity : IAnalyzerRule
     {
         public string Id => "INVALID001";
         public string Description => "Invalid rule with undefined severity";
-        public Severity Severity => unchecked((Severity)999);
+        public Severity Severity => unchecked((Severity) 999);
         public string Category => DiagnosticCategories.General;
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree) => Enumerable.Empty<DiagnosticResult>();
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            return Enumerable.Empty<DiagnosticResult>();
+        }
     }
 
     private sealed class InvalidRuleEmptyCategory : IAnalyzerRule
@@ -134,7 +145,11 @@ public class AnalyzerManagerTests
         public string Description => "Invalid rule with empty category";
         public Severity Severity => Severity.Warning;
         public string Category => "";
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree) => Enumerable.Empty<DiagnosticResult>();
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            return Enumerable.Empty<DiagnosticResult>();
+        }
     }
 
     private sealed class InvalidRuleNullCategory : IAnalyzerRule
@@ -143,7 +158,11 @@ public class AnalyzerManagerTests
         public string Description => "Invalid rule with null category";
         public Severity Severity => Severity.Warning;
         public string Category => null!;
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree) => Enumerable.Empty<DiagnosticResult>();
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            return Enumerable.Empty<DiagnosticResult>();
+        }
     }
 
     private sealed class ValidRule : IAnalyzerRule
@@ -152,6 +171,10 @@ public class AnalyzerManagerTests
         public string Description => "Valid rule";
         public Severity Severity => Severity.Info;
         public string Category => DiagnosticCategories.Style;
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree) => Enumerable.Empty<DiagnosticResult>();
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            return Enumerable.Empty<DiagnosticResult>();
+        }
     }
 }

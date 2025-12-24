@@ -14,8 +14,8 @@ public class LongMethodRule : IAnalyzerRule
     {
         var root = tree.GetRoot();
         var longMethods = root.DescendantNodes()
-                             .OfType<MethodDeclarationSyntax>()
-                             .Where(m => m.Body?.Statements.Count > 20);
+            .OfType<MethodDeclarationSyntax>()
+            .Where(m => m.Body?.Statements.Count > 20);
 
         foreach (var method in longMethods)
         {

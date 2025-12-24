@@ -1,37 +1,20 @@
-using Xunit;
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.Abstractions;
-using Lintelligent.AnalyzerEngine.Tests.TestUtilities;
 using Lintelligent.AnalyzerEngine.Analysis;
-using Lintelligent.AnalyzerEngine.Rules;
 using Lintelligent.AnalyzerEngine.Results;
+using Lintelligent.AnalyzerEngine.Rules;
+using Lintelligent.AnalyzerEngine.Tests.TestUtilities;
 using Microsoft.CodeAnalysis;
+using Xunit;
 
 namespace Lintelligent.AnalyzerEngine.Tests;
 
 /// <summary>
-/// Integration tests demonstrating that AnalyzerEngine behavior is consistent
-/// regardless of which ICodeProvider implementation is used.
+///     Integration tests demonstrating that AnalyzerEngine behavior is consistent
+///     regardless of which ICodeProvider implementation is used.
 /// </summary>
 public class CodeProviderIntegrationTests
 {
-    private sealed class TestRule : IAnalyzerRule
-    {
-        public string Id => "INTEGRATION001";
-        public string Description => "Test rule for integration testing";
-        public Severity Severity => Severity.Warning;
-        public string Category => DiagnosticCategories.General;
-
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
-        {
-            // Report diagnostic for any class named "Problem"
-            if (tree.ToString().Contains("class Problem"))
-            {
-                yield return new DiagnosticResult(tree.FilePath, Id, Description, 1, Severity, Category);
-            }
-        }
-    }
-
     [Fact]
     public void AnalyzerEngine_WithDifferentProviders_ProducesSameResults()
     {
@@ -53,7 +36,7 @@ public class CodeProviderIntegrationTests
 
         var manager = new AnalyzerManager();
         manager.RegisterRule(new TestRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act
         var results1 = engine.Analyze(inMemoryProvider.GetSyntaxTrees()).ToList();
@@ -62,7 +45,7 @@ public class CodeProviderIntegrationTests
         // Assert - Results should be identical
         results1.Should().HaveCount(1);
         results2.Should().HaveCount(1);
-        
+
         results1[0].RuleId.Should().Be(results2[0].RuleId);
         results1[0].FilePath.Should().Be(results2[0].FilePath);
         results1[0].Message.Should().Be(results2[0].Message);
@@ -75,11 +58,11 @@ public class CodeProviderIntegrationTests
         // Arrange
         var sources = new Dictionary<string, string>
         {
-            ["Problem1.cs"] = "class Problem { }",  // Should be analyzed
-            ["Excluded.cs"] = "class Problem { }",  // Should be excluded
-            ["Problem2.cs"] = "class Problem { }"   // Should be analyzed
+            ["Problem1.cs"] = "class Problem { }", // Should be analyzed
+            ["Excluded.cs"] = "class Problem { }", // Should be excluded
+            ["Problem2.cs"] = "class Problem { }" // Should be analyzed
         };
-        
+
         var baseProvider = new InMemoryCodeProvider(sources);
         var filteredProvider = new FilteringCodeProvider(
             baseProvider,
@@ -87,7 +70,7 @@ public class CodeProviderIntegrationTests
 
         var manager = new AnalyzerManager();
         manager.RegisterRule(new TestRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act
         var results = engine.Analyze(filteredProvider.GetSyntaxTrees()).ToList();
@@ -109,14 +92,14 @@ public class CodeProviderIntegrationTests
             ["src/Models/User.cs"] = "class Problem { }",
             ["tests/UnitTest1.cs"] = "class Problem { }"
         };
-        
+
         var baseProvider = new InMemoryCodeProvider(sources);
-        
+
         // Filter 1: Only src/ directory
         var srcOnly = new FilteringCodeProvider(
             baseProvider,
             tree => tree.FilePath.StartsWith("src/"));
-        
+
         // Filter 2: Only Controllers
         var controllersOnly = new FilteringCodeProvider(
             srcOnly,
@@ -124,7 +107,7 @@ public class CodeProviderIntegrationTests
 
         var manager = new AnalyzerManager();
         manager.RegisterRule(new TestRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act
         var results = engine.Analyze(controllersOnly.GetSyntaxTrees()).ToList();
@@ -139,10 +122,10 @@ public class CodeProviderIntegrationTests
     {
         // Arrange
         var emptyProvider = new InMemoryCodeProvider(new Dictionary<string, string>());
-        
+
         var manager = new AnalyzerManager();
         manager.RegisterRule(new TestRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act
         var results = engine.Analyze(emptyProvider.GetSyntaxTrees()).ToList();
@@ -162,12 +145,12 @@ public class CodeProviderIntegrationTests
 
         var editorBufferProvider = new InMemoryCodeProvider(new Dictionary<string, string>
         {
-            ["File.cs"] = "class Problem { }"  // Modified in editor, not saved
+            ["File.cs"] = "class Problem { }" // Modified in editor, not saved
         });
 
         var manager = new AnalyzerManager();
         manager.RegisterRule(new TestRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act
         var savedResults = engine.Analyze(savedFileProvider.GetSyntaxTrees()).ToList();
@@ -204,11 +187,11 @@ public class CodeProviderIntegrationTests
 
         var filteredProvider = new FilteringCodeProvider(
             provider2,
-            tree => true);  // Filter that includes everything
+            tree => true); // Filter that includes everything
 
         var manager = new AnalyzerManager();
         manager.RegisterRule(new TestRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act
         var results1 = engine.Analyze(provider1.GetSyntaxTrees()).ToList();
@@ -230,7 +213,7 @@ public class CodeProviderIntegrationTests
 
         var manager = new AnalyzerManager();
         manager.RegisterRule(new TestRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act - Analyze same provider multiple times
         var results1 = engine.Analyze(provider.GetSyntaxTrees()).ToList();
@@ -241,8 +224,23 @@ public class CodeProviderIntegrationTests
         results1.Should().HaveCount(1);
         results2.Should().HaveCount(1);
         results3.Should().HaveCount(1);
-        
+
         results1[0].RuleId.Should().Be(results2[0].RuleId);
         results2[0].RuleId.Should().Be(results3[0].RuleId);
+    }
+
+    private sealed class TestRule : IAnalyzerRule
+    {
+        public string Id => "INTEGRATION001";
+        public string Description => "Test rule for integration testing";
+        public Severity Severity => Severity.Warning;
+        public string Category => DiagnosticCategories.General;
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            // Report diagnostic for any class named "Problem"
+            if (tree.ToString().Contains("class Problem"))
+                yield return new DiagnosticResult(tree.FilePath, Id, Description, 1, Severity, Category);
+        }
     }
 }

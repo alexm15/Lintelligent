@@ -30,8 +30,10 @@ foundational governance and architectural principles.
 
 **MUST enforce separation of concerns:**
 
-- **AnalyzerEngine** (core): Framework-agnostic analysis logic; MUST NOT depend on hosting, logging, IO, or configuration files
-- **Rules** (domain): Stateless, deterministic implementations; MUST NOT depend on CLI, reporting, configuration, or other rules
+- **AnalyzerEngine** (core): Framework-agnostic analysis logic; MUST NOT depend on hosting, logging, IO, or
+  configuration files
+- **Rules** (domain): Stateless, deterministic implementations; MUST NOT depend on CLI, reporting, configuration, or
+  other rules
 - **Reporting** (transformation): Pure data transformation; MUST NOT perform IO or depend on CLI
 - **CLI** (composition root): ONLY layer permitted to use dependency injection; orchestrates all other layers
 
@@ -42,7 +44,8 @@ foundational governance and architectural principles.
 - AnalyzerEngine depending on hosting frameworks (e.g., Generic Host) or logging abstractions
 - Cross-layer dependencies that violate the hierarchy: CLI → Reporting/AnalyzerEngine → Rules
 
-**Rationale**: Layered boundaries ensure testability, portability, and long-term maintainability. The AnalyzerEngine MUST be usable in CI, IDE plugins, or alternative frontends without requiring the CLI infrastructure.
+**Rationale**: Layered boundaries ensure testability, portability, and long-term maintainability. The AnalyzerEngine
+MUST be usable in CI, IDE plugins, or alternative frontends without requiring the CLI infrastructure.
 
 ### II. Dependency Injection Boundaries
 
@@ -56,7 +59,8 @@ foundational governance and architectural principles.
 - Rules (MUST be stateless and instantiable without DI)
 - Reporting (pure functions or simple constructors)
 
-**Rationale**: DI is a hosting concern. Restricting it to the CLI prevents framework coupling and ensures core logic remains portable and testable without container infrastructure.
+**Rationale**: DI is a hosting concern. Restricting it to the CLI prevents framework coupling and ensures core logic
+remains portable and testable without container infrastructure.
 
 ### III. Rule Implementation Contract
 
@@ -75,7 +79,8 @@ foundational governance and architectural principles.
 - Perform side effects
 - Require runtime configuration (compile-time configuration via constructor is acceptable)
 
-**Rationale**: Rules are the core domain logic. Statelessness ensures parallelizability, determinism ensures reproducibility, and zero external dependencies ensure testability in isolation.
+**Rationale**: Rules are the core domain logic. Statelessness ensures parallelizability, determinism ensures
+reproducibility, and zero external dependencies ensure testability in isolation.
 
 ### IV. Explicit Execution Model
 
@@ -91,9 +96,11 @@ foundational governance and architectural principles.
 - Implicit use of `IHost.RunAsync()` or similar patterns for standard CLI operations
 - Event loops or async workflows that outlive the command execution
 
-**Exceptions**: Future extensions (e.g., watch mode, language server) MAY use background execution when explicitly designed and documented.
+**Exceptions**: Future extensions (e.g., watch mode, language server) MAY use background execution when explicitly
+designed and documented.
 
-**Rationale**: Explicitness over magic. The CLI is a tool, not a service. Users expect deterministic, finite execution. Long-running patterns obscure control flow and complicate testing.
+**Rationale**: Explicitness over magic. The CLI is a tool, not a service. Users expect deterministic, finite execution.
+Long-running patterns obscure control flow and complicate testing.
 
 ### V. Testing Discipline
 
@@ -104,9 +111,11 @@ foundational governance and architectural principles.
 - **CLI**: Integration tests focus ONLY on orchestration and command parsing, NOT business logic
 - **Reporting**: Pure transformation logic tested with sample inputs/outputs
 
-**DI usage in tests**: Acceptable as a mechanism to swap implementations (e.g., in-memory file system, mock rules) for CLI integration tests.
+**DI usage in tests**: Acceptable as a mechanism to swap implementations (e.g., in-memory file system, mock rules) for
+CLI integration tests.
 
-**Rationale**: Core logic MUST be testable without spinning up the full application. Tests that require DI indicate architectural violations (logic leaking into the composition root).
+**Rationale**: Core logic MUST be testable without spinning up the full application. Tests that require DI indicate
+architectural violations (logic leaking into the composition root).
 
 ### VI. Extensibility and Stability
 
@@ -123,7 +132,8 @@ foundational governance and architectural principles.
 - Favor explicit contracts over implicit conventions
 - Maintain backward compatibility or follow semantic versioning strictly
 
-**Rationale**: Lintelligent is infrastructure tooling. Breaking changes have high user cost. Extensibility ensures the tool grows with user needs without requiring architectural rewrites.
+**Rationale**: Lintelligent is infrastructure tooling. Breaking changes have high user cost. Extensibility ensures the
+tool grows with user needs without requiring architectural rewrites.
 
 ### VII. Determinism and Predictability
 
@@ -139,7 +149,8 @@ foundational governance and architectural principles.
 - Time-based or hardware-dependent analysis outcomes
 - Hidden global state or ambient context
 
-**Rationale**: Users trust static analysis tools that produce consistent, explainable results. Non-determinism undermines trust and complicates debugging.
+**Rationale**: Users trust static analysis tools that produce consistent, explainable results. Non-determinism
+undermines trust and complicates debugging.
 
 ## Architectural Boundaries
 
@@ -186,7 +197,8 @@ var host = Host.CreateDefaultBuilder(args)
 await host.RunAsync(); // Violates explicit execution model
 ```
 
-**Rationale**: The latter hides control flow and implies service-like behavior. CLI commands MUST be transparent, finite operations.
+**Rationale**: The latter hides control flow and implies service-like behavior. CLI commands MUST be transparent, finite
+operations.
 
 ## Testing Philosophy
 
@@ -202,7 +214,8 @@ await host.RunAsync(); // Violates explicit execution model
 - AnalyzerEngine: All analysis workflows covered
 - CLI: Command parsing and orchestration verified, NOT business logic re-tested
 
-**Test-first discipline**: When implementing new rules or analysis features, tests MUST be written first, approved, and shown to fail before implementation begins.
+**Test-first discipline**: When implementing new rules or analysis features, tests MUST be written first, approved, and
+shown to fail before implementation begins.
 
 ## Extensibility
 
@@ -226,9 +239,9 @@ await host.RunAsync(); // Violates explicit execution model
 1. Proposed changes MUST be documented with rationale
 2. Architectural violations MUST be explicitly justified before approval
 3. Amendments require version bump per semantic versioning:
-   - **MAJOR**: Backward-incompatible governance changes, principle removal/redefinition
-   - **MINOR**: New principle added or materially expanded guidance
-   - **PATCH**: Clarifications, wording fixes, non-semantic refinements
+    - **MAJOR**: Backward-incompatible governance changes, principle removal/redefinition
+    - **MINOR**: New principle added or materially expanded guidance
+    - **PATCH**: Clarifications, wording fixes, non-semantic refinements
 
 **Compliance:**
 
@@ -238,10 +251,12 @@ await host.RunAsync(); // Violates explicit execution model
 
 **Versioning Policy:**
 
-This constitution follows semantic versioning. Breaking changes to principles require community/team approval and migration documentation.
+This constitution follows semantic versioning. Breaking changes to principles require community/team approval and
+migration documentation.
 
 **Constitution Supersedes:**
 
-This document supersedes all other development practices, coding guidelines, or architectural decisions. In case of conflict, the constitution prevails unless formally amended.
+This document supersedes all other development practices, coding guidelines, or architectural decisions. In case of
+conflict, the constitution prevails unless formally amended.
 
 **Version**: 1.0.0 | **Ratified**: 2025-12-22 | **Last Amended**: 2025-12-22

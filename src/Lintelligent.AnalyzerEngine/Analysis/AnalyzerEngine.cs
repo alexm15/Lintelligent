@@ -1,64 +1,56 @@
 ﻿using Lintelligent.AnalyzerEngine.Results;
-using Microsoft.CodeAnalysis;
 
 namespace Lintelligent.AnalyzerEngine.Analysis;
 
 /// <summary>
-/// Core analysis orchestrator that processes syntax trees through registered analyzer rules.
+///     Core analysis orchestrator that processes syntax trees through registered analyzer rules.
 /// </summary>
 /// <remarks>
-/// This engine is framework-agnostic and performs no file system IO operations.
-/// Syntax trees are provided by implementations of ICodeProvider (in the CLI layer).
-/// 
-/// Design Principles:
-/// - Stateless: No mutable state, same trees always yield identical results
-/// - Streaming: Uses yield to process large codebases without memory exhaustion
-/// - Deterministic: Analysis results depend only on input syntax trees, not environment
-/// - Resilient: Continues analysis when individual rules throw exceptions
+///     This engine is framework-agnostic and performs no file system IO operations.
+///     Syntax trees are provided by implementations of ICodeProvider (in the CLI layer).
+///     Design Principles:
+///     - Stateless: No mutable state, same trees always yield identical results
+///     - Streaming: Uses yield to process large codebases without memory exhaustion
+///     - Deterministic: Analysis results depend only on input syntax trees, not environment
+///     - Resilient: Continues analysis when individual rules throw exceptions
 /// </remarks>
 public class AnalyzerEngine(AnalyzerManager manager)
 {
     private readonly List<RuleException> _exceptions = [];
 
     /// <summary>
-    /// Gets the collection of exceptions thrown by rules during the last analysis.
+    ///     Gets the collection of exceptions thrown by rules during the last analysis.
     /// </summary>
     public IReadOnlyList<RuleException> Exceptions => _exceptions.AsReadOnly();
 
     /// <summary>
-    /// Analyzes a collection of syntax trees and yields diagnostic results.
+    ///     Analyzes a collection of syntax trees and yields diagnostic results.
     /// </summary>
     /// <param name="syntaxTrees">
-    /// Enumerable collection of parsed syntax trees to analyze.
-    /// Trees should have FilePath set for accurate diagnostic reporting.
+    ///     Enumerable collection of parsed syntax trees to analyze.
+    ///     Trees should have FilePath set for accurate diagnostic reporting.
     /// </param>
     /// <returns>
-    /// Lazy sequence of diagnostic results for each rule violation found.
-    /// Empty if no violations detected or input is empty.
+    ///     Lazy sequence of diagnostic results for each rule violation found.
+    ///     Empty if no violations detected or input is empty.
     /// </returns>
     /// <remarks>
-    /// This method processes trees in a streaming fashion using yield return.
-    /// Results are produced as trees are analyzed, enabling memory-efficient processing
-    /// of large codebases without loading all diagnostics into memory.
-    /// 
-    /// Implementation is deterministic: same syntax trees will always produce
-    /// identical diagnostic results regardless of execution environment.
-    /// 
-    /// If a rule throws an exception, the engine catches it, records it in the Exceptions
-    /// collection, and continues analyzing with the remaining rules. This ensures that
-    /// one faulty rule doesn't prevent analysis of the entire codebase.
+    ///     This method processes trees in a streaming fashion using yield return.
+    ///     Results are produced as trees are analyzed, enabling memory-efficient processing
+    ///     of large codebases without loading all diagnostics into memory.
+    ///     Implementation is deterministic: same syntax trees will always produce
+    ///     identical diagnostic results regardless of execution environment.
+    ///     If a rule throws an exception, the engine catches it, records it in the Exceptions
+    ///     collection, and continues analyzing with the remaining rules. This ensures that
+    ///     one faulty rule doesn't prevent analysis of the entire codebase.
     /// </remarks>
     public IEnumerable<DiagnosticResult> Analyze(IEnumerable<SyntaxTree> syntaxTrees)
     {
         _exceptions.Clear();
-        
+
         foreach (var tree in syntaxTrees)
-        {
-            foreach (var result in AnalyzeTree(tree))
-            {
-                yield return result;
-            }
-        }
+        foreach (var result in AnalyzeTree(tree))
+            yield return result;
     }
 
     private IEnumerable<DiagnosticResult> AnalyzeTree(SyntaxTree tree)
@@ -76,10 +68,7 @@ public class AnalyzerEngine(AnalyzerManager manager)
                 continue;
             }
 
-            foreach (var result in results)
-            {
-                yield return result;
-            }
+            foreach (var result in results) yield return result;
         }
     }
 }

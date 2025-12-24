@@ -1,7 +1,7 @@
-using Xunit;
 using Lintelligent.Cli.Commands;
 using Lintelligent.Cli.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 
 namespace Lintelligent.Cli.Tests;
 
@@ -12,10 +12,7 @@ public class CliApplicationTests
     {
         // Arrange
         var builder = new CliApplicationBuilder();
-        builder.ConfigureServices(services =>
-        {
-            services.AddTransient<TestCommand>();
-        });
+        builder.ConfigureServices(services => { services.AddTransient<TestCommand>(); });
         builder.AddCommand<TestCommand>();
 
         // Act
@@ -30,10 +27,7 @@ public class CliApplicationTests
     {
         // Arrange
         var builder = new CliApplicationBuilder();
-        builder.ConfigureServices(services =>
-        {
-            services.AddTransient<TestCommand>();
-        });
+        builder.ConfigureServices(services => { services.AddTransient<TestCommand>(); });
         builder.AddCommand<TestCommand>();
         using var app = builder.Build();
 
@@ -51,10 +45,7 @@ public class CliApplicationTests
     {
         // Arrange
         var builder = new CliApplicationBuilder();
-        builder.ConfigureServices(services =>
-        {
-            services.AddTransient<ThrowingCommand>();
-        });
+        builder.ConfigureServices(services => { services.AddTransient<ThrowingCommand>(); });
         builder.AddCommand<ThrowingCommand>();
         using var app = builder.Build();
 
@@ -72,10 +63,7 @@ public class CliApplicationTests
     {
         // Arrange
         var builder = new CliApplicationBuilder();
-        builder.ConfigureServices(services =>
-        {
-            services.AddTransient<GeneralErrorCommand>();
-        });
+        builder.ConfigureServices(services => { services.AddTransient<GeneralErrorCommand>(); });
         builder.AddCommand<GeneralErrorCommand>();
         using var app = builder.Build();
 
@@ -135,7 +123,7 @@ public class CliApplicationTests
     {
         // Act & Assert - exit code too high
         Assert.Throws<ArgumentOutOfRangeException>(() => new CommandResult(256, "", ""));
-        
+
         // Act & Assert - exit code negative
         Assert.Throws<ArgumentOutOfRangeException>(() => new CommandResult(-1, "", ""));
     }
@@ -145,7 +133,7 @@ public class CliApplicationTests
     {
         // Act & Assert - exit code 0 not allowed for Failure
         Assert.Throws<ArgumentOutOfRangeException>(() => CommandResult.Failure(0, "error"));
-        
+
         // Act & Assert - exit code too high
         Assert.Throws<ArgumentOutOfRangeException>(() => CommandResult.Failure(256, "error"));
     }

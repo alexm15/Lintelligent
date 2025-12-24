@@ -1,60 +1,20 @@
-using Xunit;
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.Abstractions;
-using Lintelligent.AnalyzerEngine.Rules;
 using Lintelligent.AnalyzerEngine.Results;
+using Lintelligent.AnalyzerEngine.Rules;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Xunit;
 using EngineClass = Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine;
 using EngineManager = Lintelligent.AnalyzerEngine.Analysis.AnalyzerManager;
 
 namespace Lintelligent.AnalyzerEngine.Tests;
 
 /// <summary>
-/// Tests verifying AnalyzerEngine correctly aggregates findings from multiple rules.
+///     Tests verifying AnalyzerEngine correctly aggregates findings from multiple rules.
 /// </summary>
 public class AnalyzerEngineTests
 {
-    private sealed class FirstRule : IAnalyzerRule
-    {
-        public string Id => "FIRST001";
-        public string Description => "First test rule";
-        public Severity Severity => Severity.Error;
-        public string Category => DiagnosticCategories.Security;
-
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
-        {
-            yield return new DiagnosticResult(tree.FilePath, Id, "Finding from first rule", 1, Severity, Category);
-        }
-    }
-
-    private sealed class SecondRule : IAnalyzerRule
-    {
-        public string Id => "SECOND001";
-        public string Description => "Second test rule";
-        public Severity Severity => Severity.Warning;
-        public string Category => DiagnosticCategories.Performance;
-
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
-        {
-            yield return new DiagnosticResult(tree.FilePath, Id, "Finding 1 from second rule", 2, Severity, Category);
-            yield return new DiagnosticResult(tree.FilePath, Id, "Finding 2 from second rule", 3, Severity, Category);
-        }
-    }
-
-    private sealed class ThirdRule : IAnalyzerRule
-    {
-        public string Id => "THIRD001";
-        public string Description => "Third test rule with no findings";
-        public Severity Severity => Severity.Info;
-        public string Category => DiagnosticCategories.Style;
-
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
-        {
-            return [];
-        }
-    }
-
     [Fact]
     public void AnalyzerEngine_WithMultipleRules_AggregatesAllFindings()
     {
@@ -66,7 +26,7 @@ public class AnalyzerEngineTests
 
         var engine = new EngineClass(manager);
         var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
-        var trees = new[] { tree };
+        var trees = new[] {tree};
 
         // Act
         var results = engine.Analyze(trees).ToList();
@@ -88,14 +48,14 @@ public class AnalyzerEngineTests
         var engine = new EngineClass(manager);
         var tree1 = CSharpSyntaxTree.ParseText("class A { }", path: "A.cs");
         var tree2 = CSharpSyntaxTree.ParseText("class B { }", path: "B.cs");
-        var trees = new[] { tree1, tree2 };
+        var trees = new[] {tree1, tree2};
 
         // Act
         var results = engine.Analyze(trees).ToList();
 
         // Assert
         results.Should().HaveCount(2, "should analyze both trees");
-        results.Select(r => r.FilePath).Should().BeEquivalentTo(new[] { "A.cs", "B.cs" });
+        results.Select(r => r.FilePath).Should().BeEquivalentTo("A.cs", "B.cs");
     }
 
     [Fact]
@@ -128,7 +88,7 @@ public class AnalyzerEngineTests
 
         // Assert - Should return IEnumerable (lazy)
         results.Should().BeAssignableTo<IEnumerable<DiagnosticResult>>();
-        
+
         // Act - Materialize results
         var materialized = results.ToList();
 
@@ -142,7 +102,7 @@ public class AnalyzerEngineTests
         // Arrange - Rule that emits 5 findings for same file
         var manager = new EngineManager();
         manager.RegisterRule(new SecondRule()); // Emits 2 findings
-        manager.RegisterRule(new FirstRule());  // Emits 1 finding
+        manager.RegisterRule(new FirstRule()); // Emits 1 finding
 
         var engine = new EngineClass(manager);
         var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
@@ -160,7 +120,7 @@ public class AnalyzerEngineTests
     {
         // Arrange
         var manager = new EngineManager();
-        manager.RegisterRule(new FirstRule());  // Works correctly
+        manager.RegisterRule(new FirstRule()); // Works correctly
         manager.RegisterRule(new ThrowingRule()); // Throws exception
         manager.RegisterRule(new SecondRule()); // Works correctly
 
@@ -204,6 +164,46 @@ public class AnalyzerEngineTests
         // Assert - Should not accumulate exceptions
         firstExceptionCount.Should().Be(1);
         secondExceptionCount.Should().Be(1, "exceptions from previous run should be cleared");
+    }
+
+    private sealed class FirstRule : IAnalyzerRule
+    {
+        public string Id => "FIRST001";
+        public string Description => "First test rule";
+        public Severity Severity => Severity.Error;
+        public string Category => DiagnosticCategories.Security;
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            yield return new DiagnosticResult(tree.FilePath, Id, "Finding from first rule", 1, Severity, Category);
+        }
+    }
+
+    private sealed class SecondRule : IAnalyzerRule
+    {
+        public string Id => "SECOND001";
+        public string Description => "Second test rule";
+        public Severity Severity => Severity.Warning;
+        public string Category => DiagnosticCategories.Performance;
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            yield return new DiagnosticResult(tree.FilePath, Id, "Finding 1 from second rule", 2, Severity, Category);
+            yield return new DiagnosticResult(tree.FilePath, Id, "Finding 2 from second rule", 3, Severity, Category);
+        }
+    }
+
+    private sealed class ThirdRule : IAnalyzerRule
+    {
+        public string Id => "THIRD001";
+        public string Description => "Third test rule with no findings";
+        public Severity Severity => Severity.Info;
+        public string Category => DiagnosticCategories.Style;
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            return [];
+        }
     }
 
     // Test helper rule that throws exception

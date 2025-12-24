@@ -1,16 +1,15 @@
-using Xunit;
+using System.Diagnostics;
 using FluentAssertions;
-using Lintelligent.AnalyzerEngine.Tests.TestUtilities;
 using Lintelligent.AnalyzerEngine.Analysis;
 using Lintelligent.AnalyzerEngine.Rules;
-using Microsoft.CodeAnalysis;
-using System.Diagnostics;
+using Lintelligent.AnalyzerEngine.Tests.TestUtilities;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Lintelligent.AnalyzerEngine.Tests;
 
 /// <summary>
-/// Performance and constitution compliance validation tests.
+///     Performance and constitution compliance validation tests.
 /// </summary>
 public class PerformanceAndComplianceTests
 {
@@ -27,9 +26,8 @@ public class PerformanceAndComplianceTests
         // Arrange - Create 10,000 in-memory files (SC-002, SC-004)
         const int fileCount = 10000;
         var sources = new Dictionary<string, string>();
-        
+
         for (var i = 0; i < fileCount; i++)
-        {
             sources[$"File{i}.cs"] = $$"""
 
                                        namespace Test{{i}}
@@ -42,18 +40,17 @@ public class PerformanceAndComplianceTests
                                            }
                                        }
                                        """;
-        }
 
         var provider = new InMemoryCodeProvider(sources);
         var manager = new AnalyzerManager();
         manager.RegisterRule(new LongMethodRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act - Measure memory before and after
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
-        var memoryBefore = GC.GetTotalMemory(forceFullCollection: true);
+        var memoryBefore = GC.GetTotalMemory(true);
 
         var sw = Stopwatch.StartNew();
         var results = engine.Analyze(provider.GetSyntaxTrees()).ToList();
@@ -62,15 +59,15 @@ public class PerformanceAndComplianceTests
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
-        var memoryAfter = GC.GetTotalMemory(forceFullCollection: true);
+        var memoryAfter = GC.GetTotalMemory(true);
 
         var memoryGrowthMB = (memoryAfter - memoryBefore) / (1024.0 * 1024.0);
 
         // Assert
         results.Should().NotBeNull();
-        
+
         // Memory should not grow more than 50MB for 10k files (streaming architecture)
-        memoryGrowthMB.Should().BeLessThan(50, 
+        memoryGrowthMB.Should().BeLessThan(50,
             $"Memory growth was {memoryGrowthMB:F2}MB, should be <50MB (streaming requirement)");
 
         // Performance should be reasonable (< 10 seconds for 10k files)
@@ -90,16 +87,13 @@ public class PerformanceAndComplianceTests
     {
         // Arrange - Create provider for lazy evaluation test
         var sources = new Dictionary<string, string>();
-        
-        for (var i = 0; i < 100; i++)
-        {
-            sources[$"File{i}.cs"] = $"class Class{i} {{ }}";
-        }
+
+        for (var i = 0; i < 100; i++) sources[$"File{i}.cs"] = $"class Class{i} {{ }}";
 
         var provider = new InMemoryCodeProvider(sources);
         var manager = new AnalyzerManager();
         manager.RegisterRule(new LongMethodRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act - Take only first 10 results (streaming should stop early)
         var sw = Stopwatch.StartNew();
@@ -108,7 +102,7 @@ public class PerformanceAndComplianceTests
 
         // Assert - Should process quickly since we only took 10 items
         results.Should().HaveCountLessOrEqualTo(10);
-        sw.ElapsedMilliseconds.Should().BeLessThan(1000, 
+        sw.ElapsedMilliseconds.Should().BeLessThan(1000,
             "Taking 10 items should be fast due to lazy evaluation");
     }
 
@@ -116,7 +110,7 @@ public class PerformanceAndComplianceTests
     public void Constitution_PrincipleI_AnalyzerEngineHasNoIODependencies()
     {
         // Arrange - Get AnalyzerEngine assembly
-        var engineAssembly = typeof(Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine).Assembly;
+        var engineAssembly = typeof(AnalyzerEngine.Analysis.AnalyzerEngine).Assembly;
 
         // Act - Get all referenced assemblies
         var referencedAssemblies = engineAssembly.GetReferencedAssemblies()
@@ -124,18 +118,15 @@ public class PerformanceAndComplianceTests
             .ToList();
 
         // Assert - Should NOT reference System.IO or any file system libraries
-        referencedAssemblies.Should().NotContain(a => 
-            a != null && (a.Contains("System.IO.FileSystem") || 
-                         a.Contains("System.IO.Compression") ||
-                         a == "System.IO"),
+        referencedAssemblies.Should().NotContain(a =>
+                a != null && (a.Contains("System.IO.FileSystem") ||
+                              a.Contains("System.IO.Compression") ||
+                              a == "System.IO"),
             "AnalyzerEngine must not depend on System.IO (Constitution Principle I)");
 
         // Output actual dependencies for verification
         _testOutputHelper.WriteLine("AnalyzerEngine Assembly References:");
-        foreach (var assembly in referencedAssemblies.OrderBy(a => a))
-        {
-            _testOutputHelper.WriteLine($"  - {assembly}");
-        }
+        foreach (var assembly in referencedAssemblies.OrderBy(a => a)) _testOutputHelper.WriteLine($"  - {assembly}");
 
         // Verify only allowed dependencies
         referencedAssemblies.Should().Contain("System.Runtime");
@@ -189,7 +180,7 @@ public class PerformanceAndComplianceTests
         var provider = new InMemoryCodeProvider(sources);
         var manager = new AnalyzerManager();
         manager.RegisterRule(new LongMethodRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act - Run analysis 3 times
         var results1 = engine.Analyze(provider.GetSyntaxTrees()).ToList();
@@ -200,7 +191,7 @@ public class PerformanceAndComplianceTests
         results1.Should().HaveCount(results2.Count);
         results2.Should().HaveCount(results3.Count);
 
-        for (int i = 0; i < results1.Count; i++)
+        for (var i = 0; i < results1.Count; i++)
         {
             results1[i].RuleId.Should().Be(results2[i].RuleId);
             results1[i].FilePath.Should().Be(results2[i].FilePath);
@@ -226,7 +217,7 @@ public class PerformanceAndComplianceTests
         var provider = new InMemoryCodeProvider(sources);
         var manager = new AnalyzerManager();
         manager.RegisterRule(new LongMethodRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act - This entire test runs in-memory, no file system
         var sw = Stopwatch.StartNew();
@@ -234,11 +225,11 @@ public class PerformanceAndComplianceTests
         sw.Stop();
 
         // Assert - Should be fast (no IO overhead)
-        sw.ElapsedMilliseconds.Should().BeLessThan(200, 
+        sw.ElapsedMilliseconds.Should().BeLessThan(200,
             "In-memory testing should be fast (<200ms)");
 
         results.Should().NotBeNull();
-        
+
         // Verify we got results without touching disk
         _testOutputHelper.WriteLine($"In-memory test completed in {sw.ElapsedMilliseconds}ms (no file system access)");
     }
@@ -248,16 +239,16 @@ public class PerformanceAndComplianceTests
     {
         // This is a placeholder assertion to document the coverage requirement.
         // Actual coverage is measured by dotnet test --collect:"XPlat Code Coverage"
-        
+
         // SC-003: Code coverage ≥90% for AnalyzerEngine core
         // Based on coverage report:
         // - AnalyzerEngine class: 100% ✓
         // - AnalyzerManager class: 93.33% ✓
         // - Overall AnalyzerEngine project: 83.87% (brought down by LongMethodRule)
-        
+
         var coreClassesCoverage = 96.67; // Average of AnalyzerEngine (100%) + AnalyzerManager (93.33%)
-        
-        coreClassesCoverage.Should().BeGreaterOrEqualTo(90, 
+
+        coreClassesCoverage.Should().BeGreaterOrEqualTo(90,
             "Core analysis classes (AnalyzerEngine, AnalyzerManager) must have ≥90% coverage (SC-003)");
 
         _testOutputHelper.WriteLine($"Core classes coverage: {coreClassesCoverage}%");
@@ -266,8 +257,8 @@ public class PerformanceAndComplianceTests
     }
 
     /// <summary>
-    /// T039: Performance benchmark comparing multiple findings vs single finding.
-    /// Verifies that returning multiple findings doesn't degrade performance.
+    ///     T039: Performance benchmark comparing multiple findings vs single finding.
+    ///     Verifies that returning multiple findings doesn't degrade performance.
     /// </summary>
     [Fact]
     public void PerformanceBenchmark_MultipleFindingsVsSingleFinding_NoPerformanceDegradation()
@@ -275,148 +266,146 @@ public class PerformanceAndComplianceTests
         // Arrange - Create files with multiple violations
         const int fileCount = 1000;
         var sources = new Dictionary<string, string>();
-        
+
         for (var i = 0; i < fileCount; i++)
-        {
             // Create files with 5 long methods each (will generate 5 findings per file)
             sources[$"File{i}.cs"] = $$"""
-                namespace Test{{i}}
-                {
-                    public class Class{{i}}
-                    {
-                        public void Method1() 
-                        {
-                            var x1 = 1;
-                            var x2 = 2;
-                            var x3 = 3;
-                            var x4 = 4;
-                            var x5 = 5;
-                            var x6 = 6;
-                            var x7 = 7;
-                            var x8 = 8;
-                            var x9 = 9;
-                            var x10 = 10;
-                            var x11 = 11;
-                            var x12 = 12;
-                            var x13 = 13;
-                            var x14 = 14;
-                            var x15 = 15;
-                            var x16 = 16;
-                            var x17 = 17;
-                            var x18 = 18;
-                            var x19 = 19;
-                            var x20 = 20;
-                            var x21 = 21; // 21 statements > 20 threshold
-                        }
-                        
-                        public void Method2() 
-                        {
-                            var x1 = 1;
-                            var x2 = 2;
-                            var x3 = 3;
-                            var x4 = 4;
-                            var x5 = 5;
-                            var x6 = 6;
-                            var x7 = 7;
-                            var x8 = 8;
-                            var x9 = 9;
-                            var x10 = 10;
-                            var x11 = 11;
-                            var x12 = 12;
-                            var x13 = 13;
-                            var x14 = 14;
-                            var x15 = 15;
-                            var x16 = 16;
-                            var x17 = 17;
-                            var x18 = 18;
-                            var x19 = 19;
-                            var x20 = 20;
-                            var x21 = 21;
-                        }
-                        
-                        public void Method3() 
-                        {
-                            var x1 = 1;
-                            var x2 = 2;
-                            var x3 = 3;
-                            var x4 = 4;
-                            var x5 = 5;
-                            var x6 = 6;
-                            var x7 = 7;
-                            var x8 = 8;
-                            var x9 = 9;
-                            var x10 = 10;
-                            var x11 = 11;
-                            var x12 = 12;
-                            var x13 = 13;
-                            var x14 = 14;
-                            var x15 = 15;
-                            var x16 = 16;
-                            var x17 = 17;
-                            var x18 = 18;
-                            var x19 = 19;
-                            var x20 = 20;
-                            var x21 = 21;
-                        }
-                        
-                        public void Method4() 
-                        {
-                            var x1 = 1;
-                            var x2 = 2;
-                            var x3 = 3;
-                            var x4 = 4;
-                            var x5 = 5;
-                            var x6 = 6;
-                            var x7 = 7;
-                            var x8 = 8;
-                            var x9 = 9;
-                            var x10 = 10;
-                            var x11 = 11;
-                            var x12 = 12;
-                            var x13 = 13;
-                            var x14 = 14;
-                            var x15 = 15;
-                            var x16 = 16;
-                            var x17 = 17;
-                            var x18 = 18;
-                            var x19 = 19;
-                            var x20 = 20;
-                            var x21 = 21;
-                        }
-                        
-                        public void Method5() 
-                        {
-                            var x1 = 1;
-                            var x2 = 2;
-                            var x3 = 3;
-                            var x4 = 4;
-                            var x5 = 5;
-                            var x6 = 6;
-                            var x7 = 7;
-                            var x8 = 8;
-                            var x9 = 9;
-                            var x10 = 10;
-                            var x11 = 11;
-                            var x12 = 12;
-                            var x13 = 13;
-                            var x14 = 14;
-                            var x15 = 15;
-                            var x16 = 16;
-                            var x17 = 17;
-                            var x18 = 18;
-                            var x19 = 19;
-                            var x20 = 20;
-                            var x21 = 21;
-                        }
-                    }
-                }
-                """;
-        }
+                                       namespace Test{{i}}
+                                       {
+                                           public class Class{{i}}
+                                           {
+                                               public void Method1() 
+                                               {
+                                                   var x1 = 1;
+                                                   var x2 = 2;
+                                                   var x3 = 3;
+                                                   var x4 = 4;
+                                                   var x5 = 5;
+                                                   var x6 = 6;
+                                                   var x7 = 7;
+                                                   var x8 = 8;
+                                                   var x9 = 9;
+                                                   var x10 = 10;
+                                                   var x11 = 11;
+                                                   var x12 = 12;
+                                                   var x13 = 13;
+                                                   var x14 = 14;
+                                                   var x15 = 15;
+                                                   var x16 = 16;
+                                                   var x17 = 17;
+                                                   var x18 = 18;
+                                                   var x19 = 19;
+                                                   var x20 = 20;
+                                                   var x21 = 21; // 21 statements > 20 threshold
+                                               }
+                                               
+                                               public void Method2() 
+                                               {
+                                                   var x1 = 1;
+                                                   var x2 = 2;
+                                                   var x3 = 3;
+                                                   var x4 = 4;
+                                                   var x5 = 5;
+                                                   var x6 = 6;
+                                                   var x7 = 7;
+                                                   var x8 = 8;
+                                                   var x9 = 9;
+                                                   var x10 = 10;
+                                                   var x11 = 11;
+                                                   var x12 = 12;
+                                                   var x13 = 13;
+                                                   var x14 = 14;
+                                                   var x15 = 15;
+                                                   var x16 = 16;
+                                                   var x17 = 17;
+                                                   var x18 = 18;
+                                                   var x19 = 19;
+                                                   var x20 = 20;
+                                                   var x21 = 21;
+                                               }
+                                               
+                                               public void Method3() 
+                                               {
+                                                   var x1 = 1;
+                                                   var x2 = 2;
+                                                   var x3 = 3;
+                                                   var x4 = 4;
+                                                   var x5 = 5;
+                                                   var x6 = 6;
+                                                   var x7 = 7;
+                                                   var x8 = 8;
+                                                   var x9 = 9;
+                                                   var x10 = 10;
+                                                   var x11 = 11;
+                                                   var x12 = 12;
+                                                   var x13 = 13;
+                                                   var x14 = 14;
+                                                   var x15 = 15;
+                                                   var x16 = 16;
+                                                   var x17 = 17;
+                                                   var x18 = 18;
+                                                   var x19 = 19;
+                                                   var x20 = 20;
+                                                   var x21 = 21;
+                                               }
+                                               
+                                               public void Method4() 
+                                               {
+                                                   var x1 = 1;
+                                                   var x2 = 2;
+                                                   var x3 = 3;
+                                                   var x4 = 4;
+                                                   var x5 = 5;
+                                                   var x6 = 6;
+                                                   var x7 = 7;
+                                                   var x8 = 8;
+                                                   var x9 = 9;
+                                                   var x10 = 10;
+                                                   var x11 = 11;
+                                                   var x12 = 12;
+                                                   var x13 = 13;
+                                                   var x14 = 14;
+                                                   var x15 = 15;
+                                                   var x16 = 16;
+                                                   var x17 = 17;
+                                                   var x18 = 18;
+                                                   var x19 = 19;
+                                                   var x20 = 20;
+                                                   var x21 = 21;
+                                               }
+                                               
+                                               public void Method5() 
+                                               {
+                                                   var x1 = 1;
+                                                   var x2 = 2;
+                                                   var x3 = 3;
+                                                   var x4 = 4;
+                                                   var x5 = 5;
+                                                   var x6 = 6;
+                                                   var x7 = 7;
+                                                   var x8 = 8;
+                                                   var x9 = 9;
+                                                   var x10 = 10;
+                                                   var x11 = 11;
+                                                   var x12 = 12;
+                                                   var x13 = 13;
+                                                   var x14 = 14;
+                                                   var x15 = 15;
+                                                   var x16 = 16;
+                                                   var x17 = 17;
+                                                   var x18 = 18;
+                                                   var x19 = 19;
+                                                   var x20 = 20;
+                                                   var x21 = 21;
+                                               }
+                                           }
+                                       }
+                                       """;
 
         var provider = new InMemoryCodeProvider(sources);
         var manager = new AnalyzerManager();
         manager.RegisterRule(new LongMethodRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act - Measure performance
         var sw = Stopwatch.StartNew();
@@ -428,21 +417,21 @@ public class PerformanceAndComplianceTests
 
         // Assert - Should get multiple findings (5 per file) and maintain performance
         totalFindings.Should().BeGreaterThan(fileCount * 4, "Should detect multiple violations per file");
-        
+
         // Performance should not degrade compared to baseline (≥20K files/sec target)
-        throughput.Should().BeGreaterOrEqualTo(800, 
+        throughput.Should().BeGreaterOrEqualTo(800,
             $"Throughput was {throughput:F0} files/sec, should maintain reasonable performance with multiple findings");
 
         _testOutputHelper.WriteLine("Multiple Findings Performance:");
         _testOutputHelper.WriteLine($"  Files Analyzed: {fileCount:N0}");
         _testOutputHelper.WriteLine($"  Total Findings: {totalFindings:N0}");
-        _testOutputHelper.WriteLine($"  Findings/File: {(double)totalFindings / fileCount:F1}");
+        _testOutputHelper.WriteLine($"  Findings/File: {(double) totalFindings / fileCount:F1}");
         _testOutputHelper.WriteLine($"  Execution Time: {sw.ElapsedMilliseconds:N0}ms");
         _testOutputHelper.WriteLine($"  Throughput: {throughput:F0} files/sec");
     }
 
     /// <summary>
-    /// T040: Verify memory growth stays under 50MB for 10K files with multiple findings.
+    ///     T040: Verify memory growth stays under 50MB for 10K files with multiple findings.
     /// </summary>
     [Fact]
     public void MemoryGrowth_10KFilesWithMultipleFindings_UnderThreshold()
@@ -450,52 +439,50 @@ public class PerformanceAndComplianceTests
         // This test is already covered by PerformanceBenchmark_LargeCodebase_NoMemoryExhaustion
         // which tests with 10K files and verifies memory growth < 50MB.
         // Adding explicit pass-through for T040 tracking.
-        
+
         const int fileCount = 10000;
         var sources = new Dictionary<string, string>();
-        
+
         for (var i = 0; i < fileCount; i++)
-        {
             sources[$"File{i}.cs"] = $$"""
-                namespace Test{{i}}
-                {
-                    public class Class{{i}}
-                    {
-                        public void Method1() { }
-                        public void Method2() { }
-                        public void Method3() { }
-                    }
-                }
-                """;
-        }
+                                       namespace Test{{i}}
+                                       {
+                                           public class Class{{i}}
+                                           {
+                                               public void Method1() { }
+                                               public void Method2() { }
+                                               public void Method3() { }
+                                           }
+                                       }
+                                       """;
 
         var provider = new InMemoryCodeProvider(sources);
         var manager = new AnalyzerManager();
         manager.RegisterRule(new LongMethodRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
-        var memoryBefore = GC.GetTotalMemory(forceFullCollection: true);
+        var memoryBefore = GC.GetTotalMemory(true);
 
         var results = engine.Analyze(provider.GetSyntaxTrees()).ToList();
 
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
-        var memoryAfter = GC.GetTotalMemory(forceFullCollection: true);
+        var memoryAfter = GC.GetTotalMemory(true);
 
         var memoryGrowthMB = (memoryAfter - memoryBefore) / (1024.0 * 1024.0);
 
-        memoryGrowthMB.Should().BeLessThan(50, 
+        memoryGrowthMB.Should().BeLessThan(50,
             $"Memory growth was {memoryGrowthMB:F2}MB for {fileCount:N0} files, must be <50MB (T040)");
 
         _testOutputHelper.WriteLine($"Memory Test (10K files): {memoryGrowthMB:F2}MB growth");
     }
 
     /// <summary>
-    /// T041: Verify throughput ≥20K files/sec (within ±10% of Feature 001 baseline of 23K).
+    ///     T041: Verify throughput ≥20K files/sec (within ±10% of Feature 001 baseline of 23K).
     /// </summary>
     [Fact]
     public void Throughput_LargeCodebase_MeetsBaseline()
@@ -503,16 +490,14 @@ public class PerformanceAndComplianceTests
         // Arrange - Create sufficient files for accurate throughput measurement
         const int fileCount = 20000;
         var sources = new Dictionary<string, string>();
-        
+
         for (var i = 0; i < fileCount; i++)
-        {
             sources[$"File{i}.cs"] = $"namespace Test{i} {{ public class Class{i} {{ }} }}";
-        }
 
         var provider = new InMemoryCodeProvider(sources);
         var manager = new AnalyzerManager();
         manager.RegisterRule(new LongMethodRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act - Measure throughput
         var sw = Stopwatch.StartNew();
@@ -522,19 +507,19 @@ public class PerformanceAndComplianceTests
         var throughput = fileCount / sw.Elapsed.TotalSeconds;
 
         // Assert - Must meet minimum throughput (20K files/sec, which is ~87% of baseline 23K)
-        throughput.Should().BeGreaterOrEqualTo(20000, 
+        throughput.Should().BeGreaterOrEqualTo(20000,
             $"Throughput was {throughput:F0} files/sec, must be ≥20,000 files/sec (within 10% of 23K baseline)");
 
         _testOutputHelper.WriteLine("Throughput Benchmark:");
         _testOutputHelper.WriteLine($"  Files Analyzed: {fileCount:N0}");
         _testOutputHelper.WriteLine($"  Execution Time: {sw.ElapsedMilliseconds:N0}ms");
         _testOutputHelper.WriteLine($"  Throughput: {throughput:F0} files/sec");
-        _testOutputHelper.WriteLine($"  Baseline Target: 23,000 files/sec");
-        _testOutputHelper.WriteLine($"  Minimum (90% of baseline): 20,000 files/sec");
+        _testOutputHelper.WriteLine("  Baseline Target: 23,000 files/sec");
+        _testOutputHelper.WriteLine("  Minimum (90% of baseline): 20,000 files/sec");
     }
 
     /// <summary>
-    /// T043: Verify determinism - 3 runs with same input produce identical results.
+    ///     T043: Verify determinism - 3 runs with same input produce identical results.
     /// </summary>
     [Fact]
     public void Determinism_MultipleRuns_ProducesIdenticalResults()
@@ -542,37 +527,35 @@ public class PerformanceAndComplianceTests
         // Arrange - Create consistent test data
         const int fileCount = 100;
         var sources = new Dictionary<string, string>();
-        
+
         for (var i = 0; i < fileCount; i++)
-        {
             sources[$"File{i}.cs"] = $$"""
-                namespace Test{{i}}
-                {
-                    public class Class{{i}}
-                    {
-                        public void LongMethod()
-                        {
-                            var x1 = 1;
-                            var x2 = 2;
-                            var x3 = 3;
-                            var x4 = 4;
-                            var x5 = 5;
-                            var x6 = 6;
-                            var x7 = 7;
-                            var x8 = 8;
-                            var x9 = 9;
-                            var x10 = 10;
-                            var x11 = 11; // Line 15+ triggers violation
-                        }
-                    }
-                }
-                """;
-        }
+                                       namespace Test{{i}}
+                                       {
+                                           public class Class{{i}}
+                                           {
+                                               public void LongMethod()
+                                               {
+                                                   var x1 = 1;
+                                                   var x2 = 2;
+                                                   var x3 = 3;
+                                                   var x4 = 4;
+                                                   var x5 = 5;
+                                                   var x6 = 6;
+                                                   var x7 = 7;
+                                                   var x8 = 8;
+                                                   var x9 = 9;
+                                                   var x10 = 10;
+                                                   var x11 = 11; // Line 15+ triggers violation
+                                               }
+                                           }
+                                       }
+                                       """;
 
         var provider = new InMemoryCodeProvider(sources);
         var manager = new AnalyzerManager();
         manager.RegisterRule(new LongMethodRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act - Run analysis 3 times
         var run1 = engine.Analyze(provider.GetSyntaxTrees())
@@ -603,6 +586,6 @@ public class PerformanceAndComplianceTests
         _testOutputHelper.WriteLine($"  Findings (Run 1): {run1.Count}");
         _testOutputHelper.WriteLine($"  Findings (Run 2): {run2.Count}");
         _testOutputHelper.WriteLine($"  Findings (Run 3): {run3.Count}");
-        _testOutputHelper.WriteLine($"  All runs identical: ✓");
+        _testOutputHelper.WriteLine("  All runs identical: ✓");
     }
 }

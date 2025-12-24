@@ -15,7 +15,7 @@ public static class Bootstrapper
         services.AddSingleton<AnalyzerManager>();
         services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
         services.AddSingleton<ReportGenerator>();
-        
+
         // Commands (transient lifetime - new instance per execution to avoid state leakage)
         services.AddTransient<ScanCommand>();
 

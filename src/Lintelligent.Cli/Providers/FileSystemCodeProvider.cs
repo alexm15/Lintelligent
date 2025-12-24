@@ -5,55 +5,51 @@ using Microsoft.CodeAnalysis.CSharp;
 namespace Lintelligent.Cli.Providers;
 
 /// <summary>
-/// Discovers and provides C# source files from the file system for analysis.
+///     Discovers and provides C# source files from the file system for analysis.
 /// </summary>
 /// <remarks>
-/// This implementation:
-/// - Recursively discovers all .cs files in a directory
-/// - Supports both directory paths and single file paths
-/// - Handles file system errors gracefully (logs and skips problematic files)
-/// - Uses lazy evaluation (yield) to support large codebases without memory exhaustion
-/// 
-/// Error Handling:
-/// - FileNotFoundException: Logged and skipped (file may have been deleted)
-/// - UnauthorizedAccessException: Logged and skipped (no permission)
-/// - PathTooLongException: Logged and skipped (path exceeds OS limits)
-/// - Other IO errors: Logged and skipped
-/// 
-/// Performance:
-/// - Uses Directory.EnumerateFiles for lazy file discovery
-/// - Yields syntax trees one at a time (streaming)
-/// - Suitable for projects with 10,000+ files
+///     This implementation:
+///     - Recursively discovers all .cs files in a directory
+///     - Supports both directory paths and single file paths
+///     - Handles file system errors gracefully (logs and skips problematic files)
+///     - Uses lazy evaluation (yield) to support large codebases without memory exhaustion
+///     Error Handling:
+///     - FileNotFoundException: Logged and skipped (file may have been deleted)
+///     - UnauthorizedAccessException: Logged and skipped (no permission)
+///     - PathTooLongException: Logged and skipped (path exceeds OS limits)
+///     - Other IO errors: Logged and skipped
+///     Performance:
+///     - Uses Directory.EnumerateFiles for lazy file discovery
+///     - Yields syntax trees one at a time (streaming)
+///     - Suitable for projects with 10,000+ files
 /// </remarks>
 public class FileSystemCodeProvider : ICodeProvider
 {
     private readonly string _rootPath;
 
     /// <summary>
-    /// Initializes a new instance of FileSystemCodeProvider.
+    ///     Initializes a new instance of FileSystemCodeProvider.
     /// </summary>
     /// <param name="rootPath">
-    /// Root directory path to scan for .cs files, or path to a single .cs file.
+    ///     Root directory path to scan for .cs files, or path to a single .cs file.
     /// </param>
     /// <exception cref="ArgumentException">
-    /// Thrown if rootPath is null, empty, or whitespace.
+    ///     Thrown if rootPath is null, empty, or whitespace.
     /// </exception>
     public FileSystemCodeProvider(string rootPath)
     {
         if (string.IsNullOrWhiteSpace(rootPath))
-        {
             throw new ArgumentException("Root path cannot be null or empty", nameof(rootPath));
-        }
 
         _rootPath = rootPath;
     }
 
     /// <summary>
-    /// Discovers C# files and yields parsed syntax trees.
+    ///     Discovers C# files and yields parsed syntax trees.
     /// </summary>
     /// <returns>
-    /// Lazy sequence of syntax trees for all .cs files found.
-    /// Empty sequence if no files found or path doesn't exist.
+    ///     Lazy sequence of syntax trees for all .cs files found.
+    ///     Empty sequence if no files found or path doesn't exist.
     /// </returns>
     public IEnumerable<SyntaxTree> GetSyntaxTrees()
     {
@@ -61,10 +57,7 @@ public class FileSystemCodeProvider : ICodeProvider
         if (File.Exists(_rootPath))
         {
             var tree = ParseFile(_rootPath);
-            if (tree != null)
-            {
-                yield return tree;
-            }
+            if (tree != null) yield return tree;
             yield break;
         }
 
@@ -91,10 +84,7 @@ public class FileSystemCodeProvider : ICodeProvider
         foreach (var file in files)
         {
             var tree = ParseFile(file);
-            if (tree != null)
-            {
-                yield return tree;
-            }
+            if (tree != null) yield return tree;
         }
     }
 

@@ -1,14 +1,13 @@
-using Xunit;
-using Lintelligent.Cli.Providers;
 using FluentAssertions;
-using Microsoft.CodeAnalysis;
+using Lintelligent.Cli.Providers;
+using Xunit;
 
 namespace Lintelligent.Cli.Tests.Providers;
 
 public class FileSystemCodeProviderTests : IDisposable
 {
-    private readonly string _tempDir;
     private readonly List<string> _createdFiles = [];
+    private readonly string _tempDir;
 
     public FileSystemCodeProviderTests()
     {
@@ -20,10 +19,7 @@ public class FileSystemCodeProviderTests : IDisposable
     {
         try
         {
-            if (Directory.Exists(_tempDir))
-            {
-                Directory.Delete(_tempDir, recursive: true);
-            }
+            if (Directory.Exists(_tempDir)) Directory.Delete(_tempDir, true);
         }
         catch
         {
@@ -35,10 +31,7 @@ public class FileSystemCodeProviderTests : IDisposable
     {
         var fullPath = Path.Combine(_tempDir, relativePath);
         var directory = Path.GetDirectoryName(fullPath);
-        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory)) Directory.CreateDirectory(directory);
         File.WriteAllText(fullPath, content);
         _createdFiles.Add(fullPath);
         return fullPath;
@@ -85,7 +78,7 @@ public class FileSystemCodeProviderTests : IDisposable
         trees.Should().HaveCount(3);
         trees.Should().OnlyContain(tree => tree != null);
         trees.Should().OnlyContain(tree => !string.IsNullOrEmpty(tree.FilePath));
-        
+
         var filePaths = trees.Select(t => t.FilePath).ToList();
         filePaths.Should().Contain(path => path.EndsWith("File1.cs"));
         filePaths.Should().Contain(path => path.EndsWith("File2.cs"));
@@ -160,7 +153,7 @@ public class FileSystemCodeProviderTests : IDisposable
 
             // Assert
             trees.Should().BeEmpty();
-            
+
             Console.SetOut(originalOut);
             var output = sw.ToString();
             output.Should().Contain("Warning");
@@ -191,7 +184,7 @@ public class FileSystemCodeProviderTests : IDisposable
 
             // Assert
             trees.Should().BeEmpty();
-            
+
             Console.SetOut(originalOut);
             var output = sw.ToString();
             output.Should().Contain("Warning");
@@ -224,7 +217,7 @@ public class FileSystemCodeProviderTests : IDisposable
         // Arrange
         CreateTestFile("File1.cs", "class Class1 { }");
         CreateTestFile("File2.cs", "class Class2 { }");
-        
+
         var provider = new FileSystemCodeProvider(_tempDir);
 
         // Act - Call GetSyntaxTrees but don't iterate
@@ -232,7 +225,7 @@ public class FileSystemCodeProviderTests : IDisposable
 
         // Assert - This should not throw even if we haven't materialized
         enumerable.Should().NotBeNull();
-        
+
         // Now materialize and verify
         var trees = enumerable.ToList();
         trees.Should().HaveCount(2);
@@ -252,7 +245,7 @@ public class FileSystemCodeProviderTests : IDisposable
         // Assert - Both enumerations should produce valid results
         trees1.Should().ContainSingle();
         trees2.Should().ContainSingle();
-        
+
         // The trees should be separate instances (not cached)
         trees1[0].Should().NotBeSameAs(trees2[0]);
     }

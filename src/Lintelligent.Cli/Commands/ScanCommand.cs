@@ -6,18 +6,17 @@ using Lintelligent.Reporting;
 namespace Lintelligent.Cli.Commands;
 
 /// <summary>
-/// CLI command that scans a project directory and analyzes C# source files.
+///     CLI command that scans a project directory and analyzes C# source files.
 /// </summary>
 /// <remarks>
-/// This command orchestrates the analysis workflow:
-/// 1. Create FileSystemCodeProvider to discover .cs files
-/// 2. Get syntax trees from provider
-/// 3. Pass trees to AnalyzerEngine for analysis
-/// 4. Filter results by severity (if --severity specified)
-/// 5. Generate and display report
-/// 
-/// The command is responsible for file system access (via FileSystemCodeProvider).
-/// The AnalyzerEngine core performs no IO operations, maintaining constitutional compliance.
+///     This command orchestrates the analysis workflow:
+///     1. Create FileSystemCodeProvider to discover .cs files
+///     2. Get syntax trees from provider
+///     3. Pass trees to AnalyzerEngine for analysis
+///     4. Filter results by severity (if --severity specified)
+///     5. Generate and display report
+///     The command is responsible for file system access (via FileSystemCodeProvider).
+///     The AnalyzerEngine core performs no IO operations, maintaining constitutional compliance.
 /// </remarks>
 public sealed class ScanCommand(
     AnalyzerEngine.Analysis.AnalyzerEngine engine,
@@ -39,10 +38,7 @@ public sealed class ScanCommand(
             var results = engine.Analyze(syntaxTrees);
 
             // Filter by severity if specified
-            if (severityFilter.HasValue)
-            {
-                results = results.Where(r => r.Severity == severityFilter.Value);
-            }
+            if (severityFilter.HasValue) results = results.Where(r => r.Severity == severityFilter.Value);
 
             // Materialize results before passing to report generator
             var materializedResults = results.ToList();
@@ -71,10 +67,8 @@ public sealed class ScanCommand(
 
     private static Severity? ParseSeverityFilter(string[] args)
     {
-        for (int i = 0; i < args.Length - 1; i++)
-        {
+        for (var i = 0; i < args.Length - 1; i++)
             if (args[i] == "--severity")
-            {
                 return args[i + 1].ToLowerInvariant() switch
                 {
                     "error" => Severity.Error,
@@ -82,21 +76,19 @@ public sealed class ScanCommand(
                     "info" => Severity.Info,
                     _ => null
                 };
-            }
-        }
+
         return null;
     }
 
     private static string? ParseGroupByOption(string[] args)
     {
-        for (int i = 0; i < args.Length - 1; i++)
-        {
+        for (var i = 0; i < args.Length - 1; i++)
             if (args[i] == "--group-by")
             {
                 var value = args[i + 1].ToLowerInvariant();
                 return value == "category" ? value : null;
             }
-        }
+
         return null;
     }
 }

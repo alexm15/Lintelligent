@@ -1,30 +1,19 @@
-﻿using Xunit;
+﻿using System.Reflection;
 using Lintelligent.AnalyzerEngine.Abstractions;
 using Lintelligent.AnalyzerEngine.Analysis;
-using Lintelligent.AnalyzerEngine.Rules;
 using Lintelligent.AnalyzerEngine.Results;
+using Lintelligent.AnalyzerEngine.Rules;
 using Lintelligent.Cli.Commands;
 using Lintelligent.Cli.Infrastructure;
+using Lintelligent.Reporting;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 
 namespace Lintelligent.Cli.Tests;
 
 public class ScanCommandTests
 {
-    private sealed class AlwaysReportRule : IAnalyzerRule
-    {
-        public string Id => "TEST001";
-        public string Description => "Always reports a diagnostic";
-        public Severity Severity => Severity.Warning;
-        public string Category => DiagnosticCategories.General;
-
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
-        {
-            yield return new DiagnosticResult(tree.FilePath, Id, Description, 1, Severity, Category);
-        }
-    }
-
     [Fact]
     public void SingleFile_ExecutionReturnsSuccessWithReport()
     {
@@ -35,25 +24,25 @@ public class ScanCommandTests
             File.WriteAllText(Path.Combine(temp, "Test.cs"), "class Test { }");
 
             // Build CLI application in-memory
-            var builder = new CliApplicationBuilder();
-            builder.ConfigureServices(services =>
-            {
-                services.AddSingleton<AnalyzerManager>();
-                services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
-                services.AddSingleton<Lintelligent.Reporting.ReportGenerator>();
-                services.AddSingleton<IAnalyzerRule, AlwaysReportRule>();
-                services.AddTransient<ScanCommand>();
-            });
-            builder.AddCommand<ScanCommand>();
 
-            using var app = builder.Build();
-            
+            using var app = new CliApplicationBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddSingleton<AnalyzerManager>();
+                    services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
+                    services.AddSingleton<ReportGenerator>();
+                    services.AddSingleton<IAnalyzerRule, AlwaysReportRule>();
+                    services.AddTransient<ScanCommand>();
+                })
+                .AddCommand<ScanCommand>()
+                .Build();
+
             // Get the AnalyzerManager and register rules manually
             // (since we're not using Bootstrapper which would do this)
-            var serviceProvider = (IServiceProvider)app.GetType()
-                .GetField("_serviceProvider", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+            var serviceProvider = (IServiceProvider) app.GetType()
+                .GetField("_serviceProvider", BindingFlags.NonPublic | BindingFlags.Instance)!
                 .GetValue(app)!;
-            
+
             var manager = serviceProvider.GetRequiredService<AnalyzerManager>();
             var rules = serviceProvider.GetServices<IAnalyzerRule>();
             manager.RegisterRules(rules);
@@ -72,7 +61,7 @@ public class ScanCommandTests
         }
         finally
         {
-            Directory.Delete(temp, recursive: true);
+            Directory.Delete(temp, true);
         }
     }
 
@@ -116,7 +105,7 @@ public class ScanCommandTests
         }
         finally
         {
-            Directory.Delete(temp, recursive: true);
+            Directory.Delete(temp, true);
         }
     }
 
@@ -140,7 +129,7 @@ public class ScanCommandTests
         }
         finally
         {
-            Directory.Delete(temp, recursive: true);
+            Directory.Delete(temp, true);
         }
     }
 
@@ -148,7 +137,20 @@ public class ScanCommandTests
     {
         services.AddSingleton<AnalyzerManager>();
         services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
-        services.AddSingleton<Lintelligent.Reporting.ReportGenerator>();
+        services.AddSingleton<ReportGenerator>();
         services.AddTransient<ScanCommand>();
+    }
+
+    private sealed class AlwaysReportRule : IAnalyzerRule
+    {
+        public string Id => "TEST001";
+        public string Description => "Always reports a diagnostic";
+        public Severity Severity => Severity.Warning;
+        public string Category => DiagnosticCategories.General;
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            yield return new DiagnosticResult(tree.FilePath, Id, Description, 1, Severity, Category);
+        }
     }
 }

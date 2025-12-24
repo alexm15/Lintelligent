@@ -1,35 +1,21 @@
-using Xunit;
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.Abstractions;
-using Lintelligent.AnalyzerEngine.Tests.TestUtilities;
 using Lintelligent.AnalyzerEngine.Analysis;
-using Lintelligent.AnalyzerEngine.Rules;
 using Lintelligent.AnalyzerEngine.Results;
+using Lintelligent.AnalyzerEngine.Rules;
+using Lintelligent.AnalyzerEngine.Tests.TestUtilities;
 using Microsoft.CodeAnalysis;
+using Xunit;
 
 namespace Lintelligent.AnalyzerEngine.Tests;
 
 public class FilteringCodeProviderTests
 {
-    private sealed class AlwaysReportRule : IAnalyzerRule
-    {
-        public string Id => "TEST001";
-        public string Description => "Always reports for testing";
-        public Severity Severity => Severity.Warning;
-        public string Category => DiagnosticCategories.General;
-
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
-        {
-            yield return new DiagnosticResult(tree.FilePath, Id, Description, 1, Severity, Category);
-        }
-    }
-
     [Fact]
     public void Constructor_NullInnerProvider_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(
-            () => new FilteringCodeProvider(null!, _ => true));
+        var exception = Assert.Throws<ArgumentNullException>(() => new FilteringCodeProvider(null!, _ => true));
         exception.ParamName.Should().Be("innerProvider");
     }
 
@@ -37,12 +23,11 @@ public class FilteringCodeProviderTests
     public void Constructor_NullPredicate_ThrowsArgumentNullException()
     {
         // Arrange
-        var sources = new Dictionary<string, string> { ["Test.cs"] = "class Test { }" };
+        var sources = new Dictionary<string, string> {["Test.cs"] = "class Test { }"};
         var innerProvider = new InMemoryCodeProvider(sources);
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(
-            () => new FilteringCodeProvider(innerProvider, null!));
+        var exception = Assert.Throws<ArgumentNullException>(() => new FilteringCodeProvider(innerProvider, null!));
         exception.ParamName.Should().Be("predicate");
     }
 
@@ -96,7 +81,7 @@ public class FilteringCodeProviderTests
             ["tests/ControllerTests.cs"] = "class ControllerTests { }"
         };
         var innerProvider = new InMemoryCodeProvider(sources);
-        
+
         // Filter: only files in Controllers directory
         var filter = new FilteringCodeProvider(
             innerProvider,
@@ -121,7 +106,7 @@ public class FilteringCodeProviderTests
             ["File3.cs"] = "public interface IPublic { }"
         };
         var innerProvider = new InMemoryCodeProvider(sources);
-        
+
         // Filter: only files containing "public class"
         var filter = new FilteringCodeProvider(
             innerProvider,
@@ -147,12 +132,12 @@ public class FilteringCodeProviderTests
             ["tests/UnitTest1.cs"] = "public class UnitTest1 { }"
         };
         var innerProvider = new InMemoryCodeProvider(sources);
-        
+
         // First filter: only Controllers
         var filter1 = new FilteringCodeProvider(
             innerProvider,
             tree => tree.FilePath.Contains("Controllers"));
-        
+
         // Second filter: only public classes
         var filter2 = new FilteringCodeProvider(
             filter1,
@@ -177,7 +162,7 @@ public class FilteringCodeProviderTests
             ["Include2.cs"] = "class Include2 { }"
         };
         var innerProvider = new InMemoryCodeProvider(sources);
-        
+
         // Filter: exclude files with "Exclude" in name
         var filter = new FilteringCodeProvider(
             innerProvider,
@@ -185,7 +170,7 @@ public class FilteringCodeProviderTests
 
         var manager = new AnalyzerManager();
         manager.RegisterRule(new AlwaysReportRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act
         var results = engine.Analyze(filter.GetSyntaxTrees()).ToList();
@@ -212,7 +197,7 @@ public class FilteringCodeProviderTests
 
         // Assert - Should not throw
         enumerable.Should().NotBeNull();
-        
+
         // Now materialize
         var trees = enumerable.ToList();
         trees.Should().ContainSingle();
@@ -253,7 +238,7 @@ public class FilteringCodeProviderTests
             ["d_Test.cs"] = "class DTest { }"
         };
         var innerProvider = new InMemoryCodeProvider(sources);
-        
+
         // Complex predicate: starts with 'a' or 'b' AND ends with 'Test.cs'
         var filter = new FilteringCodeProvider(
             innerProvider,
@@ -270,5 +255,18 @@ public class FilteringCodeProviderTests
         trees.Should().HaveCount(2);
         trees.Select(t => Path.GetFileName(t.FilePath))
             .Should().BeEquivalentTo("a_Test.cs", "b_Test.cs");
+    }
+
+    private sealed class AlwaysReportRule : IAnalyzerRule
+    {
+        public string Id => "TEST001";
+        public string Description => "Always reports for testing";
+        public Severity Severity => Severity.Warning;
+        public string Category => DiagnosticCategories.General;
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            yield return new DiagnosticResult(tree.FilePath, Id, Description, 1, Severity, Category);
+        }
     }
 }

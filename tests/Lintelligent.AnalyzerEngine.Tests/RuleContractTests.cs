@@ -1,82 +1,19 @@
-using Xunit;
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.Abstractions;
-using Lintelligent.AnalyzerEngine.Rules;
 using Lintelligent.AnalyzerEngine.Results;
+using Lintelligent.AnalyzerEngine.Rules;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Xunit;
 
 namespace Lintelligent.AnalyzerEngine.Tests;
 
 /// <summary>
-/// Tests verifying the IAnalyzerRule contract for IEnumerable return type.
-/// Validates that rules correctly implement multiple findings behavior.
+///     Tests verifying the IAnalyzerRule contract for IEnumerable return type.
+///     Validates that rules correctly implement multiple findings behavior.
 /// </summary>
 public class RuleContractTests
 {
-    private sealed class ZeroFindingsRule : IAnalyzerRule
-    {
-        public string Id => "ZERO001";
-        public string Description => "Never reports any findings";
-        public Severity Severity => Severity.Info;
-        public string Category => DiagnosticCategories.General;
-
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
-        {
-            // Return empty enumerable - no findings
-            return Enumerable.Empty<DiagnosticResult>();
-        }
-    }
-
-    private sealed class MultipleFindingsRule(int findingCount) : IAnalyzerRule
-    {
-        public string Id => "MULTI001";
-        public string Description => "Reports multiple findings";
-        public Severity Severity => Severity.Warning;
-        public string Category => DiagnosticCategories.Maintainability;
-
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
-        {
-            for (var i = 1; i <= findingCount; i++)
-            {
-                yield return new DiagnosticResult(
-                    tree.FilePath,
-                    Id,
-                    $"Finding {i}",
-                    i,
-                    Severity,
-                    Category
-                );
-            }
-        }
-    }
-
-    private sealed class LazyEvaluationRule : IAnalyzerRule
-    {
-        public int EvaluationCount { get; private set; }
-
-        public string Id => "LAZY001";
-        public string Description => "Tracks evaluation count";
-        public Severity Severity => Severity.Info;
-        public string Category => DiagnosticCategories.General;
-
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
-        {
-            for (var i = 1; i <= 3; i++)
-            {
-                EvaluationCount++;
-                yield return new DiagnosticResult(
-                    tree.FilePath,
-                    Id,
-                    $"Finding {i}",
-                    i,
-                    Severity,
-                    Category
-                );
-            }
-        }
-    }
-
     [Fact]
     public void Rule_EmittingZeroFindings_ReturnsEmptyEnumerable()
     {
@@ -105,7 +42,7 @@ public class RuleContractTests
         // Assert
         results.Should().HaveCount(5, "rule should emit 5 findings");
         results.Select(r => r.Message).Should().BeEquivalentTo(
-            new[] { "Finding 1", "Finding 2", "Finding 3", "Finding 4", "Finding 5" },
+            new[] {"Finding 1", "Finding 2", "Finding 3", "Finding 4", "Finding 5"},
             "all findings should be returned");
     }
 
@@ -183,5 +120,66 @@ public class RuleContractTests
         results.Should().NotBeNull("null is not a valid return value");
         results.Should().BeAssignableTo<IEnumerable<DiagnosticResult>>("must return IEnumerable");
         results.Any().Should().BeFalse("should have no findings");
+    }
+
+    private sealed class ZeroFindingsRule : IAnalyzerRule
+    {
+        public string Id => "ZERO001";
+        public string Description => "Never reports any findings";
+        public Severity Severity => Severity.Info;
+        public string Category => DiagnosticCategories.General;
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            // Return empty enumerable - no findings
+            return Enumerable.Empty<DiagnosticResult>();
+        }
+    }
+
+    private sealed class MultipleFindingsRule(int findingCount) : IAnalyzerRule
+    {
+        public string Id => "MULTI001";
+        public string Description => "Reports multiple findings";
+        public Severity Severity => Severity.Warning;
+        public string Category => DiagnosticCategories.Maintainability;
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            for (var i = 1; i <= findingCount; i++)
+                yield return new DiagnosticResult(
+                    tree.FilePath,
+                    Id,
+                    $"Finding {i}",
+                    i,
+                    Severity,
+                    Category
+                );
+        }
+    }
+
+    private sealed class LazyEvaluationRule : IAnalyzerRule
+    {
+        public int EvaluationCount { get; private set; }
+
+        public string Id => "LAZY001";
+        public string Description => "Tracks evaluation count";
+        public Severity Severity => Severity.Info;
+        public string Category => DiagnosticCategories.General;
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            for (var i = 1; i <= 3; i++)
+            {
+                EvaluationCount++;
+                yield return new DiagnosticResult(
+                    tree.FilePath,
+                    Id,
+                    $"Finding {i}",
+                    i,
+                    Severity,
+                    Category
+                );
+            }
+        }
     }
 }

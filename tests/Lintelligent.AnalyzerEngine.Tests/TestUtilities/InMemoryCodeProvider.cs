@@ -5,17 +5,16 @@ using Microsoft.CodeAnalysis.CSharp;
 namespace Lintelligent.AnalyzerEngine.Tests.TestUtilities;
 
 /// <summary>
-/// In-memory implementation of ICodeProvider for testing and demonstration.
+///     In-memory implementation of ICodeProvider for testing and demonstration.
 /// </summary>
 /// <remarks>
-/// This provider demonstrates that AnalyzerEngine can analyze code from
-/// any source, not just the file system. Useful for:
-/// - Unit testing without file system dependencies
-/// - IDE integration with unsaved editor buffers
-/// - Analyzing generated or dynamically constructed code
-/// 
-/// Example usage:
-/// <code>
+///     This provider demonstrates that AnalyzerEngine can analyze code from
+///     any source, not just the file system. Useful for:
+///     - Unit testing without file system dependencies
+///     - IDE integration with unsaved editor buffers
+///     - Analyzing generated or dynamically constructed code
+///     Example usage:
+///     <code>
 /// var sources = new Dictionary&lt;string, string&gt;
 /// {
 ///     ["Test.cs"] = "class Test { void Method() { } }"
@@ -30,15 +29,15 @@ public class InMemoryCodeProvider : ICodeProvider
     private readonly Dictionary<string, string> _sources;
 
     /// <summary>
-    /// Initializes a new instance of InMemoryCodeProvider.
+    ///     Initializes a new instance of InMemoryCodeProvider.
     /// </summary>
     /// <param name="sources">
-    /// Dictionary mapping file paths to source code content.
-    /// Keys should be valid file paths (used for diagnostics reporting).
-    /// Values are the C# source code to parse.
+    ///     Dictionary mapping file paths to source code content.
+    ///     Keys should be valid file paths (used for diagnostics reporting).
+    ///     Values are the C# source code to parse.
     /// </param>
     /// <exception cref="ArgumentNullException">
-    /// Thrown if sources is null.
+    ///     Thrown if sources is null.
     /// </exception>
     public InMemoryCodeProvider(Dictionary<string, string> sources)
     {
@@ -46,12 +45,12 @@ public class InMemoryCodeProvider : ICodeProvider
     }
 
     /// <summary>
-    /// Yields syntax trees for all in-memory source code.
+    ///     Yields syntax trees for all in-memory source code.
     /// </summary>
     /// <returns>
-    /// Lazy sequence of parsed syntax trees, one per dictionary entry.
-    /// File paths from dictionary keys are set on the syntax trees for
-    /// diagnostic reporting.
+    ///     Lazy sequence of parsed syntax trees, one per dictionary entry.
+    ///     File paths from dictionary keys are set on the syntax trees for
+    ///     diagnostic reporting.
     /// </returns>
     public IEnumerable<SyntaxTree> GetSyntaxTrees()
     {
@@ -59,7 +58,7 @@ public class InMemoryCodeProvider : ICodeProvider
         {
             var filePath = kvp.Key;
             var sourceCode = kvp.Value;
-            
+
             var tree = CSharpSyntaxTree.ParseText(sourceCode, path: filePath);
             yield return tree;
         }

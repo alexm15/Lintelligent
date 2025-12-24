@@ -1,21 +1,20 @@
 using Lintelligent.Cli.Commands;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Lintelligent.Cli.Infrastructure;
 
 /// <summary>
-/// Represents a configured CLI application that executes commands synchronously.
+///     Represents a configured CLI application that executes commands synchronously.
 /// </summary>
 /// <remarks>
-/// CliApplication is immutable after construction. To change configuration, create a new builder.
-/// Execute() can be called multiple times on the same instance (stateless execution).
-/// The service provider is disposed when CliApplication is disposed.
+///     CliApplication is immutable after construction. To change configuration, create a new builder.
+///     Execute() can be called multiple times on the same instance (stateless execution).
+///     The service provider is disposed when CliApplication is disposed.
 /// </remarks>
 public sealed class CliApplication : IDisposable
 {
-    private readonly IServiceProvider _serviceProvider;
     private readonly IReadOnlyList<Type> _commandTypes;
-    private bool _disposed = false;
+    private readonly IServiceProvider _serviceProvider;
+    private bool _disposed;
 
     // Internal constructor - instances created only via CliApplicationBuilder.Build()
     internal CliApplication(IServiceProvider serviceProvider, IReadOnlyList<Type> commandTypes)
@@ -25,18 +24,30 @@ public sealed class CliApplication : IDisposable
     }
 
     /// <summary>
-    /// Executes the CLI command specified in args and returns the result synchronously.
+    ///     Disposes the service provider and releases resources.
+    /// </summary>
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            if (_serviceProvider is IDisposable disposable) disposable.Dispose();
+            _disposed = true;
+        }
+    }
+
+    /// <summary>
+    ///     Executes the CLI command specified in args and returns the result synchronously.
     /// </summary>
     /// <param name="args">Command-line arguments (args[0] is command name, args[1+] are command arguments).</param>
     /// <returns>Command execution result with exit code, output, and error information.</returns>
     /// <exception cref="ArgumentNullException">Thrown if args is null.</exception>
     /// <remarks>
-    /// This method is synchronous even if the command uses async I/O internally.
-    /// Exceptions are caught and converted to CommandResult with appropriate exit codes:
-    /// - ArgumentException and derived types → exit code 2 (invalid arguments)
-    /// - Other exceptions → exit code 1 (general error)
-    /// - DI resolution failures → exit code 1 (general error)
-    /// Exception.Message is stored in CommandResult.Error (no stack traces).
+    ///     This method is synchronous even if the command uses async I/O internally.
+    ///     Exceptions are caught and converted to CommandResult with appropriate exit codes:
+    ///     - ArgumentException and derived types → exit code 2 (invalid arguments)
+    ///     - Other exceptions → exit code 1 (general error)
+    ///     - DI resolution failures → exit code 1 (general error)
+    ///     Exception.Message is stored in CommandResult.Error (no stack traces).
     /// </remarks>
     public CommandResult Execute(string[] args)
     {
@@ -50,9 +61,9 @@ public sealed class CliApplication : IDisposable
         try
         {
             var commandName = args[0].ToLowerInvariant();
-            
+
             // Find command type by name (simple name matching)
-            var commandType = _commandTypes.FirstOrDefault(t => 
+            var commandType = _commandTypes.FirstOrDefault(t =>
                 t.Name.Equals($"{commandName}Command", StringComparison.OrdinalIgnoreCase) ||
                 t.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
 
@@ -66,18 +77,12 @@ public sealed class CliApplication : IDisposable
 
             // Execute command (async or sync)
             if (commandInstance is IAsyncCommand asyncCommand)
-            {
                 // GetAwaiter().GetResult() unwraps AggregateException automatically
                 return asyncCommand.ExecuteAsync(args).GetAwaiter().GetResult();
-            }
-            else if (commandInstance is ICommand syncCommand)
-            {
-                return syncCommand.Execute(args);
-            }
-            else
-            {
-                return CommandResult.Failure(1, $"Command {commandType.Name} does not implement ICommand or IAsyncCommand");
-            }
+
+            if (commandInstance is ICommand syncCommand) return syncCommand.Execute(args);
+
+            return CommandResult.Failure(1, $"Command {commandType.Name} does not implement ICommand or IAsyncCommand");
         }
         catch (ArgumentException ex)
         {
@@ -88,21 +93,6 @@ public sealed class CliApplication : IDisposable
         {
             // All other exceptions → exit code 1
             return CommandResult.Failure(1, ex.Message);
-        }
-    }
-
-    /// <summary>
-    /// Disposes the service provider and releases resources.
-    /// </summary>
-    public void Dispose()
-    {
-        if (!_disposed)
-        {
-            if (_serviceProvider is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-            _disposed = true;
         }
     }
 }

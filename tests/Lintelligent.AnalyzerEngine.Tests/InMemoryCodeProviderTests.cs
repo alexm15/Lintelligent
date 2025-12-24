@@ -1,29 +1,16 @@
-using Xunit;
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.Abstractions;
-using Lintelligent.AnalyzerEngine.Tests.TestUtilities;
 using Lintelligent.AnalyzerEngine.Analysis;
-using Lintelligent.AnalyzerEngine.Rules;
 using Lintelligent.AnalyzerEngine.Results;
+using Lintelligent.AnalyzerEngine.Rules;
+using Lintelligent.AnalyzerEngine.Tests.TestUtilities;
 using Microsoft.CodeAnalysis;
+using Xunit;
 
 namespace Lintelligent.AnalyzerEngine.Tests;
 
 public class InMemoryCodeProviderTests
 {
-    private sealed class AlwaysReportRule : IAnalyzerRule
-    {
-        public string Id => "TEST001";
-        public string Description => "Always reports for testing";
-        public Severity Severity => Severity.Warning;
-        public string Category => DiagnosticCategories.General;
-
-        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
-        {
-            yield return new DiagnosticResult(tree.FilePath, Id, Description, 1, Severity, Category);
-        }
-    }
-
     [Fact]
     public void Constructor_NullSources_ThrowsArgumentNullException()
     {
@@ -149,10 +136,10 @@ public class InMemoryCodeProviderTests
             ["Test2.cs"] = "class Test2 { }"
         };
         var provider = new InMemoryCodeProvider(sources);
-        
+
         var manager = new AnalyzerManager();
         manager.RegisterRule(new AlwaysReportRule());
-        var engine = new Lintelligent.AnalyzerEngine.Analysis.AnalyzerEngine(manager);
+        var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
         // Act
         var results = engine.Analyze(provider.GetSyntaxTrees()).ToList();
@@ -201,7 +188,7 @@ public class InMemoryCodeProviderTests
         // Assert - Both enumerations should succeed
         trees1.Should().ContainSingle();
         trees2.Should().ContainSingle();
-        
+
         // Trees should be separate instances (not cached)
         trees1[0].Should().NotBeSameAs(trees2[0]);
     }
@@ -221,9 +208,22 @@ public class InMemoryCodeProviderTests
 
         // Assert - Should not throw even if not yet materialized
         enumerable.Should().NotBeNull();
-        
+
         // Now materialize and verify
         var trees = enumerable.ToList();
         trees.Should().ContainSingle();
+    }
+
+    private sealed class AlwaysReportRule : IAnalyzerRule
+    {
+        public string Id => "TEST001";
+        public string Description => "Always reports for testing";
+        public Severity Severity => Severity.Warning;
+        public string Category => DiagnosticCategories.General;
+
+        public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
+        {
+            yield return new DiagnosticResult(tree.FilePath, Id, Description, 1, Severity, Category);
+        }
     }
 }

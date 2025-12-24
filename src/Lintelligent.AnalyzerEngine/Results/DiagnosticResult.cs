@@ -3,33 +3,24 @@
 namespace Lintelligent.AnalyzerEngine.Results;
 
 /// <summary>
-/// Represents a single diagnostic finding from an analyzer rule.
-/// Immutable value object containing location and metadata.
+///     Represents a single diagnostic finding from an analyzer rule.
+///     Immutable value object containing location and metadata.
 /// </summary>
 /// <remarks>
-/// Breaking Change from v1.x:
-/// - Old constructor: DiagnosticResult(string FilePath, string RuleId, string Message, int LineNumber)
-/// - New constructor: Adds Severity and Category parameters (required)
-/// - Migration: Pass rule.Severity and rule.Category to constructor
-/// 
-/// Immutability:
-/// - Implemented as C# record (structural equality, immutable after construction)
-/// - No setters, all properties initialized via constructor
-/// - Thread-safe by design (no mutable state)
-/// 
-/// Constitutional Compliance:
-/// - Principle VII (Determinism): Immutable structure ensures consistent comparison
-/// - Principle III (Rule Contract): Enforces metadata flow via required constructor params
+///     Breaking Change from v1.x:
+///     - Old constructor: DiagnosticResult(string FilePath, string RuleId, string Message, int LineNumber)
+///     - New constructor: Adds Severity and Category parameters (required)
+///     - Migration: Pass rule.Severity and rule.Category to constructor
+///     Immutability:
+///     - Implemented as C# record (structural equality, immutable after construction)
+///     - No setters, all properties initialized via constructor
+///     - Thread-safe by design (no mutable state)
+///     Constitutional Compliance:
+///     - Principle VII (Determinism): Immutable structure ensures consistent comparison
+///     - Principle III (Rule Contract): Enforces metadata flow via required constructor params
 /// </remarks>
 public record DiagnosticResult
 {
-    public string FilePath { get; init; }
-    public string RuleId { get; init; }
-    public string Message { get; init; }
-    public int LineNumber { get; init; }
-    public Severity Severity { get; init; }
-    public string Category { get; init; }
-
     public DiagnosticResult(
         string filePath,
         string ruleId,
@@ -38,10 +29,10 @@ public record DiagnosticResult
         Severity severity,
         string category)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(filePath, nameof(filePath));
-        ArgumentException.ThrowIfNullOrWhiteSpace(ruleId, nameof(ruleId));
-        ArgumentException.ThrowIfNullOrWhiteSpace(message, nameof(message));
-        ArgumentException.ThrowIfNullOrWhiteSpace(category, nameof(category));
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(ruleId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(message);
+        ArgumentException.ThrowIfNullOrWhiteSpace(category);
 
         if (lineNumber < 1)
             throw new ArgumentOutOfRangeException(
@@ -61,5 +52,11 @@ public record DiagnosticResult
         Severity = severity;
         Category = category;
     }
-}
 
+    public string FilePath { get; init; }
+    public string RuleId { get; init; }
+    public string Message { get; init; }
+    public int LineNumber { get; init; }
+    public Severity Severity { get; init; }
+    public string Category { get; init; }
+}

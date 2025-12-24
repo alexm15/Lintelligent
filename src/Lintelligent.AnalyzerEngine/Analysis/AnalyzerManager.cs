@@ -11,13 +11,13 @@ public sealed class AnalyzerManager
 
     public void RegisterRule(IAnalyzerRule rule)
     {
-        ArgumentNullException.ThrowIfNull(rule);
+        ArgumentNullExceptionPolyfills.ThrowIfNull(rule, nameof(rule));
 
         // Validate rule metadata at registration time (fail-fast)
-        ArgumentException.ThrowIfNullOrWhiteSpace(rule.Id, nameof(rule.Id));
-        ArgumentException.ThrowIfNullOrWhiteSpace(rule.Category, nameof(rule.Category));
+        ArgumentExceptionPolyfills.ThrowIfNullOrWhiteSpace(rule.Id, nameof(rule.Id));
+        ArgumentExceptionPolyfills.ThrowIfNullOrWhiteSpace(rule.Category, nameof(rule.Category));
 
-        if (!Enum.IsDefined(rule.Severity))
+        if (!EnumPolyfills.IsDefined(rule.Severity))
             throw new ArgumentException(
                 $"Rule '{rule.Id}' has undefined severity value: {rule.Severity}",
                 nameof(rule.Severity));

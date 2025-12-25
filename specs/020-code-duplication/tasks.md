@@ -20,9 +20,9 @@
 
 **Purpose**: Project initialization and workspace analyzer infrastructure
 
-- [ ] T001 Create `WorkspaceAnalyzers/` directory in src/Lintelligent.AnalyzerEngine/
-- [ ] T002 Create `WorkspaceAnalyzers/CodeDuplication/` subdirectory for duplication detection implementation
-- [ ] T003 Create test directory tests/Lintelligent.AnalyzerEngine.Tests/WorkspaceAnalyzers/CodeDuplication/
+- [X] T001 Create `WorkspaceAnalyzers/` directory in src/Lintelligent.AnalyzerEngine/
+- [X] T002 Create `WorkspaceAnalyzers/CodeDuplication/` subdirectory for duplication detection implementation
+- [X] T003 Create test directory tests/Lintelligent.AnalyzerEngine.Tests/WorkspaceAnalyzers/CodeDuplication/
 
 ---
 
@@ -32,12 +32,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Create `IWorkspaceAnalyzer` interface in src/Lintelligent.AnalyzerEngine/Abstractions/IWorkspaceAnalyzer.cs
-- [ ] T005 Create `WorkspaceContext` class in src/Lintelligent.AnalyzerEngine/Abstractions/WorkspaceContext.cs
-- [ ] T006 [P] Create `DuplicationInstance` record in src/Lintelligent.AnalyzerEngine/WorkspaceAnalyzers/CodeDuplication/DuplicationInstance.cs
-- [ ] T007 [P] Create `DuplicationGroup` class in src/Lintelligent.AnalyzerEngine/WorkspaceAnalyzers/CodeDuplication/DuplicationGroup.cs
-- [ ] T008 [P] Create `TokenHasher` utility class in src/Lintelligent.AnalyzerEngine/Utilities/TokenHasher.cs (Rabin-Karp rolling hash)
-- [ ] T009 Create `WorkspaceAnalyzerEngine` orchestrator in src/Lintelligent.AnalyzerEngine/Analysis/WorkspaceAnalyzerEngine.cs
+- [X] T004 Create `IWorkspaceAnalyzer` interface in src/Lintelligent.AnalyzerEngine/Abstractions/IWorkspaceAnalyzer.cs
+- [X] T005 Create `WorkspaceContext` class in src/Lintelligent.AnalyzerEngine/Abstractions/WorkspaceContext.cs
+- [X] T006 [P] Create `DuplicationInstance` record in src/Lintelligent.AnalyzerEngine/WorkspaceAnalyzers/CodeDuplication/DuplicationInstance.cs
+- [X] T007 [P] Create `DuplicationGroup` class in src/Lintelligent.AnalyzerEngine/WorkspaceAnalyzers/CodeDuplication/DuplicationGroup.cs
+- [X] T008 [P] Create `TokenHasher` utility class in src/Lintelligent.AnalyzerEngine/Utilities/TokenHasher.cs (Rabin-Karp rolling hash)
+- [X] T009 Create `WorkspaceAnalyzerEngine` orchestrator in src/Lintelligent.AnalyzerEngine/Analysis/WorkspaceAnalyzerEngine.cs
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -53,8 +53,8 @@
 
 > **TDD Workflow**: Write these tests FIRST, ensure they FAIL before implementation
 
-- [ ] T010 [P] [US1] Test: `TokenHasher_IdenticalCode_ProducesSameHash` in tests/Lintelligent.AnalyzerEngine.Tests/WorkspaceAnalyzers/CodeDuplication/TokenHasherTests.cs
-- [ ] T011 [P] [US1] Test: `TokenHasher_WhitespaceOnlyDifferences_ProducesSameHash` in TokenHasherTests.cs
+- [X] T010 [P] [US1] Test: `TokenHasher_IdenticalCode_ProducesSameHash` in tests/Lintelligent.AnalyzerEngine.Tests/WorkspaceAnalyzers/CodeDuplication/TokenHasherTests.cs
+- [X] T011 [P] [US1] Test: `TokenHasher_WhitespaceOnlyDifferences_ProducesSameHash` in TokenHasherTests.cs
 - [ ] T012 [P] [US1] Test: `ExactDuplicationFinder_TwoIdenticalMethods_ReturnsOneDuplicationGroup` in ExactDuplicationFinderTests.cs
 - [ ] T013 [P] [US1] Test: `ExactDuplicationFinder_ThreeIdenticalClasses_GroupsAllThreeInstances` in ExactDuplicationFinderTests.cs
 - [ ] T014 [P] [US1] Test: `DuplicationDetector_TwoIdentical15LineMethods_ReportsOneDuplication` in DuplicationDetectorTests.cs

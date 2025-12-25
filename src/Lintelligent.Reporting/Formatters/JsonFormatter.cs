@@ -1,9 +1,9 @@
-namespace Lintelligent.Reporting.Formatters;
-
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Lintelligent.AnalyzerEngine.Results;
 using Lintelligent.Reporting.Formatters.Models;
+
+namespace Lintelligent.Reporting.Formatters;
 
 /// <summary>
 /// Formats diagnostic results as JSON for CI/CD pipeline integration.

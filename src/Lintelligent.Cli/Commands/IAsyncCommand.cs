@@ -17,5 +17,5 @@ public interface IAsyncCommand
     /// </summary>
     /// <param name="args">Command-line arguments (args[0] may be command name, args[1+] are parameters).</param>
     /// <returns>Task representing the async operation, with CommandResult as the result.</returns>
-    Task<CommandResult> ExecuteAsync(string[] args);
+    public Task<CommandResult> ExecuteAsync(string[] args);
 }

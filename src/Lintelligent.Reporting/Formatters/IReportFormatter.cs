@@ -25,10 +25,10 @@ public interface IReportFormatter
     /// - MUST NOT perform I/O operations (pure transformation)
     /// - SHOULD complete in &lt;10 seconds for 10,000 results (SC-008)
     /// </remarks>
-    string Format(IEnumerable<DiagnosticResult> results);
+    public string Format(IEnumerable<DiagnosticResult> results);
     
     /// <summary>
     /// Gets the format name (e.g., "json", "sarif", "markdown") for CLI selection.
     /// </summary>
-    string FormatName { get; }
+    public string FormatName { get; }
 }

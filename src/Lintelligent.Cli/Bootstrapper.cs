@@ -14,13 +14,11 @@ public static class Bootstrapper
         // so callers (Program or tests) can register explicit, deterministic rules as needed.
         services.AddSingleton<AnalyzerManager>();
         services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
-        services.AddSingleton<ReportGenerator>();
 
         // Commands (transient lifetime - new instance per execution to avoid state leakage)
         services.AddTransient<ScanCommand>();
 
         // Rules (explicit, deterministic)
         services.AddSingleton<IAnalyzerRule, LongMethodRule>();
-        // services.AddSingleton<IAnalyzerRule, AvoidEmptyCatchRule>();
     }
 }

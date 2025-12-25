@@ -30,22 +30,20 @@ public class LongParameterListRule : IAnalyzerRule
             if (IsExtensionMethod(method))
                 paramCount--;
 
-            if (paramCount > MaxParameters)
-            {
-                var line = method.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-                var methodName = GetMethodName(method);
-                var message = $"Method '{methodName}' has {paramCount} parameters (max: {MaxParameters}). " +
-                             "Consider using a parameter object or builder pattern.";
+            if (paramCount <= MaxParameters) continue;
+            var line = method.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+            var methodName = GetMethodName(method);
+            var message = $"Method '{methodName}' has {paramCount} parameters (max: {MaxParameters}). " +
+                          "Consider using a parameter object or builder pattern.";
 
-                yield return new DiagnosticResult(
-                    tree.FilePath,
-                    Id,
-                    message,
-                    line,
-                    Severity,
-                    Category
-                );
-            }
+            yield return new DiagnosticResult(
+                tree.FilePath,
+                Id,
+                message,
+                line,
+                Severity,
+                Category
+            );
         }
     }
 
@@ -78,8 +76,8 @@ public class LongParameterListRule : IAnalyzerRule
     private static bool IsGeneratedCode(SyntaxTree tree)
     {
         string fileName = Path.GetFileName(tree.FilePath);
-        if (fileName.EndsWith(".Designer.cs") || 
-            fileName.EndsWith(".g.cs") || 
+        if (fileName.EndsWith(".Designer.cs", StringComparison.OrdinalIgnoreCase) ||
+            fileName.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) ||
             fileName.Contains(".Generated."))
             return true;
 

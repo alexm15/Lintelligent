@@ -17,5 +17,5 @@ public interface ICommand
     /// </summary>
     /// <param name="args">Command-line arguments (args[0] may be command name, args[1+] are parameters).</param>
     /// <returns>Command execution result.</returns>
-    CommandResult Execute(string[] args);
+    public CommandResult Execute(string[] args);
 }

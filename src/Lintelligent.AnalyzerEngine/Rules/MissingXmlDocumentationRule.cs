@@ -17,7 +17,18 @@ public class MissingXmlDocumentationRule : IAnalyzerRule
 
         var root = tree.GetRoot();
 
-        // Check classes
+        foreach (var result in CheckClasses(tree, root))
+            yield return result;
+
+        foreach (var result in CheckMethods(tree, root))
+            yield return result;
+
+        foreach (var result in CheckProperties(tree, root))
+            yield return result;
+    }
+
+    private IEnumerable<DiagnosticResult> CheckClasses(SyntaxTree tree, SyntaxNode root)
+    {
         foreach (var classDecl in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
         {
             if (IsPublicOrProtected(classDecl.Modifiers) && !HasXmlDocumentation(classDecl))
@@ -25,49 +36,7 @@ public class MissingXmlDocumentationRule : IAnalyzerRule
                 var className = classDecl.Identifier.ValueText;
                 var line = classDecl.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
                 var message = $"Public class '{className}' is missing XML documentation. " +
-                             "Add a /// <summary> comment to describe the API.";
-
-                yield return new DiagnosticResult(
-                    tree.FilePath,
-                    Id,
-                    message,
-                    line,
-                    Severity,
-                    Category
-                );
-            }
-        }
-
-        // Check methods
-        foreach (var methodDecl in root.DescendantNodes().OfType<MethodDeclarationSyntax>())
-        {
-            if (IsPublicOrProtected(methodDecl.Modifiers) && !HasXmlDocumentation(methodDecl))
-            {
-                var methodName = methodDecl.Identifier.ValueText;
-                var line = methodDecl.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-                var message = $"Public method '{methodName}' is missing XML documentation. " +
-                             "Add a /// <summary> comment to describe the API.";
-
-                yield return new DiagnosticResult(
-                    tree.FilePath,
-                    Id,
-                    message,
-                    line,
-                    Severity,
-                    Category
-                );
-            }
-        }
-
-        // Check properties
-        foreach (var propertyDecl in root.DescendantNodes().OfType<PropertyDeclarationSyntax>())
-        {
-            if (IsPublicOrProtected(propertyDecl.Modifiers) && !HasXmlDocumentation(propertyDecl))
-            {
-                var propertyName = propertyDecl.Identifier.ValueText;
-                var line = propertyDecl.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-                var message = $"Public property '{propertyName}' is missing XML documentation. " +
-                             "Add a /// <summary> comment to describe the API.";
+                              "Add a /// <summary> comment to describe the API.";
 
                 yield return new DiagnosticResult(
                     tree.FilePath,
@@ -81,9 +50,53 @@ public class MissingXmlDocumentationRule : IAnalyzerRule
         }
     }
 
+    private IEnumerable<DiagnosticResult> CheckMethods(SyntaxTree tree, SyntaxNode root)
+    {
+        foreach (var methodDecl in root.DescendantNodes().OfType<MethodDeclarationSyntax>())
+        {
+            if (IsPublicOrProtected(methodDecl.Modifiers) && !HasXmlDocumentation(methodDecl))
+            {
+                var methodName = methodDecl.Identifier.ValueText;
+                var line = methodDecl.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                var message = $"Public method '{methodName}' is missing XML documentation. " +
+                              "Add a /// <summary> comment to describe the API.";
+
+                yield return new DiagnosticResult(
+                    tree.FilePath,
+                    Id,
+                    message,
+                    line,
+                    Severity,
+                    Category
+                );
+            }
+        }
+    }
+
+    private IEnumerable<DiagnosticResult> CheckProperties(SyntaxTree tree, SyntaxNode root)
+    {
+        foreach (var propertyDecl in root.DescendantNodes().OfType<PropertyDeclarationSyntax>())
+        {
+            if (!IsPublicOrProtected(propertyDecl.Modifiers) || HasXmlDocumentation(propertyDecl)) continue;
+            var propertyName = propertyDecl.Identifier.ValueText;
+            var line = propertyDecl.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+            var message = $"Public property '{propertyName}' is missing XML documentation. " +
+                          "Add a /// <summary> comment to describe the API.";
+
+            yield return new DiagnosticResult(
+                tree.FilePath,
+                Id,
+                message,
+                line,
+                Severity,
+                Category
+            );
+        }
+    }
+
     private static bool IsPublicOrProtected(SyntaxTokenList modifiers)
     {
-        return modifiers.Any(SyntaxKind.PublicKeyword) || 
+        return modifiers.Any(SyntaxKind.PublicKeyword) ||
                modifiers.Any(SyntaxKind.ProtectedKeyword);
     }
 
@@ -92,36 +105,24 @@ public class MissingXmlDocumentationRule : IAnalyzerRule
         var leadingTrivia = node.GetLeadingTrivia();
 
         // Check for XML documentation comment trivia
-        foreach (var trivia in leadingTrivia)
-        {
-            if (trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
-                trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia))
-            {
-                var triviaText = trivia.ToString();
-
-                // Check for <summary> or <inheritdoc />
-                if (triviaText.Contains("<summary") || 
-                    triviaText.Contains("<inheritdoc"))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return (from trivia in leadingTrivia
+                where trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
+                      trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia)
+                select trivia.ToString())
+            .Any(triviaText => triviaText.Contains("<summary") || triviaText.Contains("<inheritdoc"));
     }
 
     private static bool IsGeneratedCode(SyntaxTree tree)
     {
-        string fileName = Path.GetFileName(tree.FilePath);
-        if (fileName.EndsWith(".Designer.cs") || 
-            fileName.EndsWith(".g.cs") || 
+        var fileName = Path.GetFileName(tree.FilePath);
+        if (fileName.EndsWith(".Designer.cs", StringComparison.OrdinalIgnoreCase) ||
+            fileName.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) ||
             fileName.Contains(".Generated."))
             return true;
 
         var root = tree.GetRoot();
         var leadingTrivia = root.GetLeadingTrivia().Take(10);
-        return leadingTrivia.Any(t => 
+        return leadingTrivia.Any(t =>
             t.ToString().Contains("<auto-generated>") ||
             t.ToString().Contains("<auto-generated />"));
     }

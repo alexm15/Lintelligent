@@ -1,4 +1,5 @@
 ﻿using Lintelligent.AnalyzerEngine.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Lintelligent.AnalyzerEngine.Results;
 
@@ -40,7 +41,11 @@ public record DiagnosticResult
                 lineNumber,
                 "Line number must be >= 1 (1-based indexing)");
 
+        // CA2263: We use non-generic Enum.IsDefined for netstandard2.0 compatibility
+        // The generic overload doesn't exist in netstandard2.0
+#pragma warning disable CA2263
         if (!Enum.IsDefined(typeof(Severity), severity))
+#pragma warning restore CA2263
             throw new ArgumentException(
                 $"Undefined severity value: {severity}",
                 nameof(severity));

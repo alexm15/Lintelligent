@@ -36,7 +36,7 @@ public record OutputConfiguration
         }
         
         var validFormats = new[] { "json", "sarif", "markdown" };
-        if (!validFormats.Contains(Format.ToLowerInvariant()))
+        if (!validFormats.Contains(Format, StringComparer.OrdinalIgnoreCase))
         {
             throw new ArgumentException(
                 $"Invalid format '{Format}'. Valid formats: {string.Join(", ", validFormats)}", 

@@ -17,7 +17,18 @@ public class MissingXmlDocumentationRule : IAnalyzerRule
 
         var root = tree.GetRoot();
 
-        // Check classes
+        foreach (var result in CheckClasses(tree, root))
+            yield return result;
+
+        foreach (var result in CheckMethods(tree, root))
+            yield return result;
+
+        foreach (var result in CheckProperties(tree, root))
+            yield return result;
+    }
+
+    private IEnumerable<DiagnosticResult> CheckClasses(SyntaxTree tree, SyntaxNode root)
+    {
         foreach (var classDecl in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
         {
             if (IsPublicOrProtected(classDecl.Modifiers) && !HasXmlDocumentation(classDecl))
@@ -37,8 +48,10 @@ public class MissingXmlDocumentationRule : IAnalyzerRule
                 );
             }
         }
+    }
 
-        // Check methods
+    private IEnumerable<DiagnosticResult> CheckMethods(SyntaxTree tree, SyntaxNode root)
+    {
         foreach (var methodDecl in root.DescendantNodes().OfType<MethodDeclarationSyntax>())
         {
             if (IsPublicOrProtected(methodDecl.Modifiers) && !HasXmlDocumentation(methodDecl))
@@ -58,8 +71,10 @@ public class MissingXmlDocumentationRule : IAnalyzerRule
                 );
             }
         }
+    }
 
-        // Check properties
+    private IEnumerable<DiagnosticResult> CheckProperties(SyntaxTree tree, SyntaxNode root)
+    {
         foreach (var propertyDecl in root.DescendantNodes().OfType<PropertyDeclarationSyntax>())
         {
             if (!IsPublicOrProtected(propertyDecl.Modifiers) || HasXmlDocumentation(propertyDecl)) continue;

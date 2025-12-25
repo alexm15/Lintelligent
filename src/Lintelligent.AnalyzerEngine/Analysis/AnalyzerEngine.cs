@@ -49,8 +49,12 @@ public class AnalyzerEngine(AnalyzerManager manager)
         _exceptions.Clear();
 
         foreach (var tree in syntaxTrees)
-        foreach (var result in AnalyzeTree(tree))
-            yield return result;
+        {
+            foreach (var result in AnalyzeTree(tree))
+            {
+                yield return result;
+            }
+        }
     }
 
     private IEnumerable<DiagnosticResult> AnalyzeTree(SyntaxTree tree)

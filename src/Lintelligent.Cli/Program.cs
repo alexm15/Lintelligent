@@ -2,6 +2,8 @@
 using Lintelligent.Cli.Commands;
 using Lintelligent.Cli.Infrastructure;
 
+#pragma warning disable S6966 // WriteLineAsync not needed for simple console output
+
 // Build CLI application
 var builder = new CliApplicationBuilder();
 

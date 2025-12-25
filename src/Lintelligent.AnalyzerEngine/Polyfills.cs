@@ -56,7 +56,7 @@ internal static class MathPolyfills
     public static int Clamp(int value, int min, int max)
     {
         if (min > max)
-            throw new ArgumentException($"min ({min}) must be <= max ({max})");
+            throw new ArgumentException($"min ({min}) must be <= max ({max})", nameof(min));
         
         if (value < min) return min;
         if (value > max) return max;

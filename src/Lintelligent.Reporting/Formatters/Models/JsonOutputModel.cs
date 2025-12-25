@@ -1,6 +1,6 @@
-namespace Lintelligent.Reporting.Formatters.Models;
-
 using System.Text.Json.Serialization;
+
+namespace Lintelligent.Reporting.Formatters.Models;
 
 /// <summary>
 /// Root JSON output model conforming to Lintelligent JSON schema.

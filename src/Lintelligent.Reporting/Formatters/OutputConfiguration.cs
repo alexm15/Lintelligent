@@ -31,12 +31,16 @@ public record OutputConfiguration
     public void Validate()
     {
         if (string.IsNullOrWhiteSpace(Format))
+        {
             throw new ArgumentException("Format cannot be null or whitespace", nameof(Format));
+        }
         
         var validFormats = new[] { "json", "sarif", "markdown" };
         if (!validFormats.Contains(Format.ToLowerInvariant()))
+        {
             throw new ArgumentException(
                 $"Invalid format '{Format}'. Valid formats: {string.Join(", ", validFormats)}", 
                 nameof(Format));
+        }
     }
 }

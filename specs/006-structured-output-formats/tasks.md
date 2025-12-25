@@ -57,26 +57,26 @@
 
 ### Implementation for User Story 1
 
-- [ ] T015 [P] [US1] Create JsonOutputModel class for strong typing in src/Lintelligent.Reporting/Formatters/JsonOutputModel.cs
-- [ ] T016 [US1] Implement JsonFormatter.Format() method using System.Text.Json in src/Lintelligent.Reporting/Formatters/JsonFormatter.cs
-- [ ] T017 [US1] Generate JSON structure with status, summary (total + bySeverity), and violations array in src/Lintelligent.Reporting/Formatters/JsonFormatter.cs
-- [ ] T018 [US1] Handle empty result sets (FR-014) in JsonFormatter in src/Lintelligent.Reporting/Formatters/JsonFormatter.cs
-- [ ] T019 [US1] Implement special character escaping (FR-012) for quotes, newlines, Unicode in src/Lintelligent.Reporting/Formatters/JsonFormatter.cs
-- [ ] T020 [P] [US1] Write test for valid JSON schema conformance in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
-- [ ] T021 [P] [US1] Write test for 0 violations edge case in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
-- [ ] T022 [P] [US1] Write test for 1 violation baseline in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
-- [ ] T023 [P] [US1] Write test for 5 violations with all severity types in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
-- [ ] T024 [P] [US1] Write test for severity filtering (Error/Warning/Info) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
-- [ ] T025 [P] [US1] Write test for category grouping (8 categories from Feature 019) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
-- [ ] T026 [P] [US1] Write test for special character escaping (quotes, newlines, Unicode) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
-- [ ] T027 [P] [US1] Write test for jq parsing compatibility (SC-004) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
-- [ ] T028 [P] [US1] Write test for PowerShell ConvertFrom-Json compatibility (SC-004) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
+- [X] T015 [P] [US1] Create JsonOutputModel class for strong typing in src/Lintelligent.Reporting/Formatters/JsonOutputModel.cs
+- [X] T016 [US1] Implement JsonFormatter.Format() method using System.Text.Json in src/Lintelligent.Reporting/Formatters/JsonFormatter.cs
+- [X] T017 [US1] Generate JSON structure with status, summary (total + bySeverity), and violations array in src/Lintelligent.Reporting/Formatters/JsonFormatter.cs
+- [X] T018 [US1] Handle empty result sets (FR-014) in JsonFormatter in src/Lintelligent.Reporting/Formatters/JsonFormatter.cs
+- [X] T019 [US1] Implement special character escaping (FR-012) for quotes, newlines, Unicode in src/Lintelligent.Reporting/Formatters/JsonFormatter.cs
+- [X] T020 [P] [US1] Write test for valid JSON schema conformance in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
+- [X] T021 [P] [US1] Write test for 0 violations edge case in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
+- [X] T022 [P] [US1] Write test for 1 violation baseline in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
+- [X] T023 [P] [US1] Write test for 5 violations with all severity types in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
+- [X] T024 [P] [US1] Write test for severity filtering (Error/Warning/Info) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
+- [X] T025 [P] [US1] Write test for category grouping (8 categories from Feature 019) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
+- [X] T026 [P] [US1] Write test for special character escaping (quotes, newlines, Unicode) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
+- [X] T027 [P] [US1] Write test for jq parsing compatibility (SC-004) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
+- [X] T028 [P] [US1] Write test for PowerShell ConvertFrom-Json compatibility (SC-004) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
 - [ ] T029 [P] [US1] Write test for 10,000 violations performance <10 seconds (SC-008) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
-- [ ] T030 [P] [US1] Write test for status field values (success/error) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
-- [ ] T031 [P] [US1] Write test for summary counts accuracy in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
+- [X] T030 [P] [US1] Write test for status field values (success/error) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
+- [X] T031 [P] [US1] Write test for summary counts accuracy in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
 - [ ] T032 [P] [US1] Write test for UTF-8 encoding in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
-- [ ] T033 [P] [US1] Write test for camelCase naming convention in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
-- [ ] T034 [P] [US1] Write test for deterministic output (same input → same output) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
+- [X] T033 [P] [US1] Write test for camelCase naming convention in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
+- [X] T034 [P] [US1] Write test for deterministic output (same input → same output) in tests/Lintelligent.Reporting.Tests/Formatters/JsonFormatterTests.cs
 
 **Checkpoint**: User Story 1 complete - JSON formatter fully functional and independently testable
 

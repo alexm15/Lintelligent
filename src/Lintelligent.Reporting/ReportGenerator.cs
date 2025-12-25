@@ -4,7 +4,7 @@ namespace Lintelligent.Reporting;
 
 public class ReportGenerator
 {
-    public string GenerateMarkdown(IEnumerable<DiagnosticResult> results)
+    public static string GenerateMarkdown(IEnumerable<DiagnosticResult> results)
     {
         // Compose final document using a raw interpolated string and concatenate entries
         return $"""
@@ -28,7 +28,7 @@ public class ReportGenerator
         ));
     }
 
-    public string GenerateMarkdownGroupedByCategory(IEnumerable<DiagnosticResult> results)
+    public static string GenerateMarkdownGroupedByCategory(IEnumerable<DiagnosticResult> results)
     {
         var grouped = results.GroupBy(r => r.Category)
             .OrderBy(g => g.Key);

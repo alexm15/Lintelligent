@@ -20,7 +20,7 @@ public sealed class AnalyzerManager
         if (!EnumPolyfills.IsDefined(rule.Severity))
             throw new ArgumentException(
                 $"Rule '{rule.Id}' has undefined severity value: {rule.Severity}",
-                nameof(rule.Severity));
+                nameof(rule));
 
         _rules.Add(rule);
     }

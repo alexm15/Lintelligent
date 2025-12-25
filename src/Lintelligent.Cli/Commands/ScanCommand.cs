@@ -18,9 +18,7 @@ namespace Lintelligent.Cli.Commands;
 ///     The command is responsible for file system access (via FileSystemCodeProvider).
 ///     The AnalyzerEngine core performs no IO operations, maintaining constitutional compliance.
 /// </remarks>
-public sealed class ScanCommand(
-    AnalyzerEngine.Analysis.AnalyzerEngine engine,
-    ReportGenerator reporter) : IAsyncCommand
+public sealed class ScanCommand(AnalyzerEngine.Analysis.AnalyzerEngine engine) : IAsyncCommand
 {
     /// <inheritdoc/>
     public async Task<CommandResult> ExecuteAsync(string[] args)
@@ -49,8 +47,8 @@ public sealed class ScanCommand(
             // Generate report with optional grouping
             var report = groupBy switch
             {
-                "category" => reporter.GenerateMarkdownGroupedByCategory(materializedResults),
-                _ => reporter.GenerateMarkdown(materializedResults)
+                "category" => ReportGenerator.GenerateMarkdownGroupedByCategory(materializedResults),
+                _ => ReportGenerator.GenerateMarkdown(materializedResults)
             };
 
             // Return success with report in Output

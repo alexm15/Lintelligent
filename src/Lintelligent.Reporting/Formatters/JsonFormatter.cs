@@ -14,6 +14,14 @@ using Lintelligent.Reporting.Formatters.Models;
 /// </summary>
 public class JsonFormatter : IReportFormatter
 {
+    // FR-012: Cached JsonSerializerOptions to avoid recreating on each call (CA1869)
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
     /// <inheritdoc />
     public string FormatName => "json";
 
@@ -42,14 +50,7 @@ public class JsonFormatter : IReportFormatter
 
         // FR-012: Special character escaping via JavaScriptEncoder
         // SC-003: camelCase naming convention via JsonPropertyName attributes
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-
-        return JsonSerializer.Serialize(output, options);
+        return JsonSerializer.Serialize(output, JsonOptions);
     }
 
     private static ViolationModel MapToViolationModel(DiagnosticResult result)

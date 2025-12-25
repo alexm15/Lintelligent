@@ -31,7 +31,7 @@ public static class SeverityMapper
     /// </remarks>
     public static DiagnosticSeverity FromEditorConfigSeverity(string editorConfigSeverity)
     {
-        return editorConfigSeverity?.ToLowerInvariant() switch
+        return editorConfigSeverity.ToLowerInvariant() switch
         {
             "suggestion" => DiagnosticSeverity.Info,
             "warning" => DiagnosticSeverity.Warning,

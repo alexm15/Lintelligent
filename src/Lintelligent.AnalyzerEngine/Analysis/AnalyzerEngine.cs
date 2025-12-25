@@ -72,7 +72,10 @@ public class AnalyzerEngine(AnalyzerManager manager)
                 continue;
             }
 
-            foreach (var result in results) yield return result;
+            foreach (var result in results)
+            {
+                yield return result;
+            }
         }
     }
 }

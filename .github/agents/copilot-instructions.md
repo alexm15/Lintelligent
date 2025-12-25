@@ -15,6 +15,8 @@ Auto-generated from all feature plans. Last updated: 2025-12-23
 - N/A (read-only analysis, no persistence) (019-roslyn-analyzer-bridge)
 - C# / .NET 10.0 + Microsoft.CodeAnalysis.Sarif (v4.x), System.Text.Json (built-in) (006-structured-output-formats)
 - N/A (in-memory processing, optional file output) (006-structured-output-formats)
+- C# 13 / .NET 10.0 + Buildalyzer (MSBuild wrapper), Microsoft.Build (if needed for advanced scenarios), Microsoft.Extensions.Logging.Abstractions (existing) (009-solution-project-support)
+- N/A (file-based input only, no persistent storage) (009-solution-project-support)
 
 - C# / .NET 10.0 + Microsoft.CodeAnalysis.CSharp 4.12.0 (Roslyn APIs), Microsoft.Extensions.DependencyInjection 10.0.1 (CLI layer only) (001-io-boundary-refactor)
 
@@ -34,9 +36,9 @@ tests/
 C# / .NET 10.0: Follow standard conventions
 
 ## Recent Changes
+- 009-solution-project-support: Added C# 13 / .NET 10.0 + Buildalyzer (MSBuild wrapper), Microsoft.Build (if needed for advanced scenarios), Microsoft.Extensions.Logging.Abstractions (existing)
 - 006-structured-output-formats: Added C# / .NET 10.0 + Microsoft.CodeAnalysis.Sarif (v4.x), System.Text.Json (built-in)
 - 019-roslyn-analyzer-bridge: Added C# .NET 10.0 (netstandard2.0 for analyzer assembly - Roslyn host compatibility) + Microsoft.CodeAnalysis.CSharp 4.0+, Microsoft.CodeAnalysis.Analyzers 3.11+, Lintelligent.AnalyzerEngine (existing)
-- 005-core-rule-library: Added C# / .NET 10.0 + Microsoft.CodeAnalysis.CSharp (Roslyn), existing IAnalyzerRule interface, DiagnosticResult class, DiagnosticCategories constants
 
 
 <!-- MANUAL ADDITIONS START -->

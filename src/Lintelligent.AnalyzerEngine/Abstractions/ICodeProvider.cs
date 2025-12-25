@@ -25,8 +25,13 @@ namespace Lintelligent.AnalyzerEngine.Abstractions;
 public interface ICodeProvider
 {
     /// <summary>
-    ///     Discovers and provides syntax trees for analysis.
+    ///     Discovers and provides syntax trees for analysis with optional conditional compilation symbols.
     /// </summary>
+    /// <param name="conditionalSymbols">
+    ///     Optional list of preprocessor symbols for conditional compilation (e.g., DEBUG, TRACE, RELEASE).
+    ///     These symbols determine which #if/#elif/#else blocks are compiled.
+    ///     If null or empty, no preprocessor symbols are defined.
+    /// </param>
     /// <returns>
     ///     Lazy sequence of parsed syntax trees.
     ///     MUST yield only valid, non-null SyntaxTree objects.
@@ -37,5 +42,5 @@ public interface ICodeProvider
     ///     Instead, log errors and skip problematic sources.
     ///     MAY throw for catastrophic failures that prevent any discovery (e.g., invalid configuration).
     /// </exception>
-    public IEnumerable<SyntaxTree> GetSyntaxTrees();
+    public IEnumerable<SyntaxTree> GetSyntaxTrees(IReadOnlyList<string>? conditionalSymbols = null);
 }

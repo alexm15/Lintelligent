@@ -1,7 +1,10 @@
 ﻿using Lintelligent.AnalyzerEngine.Abstractions;
+using Lintelligent.AnalyzerEngine.ProjectModel;
+using Lintelligent.AnalyzerEngine.Results;
 using Lintelligent.Cli.Infrastructure;
 using Lintelligent.Cli.Providers;
 using Lintelligent.Reporting;
+using Microsoft.Extensions.Logging;
 
 #pragma warning disable MA0006 // Use string.Equals instead of == operator
 #pragma warning disable MA0026 // TODO comment detected
@@ -24,7 +27,11 @@ namespace Lintelligent.Cli.Commands;
 ///     The command is responsible for file system access (via FileSystemCodeProvider).
 ///     The AnalyzerEngine core performs no IO operations, maintaining constitutional compliance.
 /// </remarks>
-public sealed class ScanCommand(AnalyzerEngine.Analysis.AnalyzerEngine engine) : IAsyncCommand
+public sealed class ScanCommand(
+    AnalyzerEngine.Analysis.AnalyzerEngine engine,
+    ISolutionProvider? solutionProvider = null,
+    IProjectProvider? projectProvider = null,
+    ILogger<ScanCommand>? logger = null) : IAsyncCommand
 {
     /// <inheritdoc/>
     public async Task<CommandResult> ExecuteAsync(string[] args)
@@ -34,10 +41,21 @@ public sealed class ScanCommand(AnalyzerEngine.Analysis.AnalyzerEngine engine) :
             var path = args.Length > 1 ? args[1] : ".";
             var severityFilter = ParseSeverityFilter(args);
             var groupBy = ParseGroupByOption(args);
+            var configuration = ParseConfigurationOption(args);
+            var targetFramework = ParseTargetFrameworkOption(args);
             _ = ParseFormatOption(args); // TODO: Use format option when implementing output formatting
             _ = ParseOutputOption(args); // TODO: Use output path when implementing file output
 
-            // Create provider to discover files from file system
+            // Check if path is a solution file
+            if (path.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
+            {
+                if (solutionProvider == null)
+                    throw new InvalidOperationException("Solution support requires ISolutionProvider to be registered.");
+
+                return await AnalyzeSolutionAsync(path, severityFilter, groupBy, configuration, targetFramework);
+            }
+
+            // Original directory-based analysis
             var codeProvider = new FileSystemCodeProvider(path);
             var syntaxTrees = codeProvider.GetSyntaxTrees();
 
@@ -70,6 +88,159 @@ public sealed class ScanCommand(AnalyzerEngine.Analysis.AnalyzerEngine engine) :
             // All other exceptions → exit code 1
             return CommandResult.Failure(1, ex.Message);
         }
+    }
+
+    private async Task<CommandResult> AnalyzeSolutionAsync(string solutionPath, Severity? severityFilter, string? groupBy, string configuration, string? targetFramework)
+    {
+        logger?.LogInformation("Analyzing solution: {SolutionPath} with configuration: {Configuration}", solutionPath, configuration);
+
+        // Parse solution to get project list
+        var solution = await solutionProvider!.ParseSolutionAsync(solutionPath);
+        logger?.LogInformation("Found {ProjectCount} projects in solution", solution.Projects.Count);
+
+        // Check if we have project provider for metadata extraction
+        if (projectProvider != null)
+        {
+            return await AnalyzeSolutionWithProviderAsync(solution, configuration, targetFramework, severityFilter, groupBy);
+        }
+
+        // Fallback to directory-based analysis if IProjectProvider not available
+        return AnalyzeSolutionDirectories(solution, severityFilter, groupBy);
+    }
+
+    private async Task<CommandResult> AnalyzeSolutionWithProviderAsync(
+        Solution solution,
+        string configuration,
+        string? targetFramework,
+        Severity? severityFilter,
+        string? groupBy)
+    {
+        var analysisStart = DateTime.UtcNow;
+        
+        // Evaluate all projects to get metadata (ConditionalSymbols, TargetFrameworks, etc.)
+        var evaluatedSolution = await projectProvider!.EvaluateAllProjectsAsync(
+            solution,
+            configuration,
+            targetFramework
+        );
+        
+        logger?.LogInformation("Successfully evaluated {Count} projects", evaluatedSolution.Projects.Count);
+        
+        // T116: Log dependency graph information
+        var depGraph = evaluatedSolution.GetDependencyGraph();
+        var totalReferences = depGraph.Values.Sum(refs => refs.Count);
+        logger?.LogInformation("Dependency graph: {ProjectCount} projects, {ReferenceCount} project references",
+            depGraph.Count, totalReferences);
+
+        // Analyze each evaluated project with its conditional symbols
+        var allResults = AnalyzeEvaluatedProjects(evaluatedSolution);
+
+        // Filter by severity if specified
+        var filteredResults = severityFilter.HasValue
+            ? allResults.Where(r => r.Severity == severityFilter.Value).ToList()
+            : allResults;
+
+        // Generate report
+        var report = groupBy switch
+        {
+            "category" => ReportGenerator.GenerateMarkdownGroupedByCategory(filteredResults),
+            _ => ReportGenerator.GenerateMarkdown(filteredResults)
+        };
+
+        var totalDuration = DateTime.UtcNow - analysisStart;
+        logger?.LogInformation("Total analysis completed in {Duration}ms: {DiagnosticCount} diagnostics",
+            totalDuration.TotalMilliseconds, filteredResults.Count);
+
+        return CommandResult.Success(report);
+    }
+
+    private CommandResult AnalyzeSolutionDirectories(Solution solution, Severity? severityFilter, string? groupBy)
+    {
+        var allResultsFallback = AnalyzeProjectDirectories(solution);
+
+        // Filter by severity if specified
+        var filteredResultsFallback = severityFilter.HasValue
+            ? allResultsFallback.Where(r => r.Severity == severityFilter.Value).ToList()
+            : allResultsFallback;
+
+        // Generate report
+        var reportFallback = groupBy switch
+        {
+            "category" => ReportGenerator.GenerateMarkdownGroupedByCategory(filteredResultsFallback),
+            _ => ReportGenerator.GenerateMarkdown(filteredResultsFallback)
+        };
+
+        return CommandResult.Success(reportFallback);
+    }
+
+    private List<DiagnosticResult> AnalyzeEvaluatedProjects(Solution solution)
+    {
+        var allResults = new List<DiagnosticResult>();
+        
+        foreach (var project in solution.Projects)
+        {
+            try
+            {
+                // Use CompileItems from the project if available, otherwise fallback to directory scan
+                if (project.CompileItems.Count > 0)
+                {
+                    logger?.LogInformation(
+                        "Analyzing project: {ProjectName} with {SymbolCount} conditional symbols",
+                        project.Name,
+                        project.ConditionalSymbols.Count);
+
+                    // Get syntax trees for the project's source files with conditional symbols
+                    var projectDir = Path.GetDirectoryName(project.FilePath);
+                    if (projectDir != null)
+                    {
+                        var codeProvider = new FileSystemCodeProvider(projectDir);
+                        var syntaxTrees = codeProvider.GetSyntaxTrees(project.ConditionalSymbols);
+                        var results = engine.Analyze(syntaxTrees);
+                        allResults.AddRange(results);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, "Failed to analyze project {ProjectName}", project.Name);
+                // Continue with other projects
+            }
+        }
+
+        logger?.LogInformation("Total diagnostics found: {Count}", allResults.Count);
+        return allResults;
+    }
+
+    private List<DiagnosticResult> AnalyzeProjectDirectories(Solution solution)
+    {
+        var allResults = new List<DiagnosticResult>();
+        
+        foreach (var project in solution.Projects)
+        {
+            try
+            {
+                var projectDir = Path.GetDirectoryName(project.FilePath);
+                if (projectDir == null || !Directory.Exists(projectDir))
+                {
+                    logger?.LogWarning("Skipping project {ProjectName}: directory not found", project.Name);
+                    continue;
+                }
+
+                logger?.LogInformation("Analyzing project: {ProjectName}", project.Name);
+                var codeProvider = new FileSystemCodeProvider(projectDir);
+                var syntaxTrees = codeProvider.GetSyntaxTrees();
+                var results = engine.Analyze(syntaxTrees);
+                allResults.AddRange(results);
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, "Failed to analyze project {ProjectName}", project.Name);
+                // Continue with other projects
+            }
+        }
+
+        logger?.LogInformation("Total diagnostics found: {Count}", allResults.Count);
+        return allResults;
     }
 
     private static Severity? ParseSeverityFilter(string[] args)
@@ -124,5 +295,55 @@ public sealed class ScanCommand(AnalyzerEngine.Analysis.AnalyzerEngine engine) :
                 return args[i + 1];
 
         return null; // Default: stdout
+    }
+    
+    /// <summary>
+    ///     Parses the --configuration flag from command line arguments.
+    /// </summary>
+    /// <param name="args">Command line arguments.</param>
+    /// <returns>
+    ///     Configuration name (e.g., Debug, Release, or custom configurations).
+    ///     Defaults to "Debug" if not specified.
+    /// </returns>
+    /// <remarks>
+    ///     The configuration value determines which preprocessor symbols are defined:
+    ///     - Debug: typically defines DEBUG and TRACE symbols
+    ///     - Release: typically defines RELEASE symbol
+    ///     Custom configurations may define different symbols based on project settings.
+    ///     
+    ///     Example usage:
+    ///     - lintelligent scan MySolution.sln --configuration Debug
+    ///     - lintelligent scan MyProject.csproj --configuration Release
+    ///     - lintelligent scan MySolution.sln --configuration Staging (custom config)
+    /// </remarks>
+    private static string ParseConfigurationOption(string[] args)
+    {
+        for (var i = 0; i < args.Length - 1; i++)
+            if (args[i] == "--configuration" || args[i] == "-c")
+                return args[i + 1];
+
+        return "Debug"; // Default configuration
+    }
+
+    /// <summary>
+    ///     Parses the --target-framework flag from command line arguments.
+    /// </summary>
+    /// <param name="args">Command line arguments.</param>
+    /// <returns>Target framework moniker (e.g., net8.0) or null if not specified.</returns>
+    /// <remarks>
+    ///     The --target-framework flag specifies which target framework to analyze for multi-targeted projects.
+    ///     If not specified, the first target framework in the project will be used.
+    ///     Example usage:
+    ///     - lintelligent scan MultiTargetProject.csproj --target-framework net8.0
+    ///     - lintelligent scan MySolution.sln --target-framework net472
+    ///     - lintelligent scan MyProject.csproj -f net8.0 (short form)
+    /// </remarks>
+    private static string? ParseTargetFrameworkOption(string[] args)
+    {
+        for (var i = 0; i < args.Length - 1; i++)
+            if (args[i] == "--target-framework" || args[i] == "-f")
+                return args[i + 1];
+
+        return null; // Default: use first available target framework
     }
 }

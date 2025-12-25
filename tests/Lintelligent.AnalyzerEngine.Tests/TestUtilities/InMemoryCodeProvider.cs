@@ -47,19 +47,29 @@ public class InMemoryCodeProvider : ICodeProvider
     /// <summary>
     ///     Yields syntax trees for all in-memory source code.
     /// </summary>
+    /// <param name="conditionalSymbols">
+    ///     Optional list of preprocessor symbols for conditional compilation (e.g., DEBUG, TRACE, RELEASE).
+    ///     These symbols determine which #if/#elif/#else blocks are included in the parsed syntax tree.
+    /// </param>
     /// <returns>
     ///     Lazy sequence of parsed syntax trees, one per dictionary entry.
     ///     File paths from dictionary keys are set on the syntax trees for
     ///     diagnostic reporting.
     /// </returns>
-    public IEnumerable<SyntaxTree> GetSyntaxTrees()
+    public IEnumerable<SyntaxTree> GetSyntaxTrees(IReadOnlyList<string>? conditionalSymbols = null)
     {
         foreach (var kvp in _sources)
         {
             var filePath = kvp.Key;
             var sourceCode = kvp.Value;
 
-            var tree = CSharpSyntaxTree.ParseText(sourceCode, path: filePath);
+            // Create parse options with conditional symbols if provided
+            var parseOptions = conditionalSymbols is { Count: > 0 }
+                ? new CSharpParseOptions(LanguageVersion.Latest)
+                    .WithPreprocessorSymbols(conditionalSymbols)
+                : new CSharpParseOptions(LanguageVersion.Latest);
+            
+            var tree = CSharpSyntaxTree.ParseText(sourceCode, parseOptions, path: filePath);
             yield return tree;
         }
     }

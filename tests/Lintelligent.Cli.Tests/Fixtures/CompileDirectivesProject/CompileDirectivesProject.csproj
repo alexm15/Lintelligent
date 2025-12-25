@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <!-- Exclude all files in Generated directory -->
+    <ItemGroup>
+        <Compile Remove="Generated/**/*.cs" />
+    </ItemGroup>
+
+    <!-- Include a linked file from outside the project directory -->
+    <ItemGroup>
+        <Compile Include="..\Shared\SharedCode.cs" Link="Shared\SharedCode.cs" />
+    </ItemGroup>
+
+</Project>

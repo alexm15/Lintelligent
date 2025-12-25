@@ -22,22 +22,22 @@ public class OutputWriter
     /// <exception cref="UnauthorizedAccessException">Thrown if path not writable.</exception>
     public void Write(string content, string? outputPath)
     {
-        if (outputPath == null || outputPath == "-")
+        if (outputPath is null or "-")
         {
             // Write to stdout (FR-010)
             Console.WriteLine(content);
             return;
         }
-        
+
         // Validate path is writable (FR-009)
         ValidateOutputPath(outputPath);
-        
+
         // Warn if file exists
         if (File.Exists(outputPath))
         {
             Console.WriteLine($"Warning: Overwriting existing file: {outputPath}");
         }
-        
+
         // Write to file (atomic: temp file → rename)
         var tempPath = Path.GetTempFileName();
         try
@@ -53,7 +53,7 @@ public class OutputWriter
             throw;
         }
     }
-    
+
     private static void ValidateOutputPath(string path)
     {
         // Check if directory exists (not path traversal validation per Clarification #4)
@@ -64,7 +64,7 @@ public class OutputWriter
                 $"Output directory does not exist: {directory}. " +
                 $"Create the directory or specify a valid path.");
         }
-        
+
         // Check if path is writable (best-effort, actual write may still fail)
         try
         {

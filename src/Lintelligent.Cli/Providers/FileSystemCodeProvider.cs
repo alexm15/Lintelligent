@@ -47,16 +47,20 @@ public class FileSystemCodeProvider : ICodeProvider
     /// <summary>
     ///     Discovers C# files and yields parsed syntax trees.
     /// </summary>
+    /// <param name="conditionalSymbols">
+    ///     Optional list of preprocessor symbols for conditional compilation (e.g., DEBUG, TRACE, RELEASE).
+    ///     These symbols determine which #if/#elif/#else blocks are included in the parsed syntax tree.
+    /// </param>
     /// <returns>
     ///     Lazy sequence of syntax trees for all .cs files found.
     ///     Empty sequence if no files found or path doesn't exist.
     /// </returns>
-    public IEnumerable<SyntaxTree> GetSyntaxTrees()
+    public IEnumerable<SyntaxTree> GetSyntaxTrees(IReadOnlyList<string>? conditionalSymbols = null)
     {
         // Check if root path is a single file
         if (File.Exists(_rootPath))
         {
-            var tree = ParseFile(_rootPath);
+            var tree = ParseFile(_rootPath, conditionalSymbols);
             if (tree != null) yield return tree;
             yield break;
         }
@@ -83,17 +87,24 @@ public class FileSystemCodeProvider : ICodeProvider
         // Parse each file and yield syntax tree
         foreach (var file in files)
         {
-            var tree = ParseFile(file);
+            var tree = ParseFile(file, conditionalSymbols);
             if (tree != null) yield return tree;
         }
     }
 
-    private SyntaxTree? ParseFile(string filePath)
+    private static SyntaxTree? ParseFile(string filePath, IReadOnlyList<string>? conditionalSymbols)
     {
         try
         {
             var sourceCode = File.ReadAllText(filePath);
-            return CSharpSyntaxTree.ParseText(sourceCode, path: filePath);
+            
+            // Create parse options with conditional symbols if provided
+            var parseOptions = conditionalSymbols is { Count: > 0 }
+                ? new CSharpParseOptions(LanguageVersion.Latest)
+                    .WithPreprocessorSymbols(conditionalSymbols)
+                : new CSharpParseOptions(LanguageVersion.Latest);
+            
+            return CSharpSyntaxTree.ParseText(sourceCode, parseOptions, path: filePath);
         }
         catch (FileNotFoundException)
         {

@@ -18,16 +18,21 @@ public sealed class AnalyzerManager
         ArgumentExceptionPolyfills.ThrowIfNullOrWhiteSpace(rule.Category, nameof(rule.Category));
 
         if (!EnumPolyfills.IsDefined(rule.Severity))
+        {
             throw new ArgumentException(
                 $"Rule '{rule.Id}' has undefined severity value: {rule.Severity}",
                 nameof(rule));
+        }
 
         _rules.Add(rule);
     }
 
     public void RegisterRules(IEnumerable<IAnalyzerRule> rules)
     {
-        foreach (var rule in rules) RegisterRule(rule);
+        foreach (var rule in rules)
+        {
+            RegisterRule(rule);
+        }
     }
 
     public IEnumerable<DiagnosticResult> Analyze(SyntaxTree syntaxTree)

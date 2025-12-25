@@ -34,20 +34,18 @@ public class DeadCodeRule : IAnalyzerRule
                     continue;
 
                 // Search for references within the class
-                if (!IsMethodReferenced(methodName, classDecl, method))
-                {
-                    var line = method.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-                    var message = $"Private method '{methodName}' is never used. Consider removing dead code.";
+                if (IsMethodReferenced(methodName, classDecl, method)) continue;
+                var line = method.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                var message = $"Private method '{methodName}' is never used. Consider removing dead code.";
 
-                    yield return new DiagnosticResult(
-                        tree.FilePath,
-                        Id,
-                        message,
-                        line,
-                        Severity,
-                        Category
-                    );
-                }
+                yield return new DiagnosticResult(
+                    tree.FilePath,
+                    Id,
+                    message,
+                    line,
+                    Severity,
+                    Category
+                );
             }
 
             // Find all private fields
@@ -125,17 +123,15 @@ public class DeadCodeRule : IAnalyzerRule
     {
         // Heuristic: if the class has a base list, check if any interface might define this member
         // This is a simple name-based check (not full semantic analysis)
-        if (classDecl.BaseList == null)
-            return false;
-
-        // If the class implements any interfaces, we assume the member might be an explicit implementation
-        // This is a conservative heuristic to avoid false positives
-        return classDecl.BaseList.Types.Any();
+        return classDecl.BaseList != null &&
+               // If the class implements any interfaces, we assume the member might be an explicit implementation
+               // This is a conservative heuristic to avoid false positives
+               classDecl.BaseList.Types.Any();
     }
 
     private static bool IsGeneratedCode(SyntaxTree tree)
     {
-        string fileName = Path.GetFileName(tree.FilePath);
+        var fileName = Path.GetFileName(tree.FilePath);
         if (fileName.EndsWith(".Designer.cs") || 
             fileName.EndsWith(".g.cs") || 
             fileName.Contains(".Generated."))

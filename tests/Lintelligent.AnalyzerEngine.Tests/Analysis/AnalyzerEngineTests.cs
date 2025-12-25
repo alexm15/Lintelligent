@@ -16,36 +16,36 @@ public class AnalyzerEngineTests
     public void Analyze_WithInMemorySyntaxTree_ReturnsDiagnosticsWithoutFileSystem()
     {
         // Arrange: Create in-memory syntax tree with a long method (>20 lines)
-        var sourceCode = """
+        const string sourceCode = """
 
-                         class TestClass
-                         {
-                             void LongMethod()
-                             {
-                                 var line1 = 1;
-                                 var line2 = 2;
-                                 var line3 = 3;
-                                 var line4 = 4;
-                                 var line5 = 5;
-                                 var line6 = 6;
-                                 var line7 = 7;
-                                 var line8 = 8;
-                                 var line9 = 9;
-                                 var line10 = 10;
-                                 var line11 = 11;
-                                 var line12 = 12;
-                                 var line13 = 13;
-                                 var line14 = 14;
-                                 var line15 = 15;
-                                 var line16 = 16;
-                                 var line17 = 17;
-                                 var line18 = 18;
-                                 var line19 = 19;
-                                 var line20 = 20;
-                                 var line21 = 21;
-                             }
-                         }
-                         """;
+                                  class TestClass
+                                  {
+                                      void LongMethod()
+                                      {
+                                          var line1 = 1;
+                                          var line2 = 2;
+                                          var line3 = 3;
+                                          var line4 = 4;
+                                          var line5 = 5;
+                                          var line6 = 6;
+                                          var line7 = 7;
+                                          var line8 = 8;
+                                          var line9 = 9;
+                                          var line10 = 10;
+                                          var line11 = 11;
+                                          var line12 = 12;
+                                          var line13 = 13;
+                                          var line14 = 14;
+                                          var line15 = 15;
+                                          var line16 = 16;
+                                          var line17 = 17;
+                                          var line18 = 18;
+                                          var line19 = 19;
+                                          var line20 = 20;
+                                          var line21 = 21;
+                                      }
+                                  }
+                                  """;
         var tree = CSharpSyntaxTree.ParseText(sourceCode, path: "InMemoryTest.cs");
         var trees = new[] {tree};
 
@@ -81,7 +81,7 @@ public class AnalyzerEngineTests
     public void Analyze_WithSameSyntaxTrees_ProducesDeterministicResults()
     {
         // Arrange: Create identical in-memory trees
-        var sourceCode = "class Test { void Method() { } }";
+        const string sourceCode = "class Test { void Method() { } }";
         var tree1 = CSharpSyntaxTree.ParseText(sourceCode, path: "Test1.cs");
         var tree2 = CSharpSyntaxTree.ParseText(sourceCode, path: "Test2.cs");
 

@@ -19,10 +19,10 @@
 
 **Purpose**: Project initialization and dependency setup
 
-- [ ] T001 Add Microsoft.CodeAnalysis.Sarif v4.x NuGet package to src/Lintelligent.Reporting/Lintelligent.Reporting.csproj
-- [ ] T002 Create src/Lintelligent.Reporting/Formatters/ directory structure
-- [ ] T003 Create src/Lintelligent.Cli/Infrastructure/ directory structure
-- [ ] T004 Create tests/Lintelligent.Reporting.Tests/Formatters/ directory structure
+- [X] T001 Add Microsoft.CodeAnalysis.Sarif v4.x NuGet package to src/Lintelligent.Reporting/Lintelligent.Reporting.csproj (⚠️ DEFERRED to Phase 4 - package incompatible with .NET 10.0, will use System.Text.Json for manual SARIF serialization)
+- [X] T002 Create src/Lintelligent.Reporting/Formatters/ directory structure
+- [X] T003 Create src/Lintelligent.Cli/Infrastructure/ directory structure
+- [X] T004 Create tests/Lintelligent.Reporting.Tests/Formatters/ directory structure
 
 **Checkpoint**: Directory structure ready for implementation
 
@@ -34,16 +34,16 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Create IReportFormatter interface in src/Lintelligent.Reporting/Formatters/IReportFormatter.cs
-- [ ] T006 Create OutputConfiguration record in src/Lintelligent.Reporting/Formatters/OutputConfiguration.cs
-- [ ] T007 Implement OutputWriter class in src/Lintelligent.Cli/Infrastructure/OutputWriter.cs
-- [ ] T008 Add --format flag parsing (json|sarif|markdown) to src/Lintelligent.Cli/Commands/ScanCommand.cs
-- [ ] T009 Add --output flag parsing (file path or `-` for stdout) to src/Lintelligent.Cli/Commands/ScanCommand.cs
-- [ ] T010 [P] Write test for OutputWriter file creation in tests/Lintelligent.Cli.Tests/Infrastructure/OutputWriterTests.cs
-- [ ] T011 [P] Write test for OutputWriter stdout handling (`--output -`) in tests/Lintelligent.Cli.Tests/Infrastructure/OutputWriterTests.cs
-- [ ] T012 [P] Write test for OutputWriter path validation in tests/Lintelligent.Cli.Tests/Infrastructure/OutputWriterTests.cs
-- [ ] T013 [P] Write test for OutputWriter read-only path error in tests/Lintelligent.Cli.Tests/Infrastructure/OutputWriterTests.cs
-- [ ] T014 [P] Write test for OutputWriter file overwrite warning in tests/Lintelligent.Cli.Tests/Infrastructure/OutputWriterTests.cs
+- [X] T005 Create IReportFormatter interface in src/Lintelligent.Reporting/Formatters/IReportFormatter.cs
+- [X] T006 Create OutputConfiguration record in src/Lintelligent.Reporting/Formatters/OutputConfiguration.cs
+- [X] T007 Implement OutputWriter class in src/Lintelligent.Cli/Infrastructure/OutputWriter.cs
+- [X] T008 Add --format flag parsing (json|sarif|markdown) to src/Lintelligent.Cli/Commands/ScanCommand.cs
+- [X] T009 Add --output flag parsing (file path or `-` for stdout) to src/Lintelligent.Cli/Commands/ScanCommand.cs
+- [X] T010 [P] Write test for OutputWriter file creation in tests/Lintelligent.Cli.Tests/Infrastructure/OutputWriterTests.cs
+- [X] T011 [P] Write test for OutputWriter stdout handling (`--output -`) in tests/Lintelligent.Cli.Tests/Infrastructure/OutputWriterTests.cs
+- [X] T012 [P] Write test for OutputWriter path validation in tests/Lintelligent.Cli.Tests/Infrastructure/OutputWriterTests.cs
+- [X] T013 [P] Write test for OutputWriter read-only path error in tests/Lintelligent.Cli.Tests/Infrastructure/OutputWriterTests.cs
+- [X] T014 [P] Write test for OutputWriter file overwrite warning in tests/Lintelligent.Cli.Tests/Infrastructure/OutputWriterTests.cs
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

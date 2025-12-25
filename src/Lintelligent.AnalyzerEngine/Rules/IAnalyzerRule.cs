@@ -26,14 +26,14 @@ public interface IAnalyzerRule
     ///     Must be non-null, non-empty, and unique within the analyzer.
     /// </summary>
     /// <example>"LongMethod", "CA1001", "SEC001"</example>
-    string Id { get; }
+    public string Id { get; }
 
     /// <summary>
     ///     Human-readable description of what the rule checks.
     ///     Should clearly explain the issue detected and why it matters.
     /// </summary>
     /// <example>"Methods should not exceed 50 lines to maintain readability"</example>
-    string Description { get; }
+    public string Description { get; }
 
     /// <summary>
     ///     Severity level of findings produced by this rule.
@@ -45,7 +45,7 @@ public interface IAnalyzerRule
     ///     - Warning: Should fix (maintainability, performance)
     ///     - Info: Nice to have (style, suggestions)
     /// </remarks>
-    Severity Severity { get; }
+    public Severity Severity { get; }
 
     /// <summary>
     ///     Category for grouping related rules.
@@ -53,7 +53,7 @@ public interface IAnalyzerRule
     ///     Use constants from DiagnosticCategories when applicable.
     /// </summary>
     /// <example>"Maintainability", "Performance", "Security"</example>
-    string Category { get; }
+    public string Category { get; }
 
     /// <summary>
     ///     Analyzes a syntax tree and returns zero or more diagnostic findings.
@@ -76,5 +76,5 @@ public interface IAnalyzerRule
     ///     - New signature: IEnumerable&lt;DiagnosticResult&gt; Analyze(SyntaxTree tree)
     ///     - Migration: Change return type, use yield return or Enumerable.Empty()
     /// </remarks>
-    IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree);
+    public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree);
 }

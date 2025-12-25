@@ -14,6 +14,8 @@ namespace Lintelligent.AnalyzerEngine.Tests;
 /// </summary>
 public class RuleContractTests
 {
+    private static readonly string[] ExpectedFindings = ["Finding 1", "Finding 2", "Finding 3", "Finding 4", "Finding 5"];
+
     [Fact]
     public void Rule_EmittingZeroFindings_ReturnsEmptyEnumerable()
     {
@@ -42,7 +44,7 @@ public class RuleContractTests
         // Assert
         results.Should().HaveCount(5, "rule should emit 5 findings");
         results.Select(r => r.Message).Should().BeEquivalentTo(
-            new[] {"Finding 1", "Finding 2", "Finding 3", "Finding 4", "Finding 5"},
+            ExpectedFindings,
             "all findings should be returned");
     }
 

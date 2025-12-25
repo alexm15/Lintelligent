@@ -37,5 +37,5 @@ public interface ICodeProvider
     ///     Instead, log errors and skip problematic sources.
     ///     MAY throw for catastrophic failures that prevent any discovery (e.g., invalid configuration).
     /// </exception>
-    IEnumerable<SyntaxTree> GetSyntaxTrees();
+    public IEnumerable<SyntaxTree> GetSyntaxTrees();
 }

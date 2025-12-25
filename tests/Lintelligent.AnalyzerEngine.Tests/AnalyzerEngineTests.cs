@@ -154,11 +154,11 @@ public class AnalyzerEngineTests
         var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
 
         // Act - First analysis
-        engine.Analyze([tree]).ToList();
+        _ = engine.Analyze([tree]).ToList();
         var firstExceptionCount = engine.Exceptions.Count;
 
         // Act - Second analysis
-        engine.Analyze([tree]).ToList();
+        _ = engine.Analyze([tree]).ToList();
         var secondExceptionCount = engine.Exceptions.Count;
 
         // Assert - Should not accumulate exceptions

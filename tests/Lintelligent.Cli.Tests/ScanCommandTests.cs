@@ -30,7 +30,6 @@ public class ScanCommandTests
                 {
                     services.AddSingleton<AnalyzerManager>();
                     services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
-                    services.AddSingleton<ReportGenerator>();
                     services.AddSingleton<IAnalyzerRule, AlwaysReportRule>();
                     services.AddTransient<ScanCommand>();
                 })
@@ -137,7 +136,6 @@ public class ScanCommandTests
     {
         services.AddSingleton<AnalyzerManager>();
         services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
-        services.AddSingleton<ReportGenerator>();
         services.AddTransient<ScanCommand>();
     }
 

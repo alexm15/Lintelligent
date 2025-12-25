@@ -1,0 +1,6 @@
+<Project>
+  <ItemGroup>
+    <!-- Include global test suppressions -->
+    <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.Tests.cs" Link="Properties\GlobalSuppressions.Tests.cs" />
+  </ItemGroup>
+</Project>

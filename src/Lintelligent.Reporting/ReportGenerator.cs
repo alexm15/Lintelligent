@@ -2,7 +2,7 @@
 
 namespace Lintelligent.Reporting;
 
-public class ReportGenerator
+public static class ReportGenerator
 {
     public static string GenerateMarkdown(IEnumerable<DiagnosticResult> results)
     {

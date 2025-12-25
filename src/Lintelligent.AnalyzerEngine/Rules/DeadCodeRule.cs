@@ -20,60 +20,72 @@ public class DeadCodeRule : IAnalyzerRule
 
         foreach (var classDecl in classes)
         {
-            // Find all private methods
-            var privateMethods = classDecl.DescendantNodes()
-                .OfType<MethodDeclarationSyntax>()
-                .Where(m => m.Modifiers.Any(SyntaxKind.PrivateKeyword));
+            foreach (var result in CheckPrivateMethods(tree, classDecl))
+                yield return result;
 
-            foreach (var method in privateMethods)
+            foreach (var result in CheckPrivateFields(tree, classDecl))
+                yield return result;
+        }
+    }
+
+    private IEnumerable<DiagnosticResult> CheckPrivateMethods(SyntaxTree tree, ClassDeclarationSyntax classDecl)
+    {
+        // Find all private methods
+        var privateMethods = classDecl.DescendantNodes()
+            .OfType<MethodDeclarationSyntax>()
+            .Where(m => m.Modifiers.Any(SyntaxKind.PrivateKeyword));
+
+        foreach (var method in privateMethods)
+        {
+            var methodName = method.Identifier.ValueText;
+            
+            // Heuristic: exclude methods that might implement interface members
+            if (MightImplementInterface(classDecl))
+                continue;
+
+            // Search for references within the class
+            if (IsMethodReferenced(methodName, classDecl, method)) continue;
+            var line = method.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+            var message = $"Private method '{methodName}' is never used. Consider removing dead code.";
+
+            yield return new DiagnosticResult(
+                tree.FilePath,
+                Id,
+                message,
+                line,
+                Severity,
+                Category
+            );
+        }
+    }
+
+    private IEnumerable<DiagnosticResult> CheckPrivateFields(SyntaxTree tree, ClassDeclarationSyntax classDecl)
+    {
+        // Find all private fields
+        var privateFields = classDecl.DescendantNodes()
+            .OfType<FieldDeclarationSyntax>()
+            .Where(f => f.Modifiers.Any(SyntaxKind.PrivateKeyword));
+
+        foreach (var fieldDecl in privateFields)
+        {
+            foreach (var variable in fieldDecl.Declaration.Variables)
             {
-                var methodName = method.Identifier.ValueText;
-                
-                // Heuristic: exclude methods that might implement interface members
-                if (MightImplementInterface(methodName, classDecl))
-                    continue;
+                var fieldName = variable.Identifier.ValueText;
 
                 // Search for references within the class
-                if (IsMethodReferenced(methodName, classDecl, method)) continue;
-                var line = method.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-                var message = $"Private method '{methodName}' is never used. Consider removing dead code.";
-
-                yield return new DiagnosticResult(
-                    tree.FilePath,
-                    Id,
-                    message,
-                    line,
-                    Severity,
-                    Category
-                );
-            }
-
-            // Find all private fields
-            var privateFields = classDecl.DescendantNodes()
-                .OfType<FieldDeclarationSyntax>()
-                .Where(f => f.Modifiers.Any(SyntaxKind.PrivateKeyword));
-
-            foreach (var fieldDecl in privateFields)
-            {
-                foreach (var variable in fieldDecl.Declaration.Variables)
+                if (!IsFieldReferenced(fieldName, classDecl, fieldDecl))
                 {
-                    var fieldName = variable.Identifier.ValueText;
+                    var line = fieldDecl.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                    var message = $"Private field '{fieldName}' is never used. Consider removing dead code.";
 
-                    // Search for references within the class
-                    if (!IsFieldReferenced(fieldName, classDecl, fieldDecl))
-                    {
-                        var line = fieldDecl.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-                        var message = $"Private field '{fieldName}' is never used. Consider removing dead code.";
-
-                        yield return new DiagnosticResult(
-                            tree.FilePath,
-                            Id,
-                            message,
-                            line,
-                            Severity,
-                            Category
-                        );
-                    }
+                    yield return new DiagnosticResult(
+                        tree.FilePath,
+                        Id,
+                        message,
+                        line,
+                        Severity,
+                        Category
+                    );
                 }
             }
         }
@@ -84,7 +96,7 @@ public class DeadCodeRule : IAnalyzerRule
         // Search for any identifier tokens matching the method name (excluding the declaration itself)
         var identifiers = classDecl.DescendantNodes()
             .OfType<IdentifierNameSyntax>()
-            .Where(id => id.Identifier.ValueText == methodName);
+            .Where(id => string.Equals(id.Identifier.ValueText, methodName, StringComparison.Ordinal));
 
         foreach (var identifier in identifiers)
         {
@@ -104,7 +116,7 @@ public class DeadCodeRule : IAnalyzerRule
         // Search for any identifier tokens matching the field name (excluding the declaration itself)
         var identifiers = classDecl.DescendantNodes()
             .OfType<IdentifierNameSyntax>()
-            .Where(id => id.Identifier.ValueText == fieldName);
+            .Where(id => string.Equals(id.Identifier.ValueText, fieldName, StringComparison.Ordinal));
 
         foreach (var identifier in identifiers)
         {
@@ -119,9 +131,9 @@ public class DeadCodeRule : IAnalyzerRule
         return false;
     }
 
-    private static bool MightImplementInterface(string memberName, ClassDeclarationSyntax classDecl)
+    private static bool MightImplementInterface(ClassDeclarationSyntax classDecl)
     {
-        // Heuristic: if the class has a base list, check if any interface might define this member
+        // Heuristic: if the class has a base list, check if any interface might define a member
         // This is a simple name-based check (not full semantic analysis)
         return classDecl.BaseList != null &&
                // If the class implements any interfaces, we assume the member might be an explicit implementation

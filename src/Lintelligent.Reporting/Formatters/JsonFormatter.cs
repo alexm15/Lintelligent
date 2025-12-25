@@ -37,8 +37,8 @@ public class JsonFormatter : IReportFormatter
         {
             Total = violations.Count,
             BySeverity = violations
-                .GroupBy(v => v.Severity)
-                .ToDictionary(g => g.Key, g => g.Count())
+                .GroupBy(v => v.Severity, StringComparer.Ordinal)
+                .ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal)
         };
 
         var output = new JsonOutputModel

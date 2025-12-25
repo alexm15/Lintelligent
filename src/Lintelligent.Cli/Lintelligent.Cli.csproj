@@ -8,6 +8,10 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    </PropertyGroup>
+
 
     <ItemGroup>
         <PackageReference Include="Lintelligent.Analyzers" Version="1.0.0">

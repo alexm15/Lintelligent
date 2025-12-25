@@ -7,6 +7,10 @@
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    </PropertyGroup>
+
     <ItemGroup>
         <InternalsVisibleTo Include="Lintelligent.Analyzers" />
         <InternalsVisibleTo Include="Lintelligent.AnalyzerEngine.Tests" />

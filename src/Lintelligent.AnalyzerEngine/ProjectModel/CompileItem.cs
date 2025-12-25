@@ -46,8 +46,39 @@ public sealed class CompileItem
         OriginalIncludePath = originalIncludePath;
     }
 
-    private static bool IsAbsolutePath(string path) =>
-        Path.IsPathRooted(path) && !Path.GetPathRoot(path)!.Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal);
+    private static bool IsAbsolutePath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return false;
+
+        // Path.IsPathRooted returns true for:
+        // - Windows: C:\path, \\network\path
+        // - Unix: /path
+        // But also for relative paths like \path on Windows
+        // So we need additional checks
+        
+        if (!Path.IsPathRooted(path))
+            return false;
+
+        // On Windows, reject paths that are just "\" or "/" (rooted but not absolute)
+        // On Unix, "/" is the root and is absolute
+        var root = Path.GetPathRoot(path);
+        if (root == null)
+            return false;
+
+        // Windows: root should be like "C:\" or "\\network\share", not just "\"
+        // Unix: root is "/", which is valid
+        if (Path.DirectorySeparatorChar == '\\')
+        {
+            // Windows
+            return root.Length > 1 || root.Equals("\\\\\\\\", StringComparison.Ordinal);
+        }
+        else
+        {
+            // Unix
+            return root.Equals("/", StringComparison.Ordinal);
+        }
+    }
 
     public override string ToString() => $"{InclusionType}: {FilePath}";
 }

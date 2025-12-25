@@ -100,8 +100,8 @@ public class MissingXmlDocumentationRule : IAnalyzerRule
     private static bool IsGeneratedCode(SyntaxTree tree)
     {
         var fileName = Path.GetFileName(tree.FilePath);
-        if (fileName.EndsWith(".Designer.cs") ||
-            fileName.EndsWith(".g.cs") ||
+        if (fileName.EndsWith(".Designer.cs", StringComparison.OrdinalIgnoreCase) ||
+            fileName.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) ||
             fileName.Contains(".Generated."))
             return true;
 

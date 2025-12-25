@@ -245,7 +245,7 @@ public class FilteringCodeProviderTests
             tree =>
             {
                 var name = Path.GetFileName(tree.FilePath);
-                return (name.StartsWith("a") || name.StartsWith("b")) && name.EndsWith("Test.cs");
+                return (name.StartsWith('a') || name.StartsWith('b')) && name.EndsWith("Test.cs", StringComparison.Ordinal);
             });
 
         // Act

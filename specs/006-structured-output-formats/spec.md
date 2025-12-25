@@ -6,6 +6,16 @@
 **Priority**: P1  
 **Constitutional Principle**: VI (Extensibility)
 
+## Clarifications
+
+### Session 2025-12-25
+
+- Q: What are the valid category values for DiagnosticResult.Category field? → A: Use Feature 019 categories: Maintainability, Performance, Security, Reliability, Design, Documentation, Naming, Testing
+- Q: Does DiagnosticResult provide column information for SARIF region objects (startColumn/endColumn)? → A: DiagnosticResult has only line numbers - SARIF region will omit columns (acceptable per spec)
+- Q: What is the acceptable formatting latency for 10,000+ violations? → A: Under 10 seconds for 10K violations
+- Q: Should system validate against malicious path traversal attacks (e.g., `--output ../../../etc/passwd`)? → A: Allow any absolute/relative path - trust user input (standard CLI tool behavior)
+- Q: How should system handle concurrent writes to the same output file path? → A: No special handling - rely on OS filesystem behavior (last write wins)
+
 ## User Scenarios & Testing
 
 ### User Story 1 - CI/CD Pipeline Integration with JSON Output (Priority: P1)
@@ -84,6 +94,7 @@ Developers reviewing reports manually need improved markdown formatting with bet
 - What happens when output file write fails mid-stream (disk full)? → Error reported, partial file cleaned up or marked incomplete
 - How to handle very large result sets (10,000+ violations) in JSON/SARIF? → Stream output, no in-memory buffering
 - What if SARIF results include unsupported characters (e.g., null bytes in source code)? → Escape properly according to SARIF spec
+- What happens when two processes write to the same output file concurrently? → No special handling - relies on OS filesystem behavior (last write wins, user should configure unique paths)
 
 ## Requirements
 
@@ -96,8 +107,8 @@ Developers reviewing reports manually need improved markdown formatting with bet
 - **FR-005**: CLI MUST accept `--format <json|sarif|markdown>` flag with `markdown` as default
 - **FR-006**: CLI MUST accept `--output <path>` flag to write results to file instead of stdout
 - **FR-007**: JSON output MUST include: status (success/failure), total violation count, counts by severity, violations array with file/line/rule/severity/message
-- **FR-008**: SARIF output MUST include: `tool` metadata, `rules` array with all rule definitions, `results` array with violation locations
-- **FR-009**: System MUST validate output file path is writable before running analysis
+- **FR-008**: SARIF output MUST include: `tool` metadata, `rules` array with all rule definitions, `results` array with violation locations (line numbers only, columns omitted)
+- **FR-009**: System MUST validate output file path is writable before running analysis (no path traversal restrictions - trust user input like standard CLI tools)
 - **FR-010**: System MUST support `--output -` to explicitly write to stdout (useful for shell pipes)
 - **FR-011**: When `--output` is used, stdout MUST contain only progress/summary messages, not the full report
 - **FR-012**: JSON and SARIF outputs MUST escape special characters correctly (quotes, newlines, Unicode)
@@ -114,6 +125,8 @@ Developers reviewing reports manually need improved markdown formatting with bet
 
 - **DiagnosticResult**: Core data structure containing violation details
   - Properties: FilePath, LineNumber, RuleId, Severity, Message, Category
+  - Category values: Maintainability, Performance, Security, Reliability, Design, Documentation, Naming, Testing
+  - Note: Does not include column numbers (line-level precision only)
   - Used as input to all formatters
 
 - **SarifReport**: SARIF-specific structure conforming to SARIF 2.1.0 schema
@@ -134,7 +147,8 @@ Developers reviewing reports manually need improved markdown formatting with bet
 - **SC-005**: Markdown output includes summary table showing violation count by severity (Error/Warning/Info)
 - **SC-006**: File output mode (`--output file.json`) completes without writing diagnostics to stdout (clean separation)
 - **SC-007**: Formatters handle 10,000+ violations without memory exhaustion (streaming or batching required)
-- **SC-008**: All three formats represent the same diagnostic data with 100% fidelity (no information loss)
+- **SC-008**: Formatting 10,000 violations completes in under 10 seconds (measured on reference hardware)
+- **SC-009**: All three formats represent the same diagnostic data with 100% fidelity (no information loss)
 
 ## Assumptions
 
@@ -145,6 +159,7 @@ Developers reviewing reports manually need improved markdown formatting with bet
 - Users have write permissions to output file paths they specify
 - JSON schema is defined inline in code documentation (no separate .json schema file published initially)
 - Color detection uses `Console.IsOutputRedirected` and environment variable checks (`NO_COLOR`, `TERM`)
+- SARIF region objects will include line numbers only (no column information), which is acceptable per SARIF 2.1.0 specification
 
 ## Out of Scope
 

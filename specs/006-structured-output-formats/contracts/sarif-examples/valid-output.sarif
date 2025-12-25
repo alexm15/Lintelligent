@@ -1,0 +1,127 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Lintelligent",
+          "version": "1.0.0",
+          "informationUri": "https://github.com/your-org/lintelligent",
+          "rules": [
+            {
+              "id": "LNT001",
+              "shortDescription": {
+                "text": "Method exceeds maximum statement count"
+              },
+              "fullDescription": {
+                "text": "Methods should not exceed 20 statements to maintain readability and testability."
+              },
+              "helpUri": "https://lintelligent.dev/rules/LNT001",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "category": "Maintainability"
+              }
+            },
+            {
+              "id": "LNT002",
+              "shortDescription": {
+                "text": "Method has too many parameters"
+              },
+              "fullDescription": {
+                "text": "Methods should have at most 5 parameters. Consider using parameter objects."
+              },
+              "helpUri": "https://lintelligent.dev/rules/LNT002",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "category": "Design"
+              }
+            },
+            {
+              "id": "LNT005",
+              "shortDescription": {
+                "text": "Class has too many methods"
+              },
+              "fullDescription": {
+                "text": "Classes should have at most 15 methods. Large classes indicate violation of Single Responsibility Principle."
+              },
+              "helpUri": "https://lintelligent.dev/rules/LNT005",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "category": "Maintainability"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "LNT001",
+          "level": "warning",
+          "message": {
+            "text": "Method 'CreateUser' exceeds 20 statements (found: 27)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///C:/Projects/MyApp/src/Services/UserService.cs",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 42
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "LNT002",
+          "level": "warning",
+          "message": {
+            "text": "Method 'UpdateUserProfile' has 8 parameters (limit: 5)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///C:/Projects/MyApp/src/Services/UserService.cs",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 105
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "LNT005",
+          "level": "error",
+          "message": {
+            "text": "Class 'User' has 22 methods (limit: 15)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///C:/Projects/MyApp/src/Models/User.cs",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 15
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

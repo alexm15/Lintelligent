@@ -19,7 +19,7 @@ public sealed record CommandResult(int ExitCode, string Output, string Error)
     /// <summary>
     ///     Gets the exit code of the command execution.
     /// </summary>
-    public int ExitCode { get; init; } = ExitCode >= 0 && ExitCode <= 255
+    public int ExitCode { get; init; } = ExitCode is >= 0 and <= 255
         ? ExitCode
         : throw new ArgumentOutOfRangeException(nameof(ExitCode), ExitCode, "Exit code must be between 0 and 255");
 
@@ -52,9 +52,6 @@ public sealed record CommandResult(int ExitCode, string Output, string Error)
     /// <exception cref="ArgumentOutOfRangeException">Thrown if exitCode is not in range 1-255.</exception>
     public static CommandResult Failure(int exitCode, string error)
     {
-        if (exitCode < 1 || exitCode > 255)
-            throw new ArgumentOutOfRangeException(nameof(exitCode), "Exit code must be between 1 and 255");
-
-        return new CommandResult(exitCode, string.Empty, error);
+        return exitCode is < 1 or > 255 ? throw new ArgumentOutOfRangeException(nameof(exitCode), "Exit code must be between 1 and 255") : new CommandResult(exitCode, string.Empty, error);
     }
 }

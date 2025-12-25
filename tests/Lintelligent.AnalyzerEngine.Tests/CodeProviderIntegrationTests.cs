@@ -98,7 +98,7 @@ public class CodeProviderIntegrationTests
         // Filter 1: Only src/ directory
         var srcOnly = new FilteringCodeProvider(
             baseProvider,
-            tree => tree.FilePath.StartsWith("src/"));
+            tree => tree.FilePath.StartsWith("src/", StringComparison.Ordinal));
 
         // Filter 2: Only Controllers
         var controllersOnly = new FilteringCodeProvider(

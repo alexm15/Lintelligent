@@ -29,29 +29,27 @@ public class ComplexConditionalRule : IAnalyzerRule
         foreach (var conditional in allConditionals)
         {
             var depth = CalculateNestingDepth(conditional);
-            
-            if (depth > MaxNestingDepth)
-            {
-                var line = conditional.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-                var message = $"Conditional nesting depth is {depth} (max: {MaxNestingDepth}). " +
-                             "Consider extracting nested logic into separate methods or using guard clauses.";
 
-                yield return new DiagnosticResult(
-                    tree.FilePath,
-                    Id,
-                    message,
-                    line,
-                    Severity,
-                    Category
-                );
-            }
+            if (depth <= MaxNestingDepth) continue;
+            var line = conditional.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+            var message = $"Conditional nesting depth is {depth} (max: {MaxNestingDepth}). " +
+                          "Consider extracting nested logic into separate methods or using guard clauses.";
+
+            yield return new DiagnosticResult(
+                tree.FilePath,
+                Id,
+                message,
+                line,
+                Severity,
+                Category
+            );
         }
     }
 
     private static int CalculateNestingDepth(SyntaxNode node)
     {
         // Start at 1 to count the current node itself
-        int depth = 1;
+        var depth = 1;
         var current = node.Parent;
 
         while (current != null)
@@ -60,8 +58,7 @@ public class ComplexConditionalRule : IAnalyzerRule
             {
                 // Check if this is an else-if chain (not true nesting)
                 // An else-if is when an IfStatement is the only statement in an ElseClause
-                if (current is IfStatementSyntax ifStmt && 
-                    ifStmt.Parent is ElseClauseSyntax elseClause &&
+                if (current is IfStatementSyntax {Parent: ElseClauseSyntax elseClause} ifStmt &&
                     elseClause.Statement == ifStmt)
                 {
                     // This is an else-if, skip counting it as nesting
@@ -81,9 +78,9 @@ public class ComplexConditionalRule : IAnalyzerRule
 
     private static bool IsGeneratedCode(SyntaxTree tree)
     {
-        string fileName = Path.GetFileName(tree.FilePath);
-        if (fileName.EndsWith(".Designer.cs") || 
-            fileName.EndsWith(".g.cs") || 
+        var fileName = Path.GetFileName(tree.FilePath);
+        if (fileName.EndsWith(".Designer.cs", StringComparison.OrdinalIgnoreCase) ||
+            fileName.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) ||
             fileName.Contains(".Generated."))
             return true;
 

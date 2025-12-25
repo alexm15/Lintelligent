@@ -468,7 +468,32 @@ This roadmap outlines the planned feature development for Lintelligent, a produc
 
 ---
 
-### Feature 020: Performance & Scalability
+### Feature 020: Code Duplication Detection
+**Priority**: P3  
+**Constitutional Principle**: III, VI, VII
+
+**Objective**: Detect duplicate or highly similar code blocks across multiple files in a solution.
+
+**User Value**: Identify redundant code for refactoring opportunities, reduce maintenance burden, improve code reusability.
+
+**Deliverables**:
+- ⏳ `IWorkspaceAnalyzer` abstraction for multi-file analysis
+- ⏳ Workspace analyzer engine integration with existing `AnalyzerEngine`
+- ⏳ Token-based exact duplication detection (Rabin-Karp rolling hash)
+- ⏳ AST-based structural similarity detection (normalized syntax tree comparison)
+- ⏳ Configurable thresholds (minimum lines, minimum tokens)
+- ⏳ CLI flags: `--min-duplication-lines <n>`, `--min-duplication-tokens <n>`
+- ⏳ Duplication reports with file locations and similarity percentages
+- ⏳ Support for solution-wide analysis using Feature 009 infrastructure
+
+**Dependencies**:
+- ✅ Feature 009: Solution & Project File Support (provides multi-file access)
+
+**Spec Location**: `specs/020-code-duplication-detection/`
+
+---
+
+### Feature 021: Performance & Scalability
 **Priority**: P3  
 **Constitutional Principle**: VII
 
@@ -483,7 +508,7 @@ This roadmap outlines the planned feature development for Lintelligent, a produc
 - Benchmark suite (track performance regressions)
 - Target: <30s for 100k LOC on standard hardware
 
-**Spec Location**: `specs/020-performance-scalability/`
+**Spec Location**: `specs/021-performance-scalability/`
 
 ---
 

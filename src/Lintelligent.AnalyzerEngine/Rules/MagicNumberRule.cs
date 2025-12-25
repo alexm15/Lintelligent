@@ -10,7 +10,7 @@ public class MagicNumberRule : IAnalyzerRule
     public Severity Severity => Severity.Info;
     public string Category => DiagnosticCategories.CodeSmell;
 
-    private static readonly HashSet<string> ExcludedValues = new() { "0", "1", "-1" };
+    private static readonly HashSet<string> ExcludedValues = ["0", "1", "-1"];
 
     public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
     {
@@ -55,21 +55,19 @@ public class MagicNumberRule : IAnalyzerRule
 
         while (current != null)
         {
-            // Check if we're in a const field declaration
-            if (current is FieldDeclarationSyntax fieldDecl &&
-                fieldDecl.Modifiers.Any(SyntaxKind.ConstKeyword))
+            switch (current)
             {
-                return true;
+                // Check if we're in a const field declaration
+                case FieldDeclarationSyntax fieldDecl when
+                    fieldDecl.Modifiers.Any(SyntaxKind.ConstKeyword):
+                // Check if we're in a const local declaration
+                case LocalDeclarationStatementSyntax localDecl when
+                    localDecl.Modifiers.Any(SyntaxKind.ConstKeyword):
+                    return true;
+                default:
+                    current = current.Parent;
+                    break;
             }
-
-            // Check if we're in a const local declaration
-            if (current is LocalDeclarationStatementSyntax localDecl &&
-                localDecl.Modifiers.Any(SyntaxKind.ConstKeyword))
-            {
-                return true;
-            }
-
-            current = current.Parent;
         }
 
         return false;
@@ -77,9 +75,9 @@ public class MagicNumberRule : IAnalyzerRule
 
     private static bool IsGeneratedCode(SyntaxTree tree)
     {
-        string fileName = Path.GetFileName(tree.FilePath);
-        if (fileName.EndsWith(".Designer.cs") || 
-            fileName.EndsWith(".g.cs") || 
+        var fileName = Path.GetFileName(tree.FilePath);
+        if (fileName.EndsWith(".Designer.cs", StringComparison.OrdinalIgnoreCase) ||
+            fileName.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) ||
             fileName.Contains(".Generated."))
             return true;
 

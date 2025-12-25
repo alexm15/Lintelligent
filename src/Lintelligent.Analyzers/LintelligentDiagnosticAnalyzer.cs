@@ -25,7 +25,7 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
 {
     private static readonly IAnalyzerRule[] Rules = DiscoverRules();
     private static readonly DiagnosticDescriptor[] Descriptors = CreateDescriptors(Rules);
-    private static readonly Dictionary<string, DiagnosticDescriptor> DescriptorMap = Descriptors.ToDictionary(d => d.Id);
+    private static readonly Dictionary<string, DiagnosticDescriptor> DescriptorMap = Descriptors.ToDictionary(d => d.Id, StringComparer.Ordinal);
     
     // Internal error descriptor for LNT999
     private static readonly DiagnosticDescriptor InternalErrorDescriptor = new(
@@ -56,7 +56,7 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
     /// <summary>
     /// Analyzes a syntax tree by executing all rules.
     /// </summary>
-    private void AnalyzeSyntaxTree(SyntaxTreeAnalysisContext context)
+    private static void AnalyzeSyntaxTree(SyntaxTreeAnalysisContext context)
     {
         var configOptions = context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Tree);
 
@@ -65,12 +65,10 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
             try
             {
                 // Check EditorConfig for severity override
-                if (configOptions.TryGetValue($"dotnet_diagnostic.{rule.Id}.severity", out var severity))
+                if (configOptions.TryGetValue($"dotnet_diagnostic.{rule.Id}.severity", out var severity) && 
+                    SeverityMapper.IsSuppressed(severity))
                 {
-                    if (SeverityMapper.IsSuppressed(severity))
-                    {
-                        continue;  // Suppressed via EditorConfig
-                    }
+                    continue;  // Suppressed via EditorConfig
                 }
 
                 // Execute rule analysis

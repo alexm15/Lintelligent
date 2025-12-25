@@ -111,10 +111,14 @@ public class BuildalyzerProjectProviderTests
         var solutionProvider = new BuildalyzerSolutionProvider(NullLogger<BuildalyzerSolutionProvider>.Instance);
         var solution = await solutionProvider.ParseSolutionAsync(_testSolutionPath);
         
-        // Corrupt one project path to cause evaluation failure
+        // Corrupt one project path to cause evaluation failure (use cross-platform path)
+        var nonExistentPath = Path.DirectorySeparatorChar == '\\'
+            ? "C:\\NonExistent\\Project.csproj"
+            : "/nonexistent/Project.csproj";
+        
         var corruptedProjects = solution.Projects.Take(1).Select(p =>
             new Lintelligent.AnalyzerEngine.ProjectModel.Project(
-                filePath: "C:\\NonExistent\\Project.csproj",
+                filePath: nonExistentPath,
                 name: "CorruptedProject",
                 targetFramework: p.TargetFramework,
                 allTargetFrameworks: p.AllTargetFrameworks,

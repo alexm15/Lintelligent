@@ -51,14 +51,17 @@ public class FilteringCodeProvider : ICodeProvider
     /// <summary>
     ///     Yields syntax trees from the inner provider that match the filter predicate.
     /// </summary>
+    /// <param name="conditionalSymbols">
+    ///     Optional list of preprocessor symbols to pass through to the inner provider.
+    /// </param>
     /// <returns>
     ///     Lazy sequence of syntax trees where predicate returns true.
     ///     Evaluation is lazy - inner provider is only queried when this
     ///     sequence is enumerated.
     /// </returns>
-    public IEnumerable<SyntaxTree> GetSyntaxTrees()
+    public IEnumerable<SyntaxTree> GetSyntaxTrees(IReadOnlyList<string>? conditionalSymbols = null)
     {
-        foreach (var tree in _innerProvider.GetSyntaxTrees())
+        foreach (var tree in _innerProvider.GetSyntaxTrees(conditionalSymbols))
             if (_predicate(tree))
                 yield return tree;
     }

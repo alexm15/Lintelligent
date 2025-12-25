@@ -9,6 +9,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Include="Fixtures\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="..\..\src\Lintelligent.AnalyzerEngine\Lintelligent.AnalyzerEngine.csproj" />
         <ProjectReference Include="..\..\src\Lintelligent.Cli\Lintelligent.Cli.csproj" />
         <ProjectReference Include="..\..\src\Lintelligent.Reporting\Lintelligent.Reporting.csproj" />

@@ -28,15 +28,15 @@ This document breaks down Feature 009 into atomic, executable tasks organized by
 
 ### Tasks
 
-- [ ] T001 Add Buildalyzer NuGet package to Lintelligent.AnalyzerEngine.csproj (version 7.1.2 or latest stable)
-- [ ] T002 Add Microsoft.Build.Construction reference to Lintelligent.AnalyzerEngine.csproj (if not already transitive)
-- [ ] T003 Create directory src/Lintelligent.AnalyzerEngine/Abstractions/ (if not exists)
-- [ ] T004 Create directory src/Lintelligent.AnalyzerEngine/ProjectModel/
-- [ ] T005 Create directory src/Lintelligent.Cli/Providers/
-- [ ] T006 Create directory tests/Lintelligent.AnalyzerEngine.Tests/ProjectModel/
-- [ ] T007 Create directory tests/Lintelligent.AnalyzerEngine.Tests/Fixtures/
-- [ ] T008 Create directory tests/Lintelligent.Cli.Tests/Providers/
-- [ ] T009 Verify solution builds successfully with new dependencies (dotnet build)
+- [X] T001 Add Buildalyzer NuGet package to Lintelligent.AnalyzerEngine.csproj (version 7.1.2 or latest stable)
+- [X] T002 Add Microsoft.Build.Construction reference to Lintelligent.AnalyzerEngine.csproj (if not already transitive)
+- [X] T003 Create directory src/Lintelligent.AnalyzerEngine/Abstractions/ (if not exists)
+- [X] T004 Create directory src/Lintelligent.AnalyzerEngine/ProjectModel/
+- [X] T005 Create directory src/Lintelligent.Cli/Providers/
+- [X] T006 Create directory tests/Lintelligent.AnalyzerEngine.Tests/ProjectModel/
+- [X] T007 Create directory tests/Lintelligent.AnalyzerEngine.Tests/Fixtures/
+- [X] T008 Create directory tests/Lintelligent.Cli.Tests/Providers/
+- [X] T009 Verify solution builds successfully with new dependencies (dotnet build)
 
 **Independent Test**: Run `dotnet build` and verify 0 errors, Buildalyzer package appears in project references
 
@@ -49,25 +49,25 @@ This document breaks down Feature 009 into atomic, executable tasks organized by
 
 ### Domain Models (Block all user stories)
 
-- [ ] T010 [P] Create TargetFramework.cs in src/Lintelligent.AnalyzerEngine/ProjectModel/ (Moniker, FrameworkFamily, Version properties, IEquatable implementation)
-- [ ] T011 [P] Create CompileItemInclusionType.cs enum in src/Lintelligent.AnalyzerEngine/ProjectModel/ (DefaultGlob, ExplicitInclude, LinkedFile)
-- [ ] T012 [P] Create CompileItem.cs in src/Lintelligent.AnalyzerEngine/ProjectModel/ (FilePath, InclusionType, OriginalIncludePath properties)
-- [ ] T013 [P] Create ProjectReference.cs in src/Lintelligent.AnalyzerEngine/ProjectModel/ (ReferencedProjectPath, ReferencedProjectName properties)
-- [ ] T014 Create Project.cs in src/Lintelligent.AnalyzerEngine/ProjectModel/ (all properties per data-model.md, constructor validation)
-- [ ] T015 Create Solution.cs in src/Lintelligent.AnalyzerEngine/ProjectModel/ (FilePath, Name, Projects, Configurations, GetDependencyGraph method)
+- [X] T010 [P] Create TargetFramework.cs in src/Lintelligent.AnalyzerEngine/ProjectModel/ (Moniker, FrameworkFamily, Version properties, IEquatable implementation)
+- [X] T011 [P] Create CompileItemInclusionType.cs enum in src/Lintelligent.AnalyzerEngine/ProjectModel/ (DefaultGlob, ExplicitInclude, LinkedFile)
+- [X] T012 [P] Create CompileItem.cs in src/Lintelligent.AnalyzerEngine/ProjectModel/ (FilePath, InclusionType, OriginalIncludePath properties)
+- [X] T013 [P] Create ProjectReference.cs in src/Lintelligent.AnalyzerEngine/ProjectModel/ (ReferencedProjectPath, ReferencedProjectName properties)
+- [X] T014 Create Project.cs in src/Lintelligent.AnalyzerEngine/ProjectModel/ (all properties per data-model.md, constructor validation)
+- [X] T015 Create Solution.cs in src/Lintelligent.AnalyzerEngine/ProjectModel/ (FilePath, Name, Projects, Configurations, GetDependencyGraph method)
 
 ### Core Abstractions (Block all user stories)
 
-- [ ] T016 [P] Create ISolutionProvider.cs in src/Lintelligent.AnalyzerEngine/Abstractions/ (ParseSolutionAsync method signature per contracts/ISolutionProvider.md)
-- [ ] T017 [P] Create IProjectProvider.cs in src/Lintelligent.AnalyzerEngine/Abstractions/ (EvaluateProjectAsync and EvaluateAllProjectsAsync per contracts/IProjectProvider.md)
+- [X] T016 [P] Create ISolutionProvider.cs in src/Lintelligent.AnalyzerEngine/Abstractions/ (ParseSolutionAsync method signature per contracts/ISolutionProvider.md)
+- [X] T017 [P] Create IProjectProvider.cs in src/Lintelligent.AnalyzerEngine/Abstractions/ (EvaluateProjectAsync and EvaluateAllProjectsAsync per contracts/IProjectProvider.md)
 
 ### Unit Tests for Domain Models
 
-- [ ] T018 [P] Create TargetFrameworkTests.cs in tests/Lintelligent.AnalyzerEngine.Tests/ProjectModel/ (test Moniker parsing, FrameworkFamily detection, IsModernDotNet/IsNetFramework/IsNetStandard properties)
-- [ ] T019 [P] Create CompileItemTests.cs in tests/Lintelligent.AnalyzerEngine.Tests/ProjectModel/ (test constructor validation, InclusionType scenarios)
-- [ ] T020 [P] Create ProjectReferenceTests.cs in tests/Lintelligent.AnalyzerEngine.Tests/ProjectModel/ (test constructor validation, path normalization)
-- [ ] T021 [P] Create ProjectTests.cs in tests/Lintelligent.AnalyzerEngine.Tests/ProjectModel/ (test constructor validation, IsMultiTargeted property, all properties correctly assigned)
-- [ ] T022 [P] Create SolutionTests.cs in tests/Lintelligent.AnalyzerEngine.Tests/ProjectModel/ (test GetDependencyGraph method, constructor validation)
+- [X] T018 [P] Create TargetFrameworkTests.cs in tests/Lintelligent.AnalyzerEngine.Tests/ProjectModel/ (test Moniker parsing, FrameworkFamily detection, IsModernDotNet/IsNetFramework/IsNetStandard properties)
+- [X] T019 [P] Create CompileItemTests.cs in tests/Lintelligent.AnalyzerEngine.Tests/ProjectModel/ (test constructor validation, InclusionType scenarios)
+- [X] T020 [P] Create ProjectReferenceTests.cs in tests/Lintelligent.AnalyzerEngine.Tests/ProjectModel/ (test constructor validation, path normalization)
+- [X] T021 [P] Create ProjectTests.cs in tests/Lintelligent.AnalyzerEngine.Tests/ProjectModel/ (test constructor validation, IsMultiTargeted property, all properties correctly assigned)
+- [X] T022 [P] Create SolutionTests.cs in tests/Lintelligent.AnalyzerEngine.Tests/ProjectModel/ (test GetDependencyGraph method, constructor validation)
 
 **Independent Test**: Run `dotnet test` on Lintelligent.AnalyzerEngine.Tests and verify all domain model tests pass
 
@@ -84,40 +84,40 @@ This document breaks down Feature 009 into atomic, executable tasks organized by
 
 ### Test Fixtures (US1)
 
-- [ ] T023 [US1] Create test solution file tests/Lintelligent.Cli.Tests/Fixtures/TestSolution.sln with 3 projects (ProjectA, ProjectB, ProjectC)
-- [ ] T024 [US1] Create tests/Lintelligent.Cli.Tests/Fixtures/ProjectA/ProjectA.csproj (simple C# library targeting net8.0, 2-3 source files)
-- [ ] T025 [US1] Create tests/Lintelligent.Cli.Tests/Fixtures/ProjectB/ProjectB.csproj (simple C# library targeting net8.0, 2-3 source files)
-- [ ] T026 [US1] Create tests/Lintelligent.Cli.Tests/Fixtures/ProjectC/ProjectC.csproj (simple C# library targeting net8.0, 2-3 source files)
-- [ ] T027 [US1] Add simple .cs source files to each test project (at least one file with intentional LNT001 violation for testing)
+- [X] T023 [US1] Create test solution file tests/Lintelligent.Cli.Tests/Fixtures/TestSolution.sln with 3 projects (ProjectA, ProjectB, ProjectC)
+- [X] T024 [US1] Create tests/Lintelligent.Cli.Tests/Fixtures/ProjectA/ProjectA.csproj (simple C# library targeting net8.0, 2-3 source files)
+- [X] T025 [US1] Create tests/Lintelligent.Cli.Tests/Fixtures/ProjectB/ProjectB.csproj (simple C# library targeting net8.0, 2-3 source files)
+- [X] T026 [US1] Create tests/Lintelligent.Cli.Tests/Fixtures/ProjectC/ProjectC.csproj (simple C# library targeting net8.0, 2-3 source files)
+- [X] T027 [US1] Add simple .cs source files to each test project (at least one file with intentional LNT001 violation for testing)
 
 ### ISolutionProvider Implementation (US1)
 
-- [ ] T028 [US1] Create BuildalyzerSolutionProvider.cs in src/Lintelligent.Cli/Providers/ (implement ISolutionProvider using Microsoft.Build.Construction.SolutionFile.Parse)
-- [ ] T029 [US1] Implement ParseSolutionAsync method in BuildalyzerSolutionProvider (extract project paths, configurations, create Solution entity)
-- [ ] T030 [US1] Add error handling for missing .sln files (FileNotFoundException with clear message)
-- [ ] T031 [US1] Add error handling for malformed .sln files (InvalidOperationException with line number if available)
-- [ ] T032 [US1] Add logging for solution discovery (ILogger, log solution name, project count, configurations)
+- [X] T028 [US1] Create BuildalyzerSolutionProvider.cs in src/Lintelligent.Cli/Providers/ (implement ISolutionProvider using Microsoft.Build.Construction.SolutionFile.Parse)
+- [X] T029 [US1] Implement ParseSolutionAsync method in BuildalyzerSolutionProvider (extract project paths, configurations, create Solution entity)
+- [X] T030 [US1] Add error handling for missing .sln files (FileNotFoundException with clear message)
+- [X] T031 [US1] Add error handling for malformed .sln files (InvalidOperationException with line number if available)
+- [X] T032 [US1] Add logging for solution discovery (ILogger, log solution name, project count, configurations)
 
 ### ISolutionProvider Tests (US1)
 
-- [ ] T033 [P] [US1] Create BuildalyzerSolutionProviderTests.cs in tests/Lintelligent.Cli.Tests/Providers/
-- [ ] T034 [US1] Write test: ParseSolutionAsync_ValidSolution_ReturnsAllProjects (use TestSolution.sln, verify 3 projects)
-- [ ] T035 [US1] Write test: ParseSolutionAsync_MissingSolution_ThrowsFileNotFoundException
-- [ ] T036 [US1] Write test: ParseSolutionAsync_MalformedSolution_ThrowsInvalidOperationException
-- [ ] T037 [US1] Write test: ParseSolutionAsync_NestedFolders_DiscoverAllProjects (if test fixture supports)
+- [X] T033 [P] [US1] Create BuildalyzerSolutionProviderTests.cs in tests/Lintelligent.Cli.Tests/Providers/
+- [X] T034 [US1] Write test: ParseSolutionAsync_ValidSolution_ReturnsAllProjects (use TestSolution.sln, verify 3 projects)
+- [X] T035 [US1] Write test: ParseSolutionAsync_MissingSolution_ThrowsFileNotFoundException
+- [X] T036 [US1] Write test: ParseSolutionAsync_MalformedSolution_ThrowsInvalidOperationException
+- [X] T037 [US1] Write test: ParseSolutionAsync_NestedFolders_DiscoverAllProjects (if test fixture supports)
 
 ### CLI Integration (US1)
 
-- [ ] T038 [US1] Update ScanCommand.cs in src/Lintelligent.Cli/Commands/ to accept .sln file paths (detect .sln extension)
-- [ ] T039 [US1] Add ISolutionProvider and IProjectProvider injection to ScanCommand constructor
-- [ ] T040 [US1] Implement solution path handling in ScanCommand.Execute: if .sln, call ParseSolutionAsync, then EvaluateAllProjectsAsync
-- [ ] T041 [US1] Update Bootstrapper.cs in src/Lintelligent.Cli/ to register BuildalyzerSolutionProvider as ISolutionProvider (singleton or transient)
+- [X] T038 [US1] Update ScanCommand.cs in src/Lintelligent.Cli/Commands/ to accept .sln file paths (detect .sln extension)
+- [X] T039 [US1] Add ISolutionProvider and IProjectProvider injection to ScanCommand constructor
+- [X] T040 [US1] Implement solution path handling in ScanCommand.Execute: if .sln, call ParseSolutionAsync, then EvaluateAllProjectsAsync
+- [X] T041 [US1] Update Bootstrapper.cs in src/Lintelligent.Cli/ to register BuildalyzerSolutionProvider as ISolutionProvider (singleton or transient)
 
 ### CLI Tests (US1)
 
-- [ ] T042 [US1] Create ScanCommandSolutionTests.cs in tests/Lintelligent.Cli.Tests/Commands/
-- [ ] T043 [US1] Write test: ScanCommand_SolutionPath_AnalyzesAllProjects (verify 3 projects analyzed, diagnostics aggregated)
-- [ ] T044 [US1] Write test: ScanCommand_SolutionPath_MissingProject_ContinuesWithOthers (verify graceful degradation)
+- [X] T042 [US1] Create ScanCommandSolutionTests.cs in tests/Lintelligent.Cli.Tests/Commands/
+- [X] T043 [US1] Write test: ScanCommand_SolutionPath_AnalyzesAllProjects (verify 3 projects analyzed, diagnostics aggregated)
+- [X] T044 [US1] Write test: ScanCommand_SolutionPath_MissingProject_ContinuesWithOthers (verify graceful degradation)
 
 **Independent Test for US1**: Run `lintelligent scan tests/Lintelligent.Cli.Tests/Fixtures/TestSolution.sln` and verify output shows 3 projects analyzed with aggregated diagnostics
 
@@ -134,46 +134,46 @@ This document breaks down Feature 009 into atomic, executable tasks organized by
 
 ### Test Fixtures (US2)
 
-- [ ] T045 [US2] Create tests/Lintelligent.Cli.Tests/Fixtures/ConditionalProject/ConditionalProject.csproj (target net8.0, Debug config with DEBUG;TRACE symbols, Release config with RELEASE symbol)
-- [ ] T046 [US2] Create tests/Lintelligent.Cli.Tests/Fixtures/ConditionalProject/ConditionalCode.cs (contains `#if DEBUG` block with code, `#if RELEASE` block with different code)
+- [X] T045 [US2] Create tests/Lintelligent.Cli.Tests/Fixtures/ConditionalProject/ConditionalProject.csproj (target net8.0, Debug config with DEBUG;TRACE symbols, Release config with RELEASE symbol)
+- [X] T046 [US2] Create tests/Lintelligent.Cli.Tests/Fixtures/ConditionalProject/ConditionalCode.cs (contains `#if DEBUG` block with code, `#if RELEASE` block with different code)
 
 ### IProjectProvider Implementation (US2)
 
-- [ ] T047 [US2] Create BuildalyzerProjectProvider.cs in src/Lintelligent.Cli/Providers/ (implement IProjectProvider using Buildalyzer)
-- [ ] T048 [US2] Implement EvaluateProjectAsync method: use Buildalyzer AnalyzerManager to load project, call Build(configuration)
-- [ ] T049 [US2] Extract ConditionalSymbols from AnalyzerResult.PreprocessorSymbols in BuildalyzerProjectProvider
-- [ ] T050 [US2] Extract TargetFramework(s) from AnalyzerResult in BuildalyzerProjectProvider (create TargetFramework entities)
-- [ ] T051 [US2] Extract Configuration and Platform from AnalyzerResult in BuildalyzerProjectProvider
-- [ ] T052 [US2] Create Project entity in BuildalyzerProjectProvider with extracted metadata
-- [ ] T053 [US2] Implement EvaluateAllProjectsAsync method: parallel evaluation of all projects with try-catch per project
-- [ ] T054 [US2] Add error handling: log failed projects, continue with successful ones, create Solution with partial results
-- [ ] T055 [US2] Add logging for project evaluation (project name, target framework, symbol count, source file count)
-- [ ] T056 [US2] Update Bootstrapper.cs to register BuildalyzerProjectProvider as IProjectProvider
+- [X] T047 [US2] Create BuildalyzerProjectProvider.cs in src/Lintelligent.Cli/Providers/ (implement IProjectProvider using Buildalyzer)
+- [X] T048 [US2] Implement EvaluateProjectAsync method: use Buildalyzer AnalyzerManager to load project, call Build(configuration)
+- [X] T049 [US2] Extract ConditionalSymbols from AnalyzerResult.PreprocessorSymbols in BuildalyzerProjectProvider
+- [X] T050 [US2] Extract TargetFramework(s) from AnalyzerResult in BuildalyzerProjectProvider (create TargetFramework entities)
+- [X] T051 [US2] Extract Configuration and Platform from AnalyzerResult in BuildalyzerProjectProvider
+- [X] T052 [US2] Create Project entity in BuildalyzerProjectProvider with extracted metadata
+- [X] T053 [US2] Implement EvaluateAllProjectsAsync method: parallel evaluation of all projects with try-catch per project
+- [X] T054 [US2] Add error handling: log failed projects, continue with successful ones, create Solution with partial results
+- [X] T055 [US2] Add logging for project evaluation (project name, target framework, symbol count, source file count)
+- [X] T056 [US2] Update Bootstrapper.cs to register BuildalyzerProjectProvider as IProjectProvider
 
 ### ICodeProvider Integration (US2)
 
-- [ ] T057 [US2] Update ICodeProvider implementation (likely FileSystemCodeProvider) to accept ConditionalSymbols parameter
-- [ ] T058 [US2] Pass ConditionalSymbols to CSharpParseOptions.WithPreprocessorSymbols() when creating SyntaxTree in ICodeProvider
-- [ ] T059 [US2] Update AnalyzerEngine.cs to receive Project entities and pass ConditionalSymbols to ICodeProvider
+- [X] T057 [US2] Update ICodeProvider implementation (likely FileSystemCodeProvider) to accept ConditionalSymbols parameter
+- [X] T058 [US2] Pass ConditionalSymbols to CSharpParseOptions.WithPreprocessorSymbols() when creating SyntaxTree in ICodeProvider
+- [X] T059 [US2] Update AnalyzerEngine.cs to receive Project entities and pass ConditionalSymbols to ICodeProvider
 
 ### IProjectProvider Tests (US2)
 
-- [ ] T060 [P] [US2] Create BuildalyzerProjectProviderTests.cs in tests/Lintelligent.Cli.Tests/Providers/
-- [ ] T061 [US2] Write test: EvaluateProjectAsync_DebugConfig_ExtractsDebugSymbols (verify DEBUG and TRACE in ConditionalSymbols)
-- [ ] T062 [US2] Write test: EvaluateProjectAsync_ReleaseConfig_ExtractsReleaseSymbols (verify RELEASE in ConditionalSymbols, DEBUG not present)
-- [ ] T063 [US2] Write test: EvaluateProjectAsync_InvalidProject_ThrowsInvalidOperationException
-- [ ] T064 [US2] Write test: EvaluateAllProjectsAsync_OneProjectFails_ReturnsPartialResults (verify graceful degradation)
+- [X] T060 [P] [US2] Create BuildalyzerProjectProviderTests.cs in tests/Lintelligent.Cli.Tests/Providers/
+- [X] T061 [US2] Write test: EvaluateProjectAsync_DebugConfig_ExtractsDebugSymbols (verify DEBUG and TRACE in ConditionalSymbols)
+- [X] T062 [US2] Write test: EvaluateProjectAsync_ReleaseConfig_ExtractsReleaseSymbols (verify RELEASE in ConditionalSymbols, DEBUG not present)
+- [X] T063 [US2] Write test: EvaluateProjectAsync_InvalidProject_ThrowsInvalidOperationException
+- [X] T064 [US2] Write test: EvaluateAllProjectsAsync_OneProjectFails_ReturnsPartialResults (verify graceful degradation)
 
 ### Integration Tests (US2)
 
-- [ ] T065 [US2] Write test in ScanCommandSolutionTests.cs: ScanCommand_DebugConfig_AnalyzesDebugCode (verify `#if DEBUG` block analyzed)
-- [ ] T066 [US2] Write test in ScanCommandSolutionTests.cs: ScanCommand_ReleaseConfig_SkipsDebugCode (verify `#if DEBUG` block NOT analyzed)
+- [X] T065 [US2] Write test in ScanCommandSolutionTests.cs: ScanCommand_DebugConfig_AnalyzesDebugCode (verify `#if DEBUG` block analyzed)
+- [X] T066 [US2] Write test in ScanCommandSolutionTests.cs: ScanCommand_ReleaseConfig_SkipsDebugCode (verify `#if DEBUG` block NOT analyzed)
 
 ### CLI Flags (US2)
 
-- [ ] T067 [US2] Add --configuration flag to ScanCommand.cs (default "Debug", accept any string)
-- [ ] T068 [US2] Pass configuration parameter from CLI flag to EvaluateProjectAsync and EvaluateAllProjectsAsync calls
-- [ ] T069 [US2] Add help text for --configuration flag (describe purpose, default value, example usage)
+- [X] T067 [US2] Add --configuration flag to ScanCommand.cs (default "Debug", accept any string)
+- [X] T068 [US2] Pass configuration parameter from CLI flag to EvaluateProjectAsync and EvaluateAllProjectsAsync calls
+- [X] T069 [US2] Add help text for --configuration flag (describe purpose, default value, example usage)
 
 **Independent Test for US2**: Run `lintelligent scan ConditionalProject.csproj --configuration Debug` and verify DEBUG code analyzed, then run with `--configuration Release` and verify DEBUG code skipped
 
@@ -190,22 +190,22 @@ This document breaks down Feature 009 into atomic, executable tasks organized by
 
 ### Test Fixtures (US3)
 
-- [ ] T070 [US3] Create tests/Lintelligent.Cli.Tests/Fixtures/CompileDirectivesProject/CompileDirectivesProject.csproj (SDK-style, `<Compile Remove="Generated/**/*.cs" />`, `<Compile Include="..\Shared\SharedCode.cs" Link="Shared\SharedCode.cs" />`)
-- [ ] T071 [US3] Create tests/Lintelligent.Cli.Tests/Fixtures/CompileDirectivesProject/Generated/GeneratedFile.cs (should be excluded)
-- [ ] T072 [US3] Create tests/Lintelligent.Cli.Tests/Fixtures/Shared/SharedCode.cs (should be included as linked file)
-- [ ] T073 [US3] Create tests/Lintelligent.Cli.Tests/Fixtures/CompileDirectivesProject/IncludedFile.cs (normal file, should be included)
+- [X] T070 [US3] Create tests/Lintelligent.Cli.Tests/Fixtures/CompileDirectivesProject/CompileDirectivesProject.csproj (SDK-style, `<Compile Remove="Generated/**/*.cs" />`, `<Compile Include="..\Shared\SharedCode.cs" Link="Shared\SharedCode.cs" />`)
+- [X] T071 [US3] Create tests/Lintelligent.Cli.Tests/Fixtures/CompileDirectivesProject/Generated/GeneratedFile.cs (should be excluded)
+- [X] T072 [US3] Create tests/Lintelligent.Cli.Tests/Fixtures/Shared/SharedCode.cs (should be included as linked file)
+- [X] T073 [US3] Create tests/Lintelligent.Cli.Tests/Fixtures/CompileDirectivesProject/IncludedFile.cs (normal file, should be included)
 
 ### IProjectProvider Enhancement (US3)
 
-- [ ] T074 [US3] Extract SourceFiles from AnalyzerResult.SourceFiles in BuildalyzerProjectProvider (Buildalyzer has already evaluated globs)
-- [ ] T075 [US3] Create CompileItem entities in BuildalyzerProjectProvider for each source file (determine InclusionType: DefaultGlob if in project dir, LinkedFile if outside, ExplicitInclude if in Compile items)
-- [ ] T076 [US3] Store CompileItems in Project entity CompileItems property
+- [X] T074 [US3] Extract SourceFiles from AnalyzerResult.SourceFiles in BuildalyzerProjectProvider (Buildalyzer has already evaluated globs)
+- [X] T075 [US3] Create CompileItem entities in BuildalyzerProjectProvider for each source file (determine InclusionType: DefaultGlob if in project dir, LinkedFile if outside, ExplicitInclude if in Compile items)
+- [X] T076 [US3] Store CompileItems in Project entity CompileItems property
 
 ### Tests (US3)
 
-- [ ] T077 [US3] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_CompileRemove_ExcludesFiles (verify Generated/**/*.cs excluded)
-- [ ] T078 [US3] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_CompileInclude_IncludesLinkedFiles (verify ..\Shared\SharedCode.cs included)
-- [ ] T079 [US3] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_SDKGlobs_IncludesAllCsFiles (verify default **/*.cs pattern works)
+- [X] T077 [US3] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_CompileRemove_ExcludesFiles (verify Generated/**/*.cs excluded)
+- [X] T078 [US3] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_CompileInclude_IncludesLinkedFiles (verify ..\Shared\SharedCode.cs included)
+- [X] T079 [US3] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_SDKGlobs_IncludesAllCsFiles (verify default **/*.cs pattern works)
 
 **Independent Test for US3**: Run `lintelligent scan CompileDirectivesProject.csproj` and verify Generated/GeneratedFile.cs is NOT in analyzed files, Shared/SharedCode.cs IS analyzed
 
@@ -222,14 +222,14 @@ This document breaks down Feature 009 into atomic, executable tasks organized by
 
 ### Test Fixtures (US4)
 
-- [ ] T080 [US4] Update tests/Lintelligent.Cli.Tests/Fixtures/ProjectA/ProjectA.csproj to add `<ProjectReference Include="..\ProjectB\ProjectB.csproj" />` (ProjectA → ProjectB dependency)
+- [X] T080 [US4] Update tests/Lintelligent.Cli.Tests/Fixtures/ProjectA/ProjectA.csproj to add `<ProjectReference Include="..\ProjectB\ProjectB.csproj" />` (ProjectA → ProjectB dependency)
 
 ### IProjectProvider Enhancement (US4)
 
-- [ ] T081 [US4] Extract ProjectReferences from AnalyzerResult.ProjectReferences in BuildalyzerProjectProvider
-- [ ] T082 [US4] Create ProjectReference entities in BuildalyzerProjectProvider for each referenced project
-- [ ] T083 [US4] Store ProjectReferences in Project entity ProjectReferences property
-- [ ] T084 [US4] Implement Solution.GetDependencyGraph() method (iterate Projects, build dictionary mapping project path to referenced project paths)
+- [X] T081 [US4] Extract ProjectReferences from AnalyzerResult.ProjectReferences in BuildalyzerProjectProvider
+- [X] T082 [US4] Create ProjectReference entities in BuildalyzerProjectProvider for each referenced project
+- [X] T083 [US4] Store ProjectReferences in Project entity ProjectReferences property
+- [X] T084 [US4] Implement Solution.GetDependencyGraph() method (iterate Projects, build dictionary mapping project path to referenced project paths)
 
 ### Reporting Integration (US4)
 
@@ -240,8 +240,8 @@ This document breaks down Feature 009 into atomic, executable tasks organized by
 
 ### Tests (US4)
 
-- [ ] T089 [US4] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_ProjectReferences_CapturesReferences (verify ProjectReference entities created)
-- [ ] T090 [US4] Write test in SolutionTests.cs: GetDependencyGraph_WithReferences_ReturnsDependencyMap (verify ProjectA → [ProjectB] mapping)
+- [X] T089 [US4] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_ProjectReferences_CapturesReferences (verify ProjectReference entities created)
+- [X] T090 [US4] Write test in SolutionTests.cs: GetDependencyGraph_WithReferences_ReturnsDependencyMap (verify ProjectA → [ProjectB] mapping)
 - [ ] T091 [US4] Write test in ScanCommandSolutionTests.cs: ScanCommand_MultiProject_ShowsPerProjectBreakdown (verify output distinguishes ProjectA vs ProjectB diagnostics)
 
 **Independent Test for US4**: Run `lintelligent scan TestSolution.sln --format json` and verify JSON output has per-project sections with correct diagnostic counts
@@ -259,27 +259,27 @@ This document breaks down Feature 009 into atomic, executable tasks organized by
 
 ### Test Fixtures (US5)
 
-- [ ] T092 [US5] Create tests/Lintelligent.Cli.Tests/Fixtures/MultiTargetProject/MultiTargetProject.csproj (`<TargetFrameworks>net472;net8.0</TargetFrameworks>`)
-- [ ] T093 [US5] Add source file with framework-conditional code to MultiTargetProject (`#if NET8_0_OR_GREATER` block)
+- [X] T092 [US5] Create tests/Lintelligent.Cli.Tests/Fixtures/MultiTargetProject/MultiTargetProject.csproj (`<TargetFrameworks>net472;net8.0</TargetFrameworks>`)
+- [X] T093 [US5] Add source file with framework-conditional code to MultiTargetProject (`#if NET8_0_OR_GREATER` block)
 
 ### IProjectProvider Enhancement (US5)
 
-- [ ] T094 [US5] Update EvaluateProjectAsync to handle multi-targeted projects: if targetFramework parameter null, select first from AnalyzerResults, else filter to specified target
-- [ ] T095 [US5] Store AllTargetFrameworks in Project entity (all targets from AnalyzerResults)
-- [ ] T096 [US5] Store selected TargetFramework in Project entity
-- [ ] T097 [US5] Add validation: if targetFramework specified but not found in project, throw InvalidOperationException with available frameworks listed
+- [X] T094 [US5] Update EvaluateProjectAsync to handle multi-targeted projects: if targetFramework parameter null, select first from AnalyzerResults, else filter to specified target
+- [X] T095 [US5] Store AllTargetFrameworks in Project entity (all targets from AnalyzerResults)
+- [X] T096 [US5] Store selected TargetFramework in Project entity
+- [X] T097 [US5] Add validation: if targetFramework specified but not found in project, throw InvalidOperationException with available frameworks listed
 
 ### CLI Flags (US5)
 
-- [ ] T098 [US5] Add --target-framework flag to ScanCommand.cs (optional, no default)
-- [ ] T099 [US5] Pass targetFramework parameter from CLI flag to EvaluateProjectAsync and EvaluateAllProjectsAsync calls
-- [ ] T100 [US5] Add help text for --target-framework flag (describe purpose, example: net8.0, note: optional)
+- [X] T098 [US5] Add --target-framework flag to ScanCommand.cs (optional, no default)
+- [X] T099 [US5] Pass targetFramework parameter from CLI flag to EvaluateProjectAsync and EvaluateAllProjectsAsync calls
+- [X] T100 [US5] Add help text for --target-framework flag (describe purpose, example: net8.0, note: optional)
 
 ### Tests (US5)
 
-- [ ] T101 [US5] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_MultiTarget_SelectsFirstByDefault (verify net472 selected when no targetFramework specified)
-- [ ] T102 [US5] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_MultiTarget_SelectsSpecifiedTarget (verify net8.0 selected when --target-framework net8.0)
-- [ ] T103 [US5] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_MultiTarget_InvalidTarget_ThrowsException (verify exception lists available targets)
+- [X] T101 [US5] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_MultiTarget_SelectsFirstByDefault (verify net472 selected when no targetFramework specified)
+- [X] T102 [US5] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_MultiTarget_SelectsSpecifiedTarget (verify net8.0 selected when --target-framework net8.0)
+- [X] T103 [US5] Write test in BuildalyzerProjectProviderTests.cs: EvaluateProjectAsync_MultiTarget_InvalidTarget_ThrowsException (verify exception lists available targets)
 - [ ] T104 [US5] Write test in ScanCommandSolutionTests.cs: ScanCommand_MultiTarget_WithFlag_AnalyzesSpecifiedTarget
 
 **Independent Test for US5**: Run `lintelligent scan MultiTargetProject.csproj` (verify net472 analyzed), then `lintelligent scan MultiTargetProject.csproj --target-framework net8.0` (verify net8.0 analyzed)
@@ -300,29 +300,29 @@ This document breaks down Feature 009 into atomic, executable tasks organized by
 
 ### Error Messages
 
-- [ ] T109 [P] Enhance error message for missing .sln file (include searched path, suggest checking path)
-- [ ] T110 [P] Enhance error message for malformed .sln file (include line number if available, suggest checking XML syntax)
-- [ ] T111 [P] Enhance error message for missing .csproj file (include project name, suggest restore or path check)
-- [ ] T112 [P] Enhance error message for MSBuild evaluation failure (include project name, suggest SDK installation or restore)
+- [X] T109 [P] Enhance error message for missing .sln file (include searched path, suggest checking path)
+- [X] T110 [P] Enhance error message for malformed .sln file (include line number if available, suggest checking XML syntax)
+- [X] T111 [P] Enhance error message for missing .csproj file (include project name, suggest restore or path check)
+- [X] T112 [P] Enhance error message for MSBuild evaluation failure (include project name, suggest SDK installation or restore)
 
 ### Logging
 
-- [ ] T113 [P] Add structured logging for solution parsing (solution name, project count, configurations)
-- [ ] T114 [P] Add structured logging for project evaluation (project name, target framework, symbol count, source file count, duration)
-- [ ] T115 [P] Add logging for failed projects (project name, error message, continue/skip indicator)
-- [ ] T116 [P] Add logging for dependency graph generation (project count, reference count)
+- [X] T113 [P] Add structured logging for solution parsing (solution name, project count, configurations)
+- [X] T114 [P] Add structured logging for project evaluation (project name, target framework, symbol count, source file count, duration)
+- [X] T115 [P] Add logging for failed projects (project name, error message, continue/skip indicator)
+- [X] T116 [P] Add logging for dependency graph generation (project count, reference count)
 
 ### Edge Cases
 
-- [ ] T117 Handle empty solution (0 projects) - log warning, exit gracefully with code 0
-- [ ] T118 Handle solution with all projects failing evaluation - log error, exit with code 1 (or 2 for evaluation failure)
+- [X] T117 Handle empty solution (0 projects) - log warning, exit gracefully with code 0
+- [X] T118 Handle solution with all projects failing evaluation - log error, exit with code 1 (or 2 for evaluation failure)
 - [ ] T119 Handle circular project references - Buildalyzer should handle, but add defensive check and logging if detected
 - [ ] T120 Handle platform-specific project conditions (AnyCPU, x64, ARM) - use default platform, log if multiple detected
 
 ### Performance
 
-- [ ] T121 Verify parallel project evaluation works (EvaluateAllProjectsAsync uses Task.WhenAll or Parallel.ForEach)
-- [ ] T122 Add performance logging for solution-level operations (total evaluation time, analysis time)
+- [X] T121 Verify parallel project evaluation works (EvaluateAllProjectsAsync uses Task.WhenAll or Parallel.ForEach)
+- [X] T122 Add performance logging for solution-level operations (total evaluation time, analysis time)
 
 ---
 

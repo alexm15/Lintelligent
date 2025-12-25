@@ -23,13 +23,12 @@ public class ExceptionSwallowingRule : IAnalyzerRule
         foreach (var catchClause in emptyCatches)
         {
             var line = catchClause.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-            var message = "Empty catch block suppresses exceptions. " +
-                         "Consider logging the exception or removing the try-catch if error handling is not needed.";
 
             yield return new DiagnosticResult(
                 tree.FilePath,
                 Id,
-                message,
+                "Empty catch block suppresses exceptions. " +
+                "Consider logging the exception or removing the try-catch if error handling is not needed.",
                 line,
                 Severity,
                 Category
@@ -39,7 +38,7 @@ public class ExceptionSwallowingRule : IAnalyzerRule
 
     private static bool IsGeneratedCode(SyntaxTree tree)
     {
-        string fileName = Path.GetFileName(tree.FilePath);
+        var fileName = Path.GetFileName(tree.FilePath);
         if (fileName.EndsWith(".Designer.cs") || 
             fileName.EndsWith(".g.cs") || 
             fileName.Contains(".Generated."))

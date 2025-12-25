@@ -22,6 +22,7 @@ public sealed class ScanCommand(
     AnalyzerEngine.Analysis.AnalyzerEngine engine,
     ReportGenerator reporter) : IAsyncCommand
 {
+    /// <inheritdoc/>
     public async Task<CommandResult> ExecuteAsync(string[] args)
     {
         try
@@ -29,6 +30,8 @@ public sealed class ScanCommand(
             var path = args.Length > 1 ? args[1] : ".";
             var severityFilter = ParseSeverityFilter(args);
             var groupBy = ParseGroupByOption(args);
+            var format = ParseFormatOption(args);
+            var outputPath = ParseOutputOption(args);
 
             // Create provider to discover files from file system
             var codeProvider = new FileSystemCodeProvider(path);
@@ -90,5 +93,32 @@ public sealed class ScanCommand(
             }
 
         return null;
+    }
+    
+    private static string ParseFormatOption(string[] args)
+    {
+        for (var i = 0; i < args.Length - 1; i++)
+            if (args[i] == "--format")
+            {
+                var value = args[i + 1].ToLowerInvariant();
+                var validFormats = new[] { "json", "sarif", "markdown" };
+                if (!validFormats.Contains(value))
+                {
+                    throw new ArgumentException(
+                        $"Invalid format '{value}'. Valid formats: {string.Join(", ", validFormats)}");
+                }
+                return value;
+            }
+
+        return "markdown"; // Default format
+    }
+    
+    private static string? ParseOutputOption(string[] args)
+    {
+        for (var i = 0; i < args.Length - 1; i++)
+            if (args[i] == "--output")
+                return args[i + 1];
+
+        return null; // Default: stdout
     }
 }

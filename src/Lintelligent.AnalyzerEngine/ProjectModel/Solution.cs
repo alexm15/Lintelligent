@@ -74,8 +74,31 @@ public sealed class Solution
         return graph;
     }
 
-    private static bool IsAbsolutePath(string path) =>
-        Path.IsPathRooted(path) && !Path.GetPathRoot(path)!.Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal);
+    private static bool IsAbsolutePath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return false;
+
+        if (!Path.IsPathRooted(path))
+            return false;
+
+        var root = Path.GetPathRoot(path);
+        if (root == null)
+            return false;
+
+        // Windows: root should be like "C:\\" or "\\\\network\\share", not just "\\"
+        // Unix: root is "/", which is valid
+        if (Path.DirectorySeparatorChar == '\\')
+        {
+            // Windows
+            return root.Length > 1 || root.Equals("\\\\\\\\", StringComparison.Ordinal);
+        }
+        else
+        {
+            // Unix
+            return root.Equals("/", StringComparison.Ordinal);
+        }
+    }
 
     public override string ToString() => $"{Name} ({Projects.Count} projects)";
 }

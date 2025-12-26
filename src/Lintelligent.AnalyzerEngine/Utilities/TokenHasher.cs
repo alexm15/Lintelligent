@@ -13,7 +13,7 @@ namespace Lintelligent.AnalyzerEngine.Utilities;
 /// - Update complexity: O(1) for rolling window
 /// - Prime modulus: 2^61 - 1 (large Mersenne prime for good distribution)
 /// - Base: 31 (standard prime for string hashing)
-/// 
+///
 /// Constitutional Compliance:
 /// - Stateless: All methods are static
 /// - Deterministic: Same token stream always produces same hash
@@ -26,12 +26,12 @@ public static class TokenHasher
     /// Provides good hash distribution while avoiding overflow.
     /// </summary>
     private const ulong Modulus = (1UL << 61) - 1;
-    
+
     /// <summary>
     /// Base prime for polynomial rolling hash.
     /// </summary>
     private const ulong Base = 31;
-    
+
     /// <summary>
     /// Computes rolling hash of token sequence using Rabin-Karp algorithm.
     /// </summary>
@@ -46,19 +46,19 @@ public static class TokenHasher
     {
         if (tokens == null)
             throw new ArgumentNullException(nameof(tokens));
-        
+
         ulong hash = 0;
-        
+
         foreach (var token in tokens)
         {
             // Use token kind for semantic comparison (ignore variable names, whitespace)
-            int tokenValue = (int)token.Kind();
+            var tokenValue = (int)token.Kind();
             hash = ((hash * Base) + (ulong)tokenValue) % Modulus;
         }
-        
+
         return hash;
     }
-    
+
     /// <summary>
     /// Extracts tokens from syntax tree, excluding trivia and comments.
     /// </summary>
@@ -69,7 +69,7 @@ public static class TokenHasher
     /// - Uses DescendantTokens() to get all tokens in tree order
     /// - Excludes trivia (whitespace, comments) for normalized comparison
     /// - Preserves token order (critical for rolling hash correctness)
-    /// 
+    ///
     /// Time complexity: O(n) where n = number of nodes in tree
     /// Space complexity: O(1) with lazy evaluation (yield return in Roslyn)
     /// </remarks>
@@ -77,14 +77,14 @@ public static class TokenHasher
     {
         if (tree == null)
             throw new ArgumentNullException(nameof(tree));
-        
+
         var root = tree.GetCompilationUnitRoot();
-        
+
         // DescendantTokens() excludes trivia by default
         // Returns tokens in syntax tree order (left-to-right, depth-first)
         return root.DescendantTokens();
     }
-    
+
     /// <summary>
     /// Computes hash of entire syntax tree.
     /// Convenience method that combines ExtractTokens and HashTokens.

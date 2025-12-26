@@ -512,6 +512,35 @@ This roadmap outlines the planned feature development for Lintelligent, a produc
 
 ---
 
+### Feature 022: Language-Ext Monad Detection Analyzer
+**Priority**: P3  
+**Constitutional Principle**: III, VI  
+**Status**: ⏳ Not Started
+
+**Objective**: Detect opportunities to use functional monads from the language-ext C# library (opt-in).
+
+**User Value**: Educational suggestions for adopting functional programming patterns, reduce null reference exceptions and improve error handling through type-safe monads.
+
+**Deliverables**:
+- ⏳ EditorConfig opt-in setting (`language_ext_monad_detection = true/false`, default: false)
+- ⏳ Nullable type → `Option<T>` detection with educational explanations
+- ⏳ Try/catch → `Either<L, R>` detection for error-as-value patterns
+- ⏳ Sequential validation → `Validation<T>` detection for error accumulation
+- ⏳ Detect common language-ext patterns: `Option<T>`, `Either<L, R>`, `Validation<T>`, `Try<T>`
+- ⏳ Unique diagnostic IDs (LNT200-LNT203) with Info/Warning severity
+- ⏳ Code examples in diagnostics showing before/after transformations
+- ⏳ Check for language-ext package reference before reporting
+- ⏳ Configurable complexity thresholds to avoid noise
+- ⏳ Performance: <10% overhead when enabled
+
+**Dependencies**:
+- Feature 019: Roslyn Analyzer Bridge (provides per-file analysis framework)
+- Feature 007: Rule Filtering & Configuration (provides EditorConfig integration)
+
+**Spec Location**: `specs/022-monad-analyzer/`
+
+---
+
 ## Implementation Strategy
 
 ### Feature Development Workflow

@@ -18,11 +18,13 @@ public sealed class ScanCommandSolutionTests
         var analyzerManager = new AnalyzerManager();
         analyzerManager.RegisterRule(new LongMethodRule());
         var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(analyzerManager);
+        var workspaceEngine = new AnalyzerEngine.Analysis.WorkspaceAnalyzerEngine();
         var solutionProvider = new BuildalyzerSolutionProvider(NullLogger<BuildalyzerSolutionProvider>.Instance);
         var projectProvider = new BuildalyzerProjectProvider(NullLogger<BuildalyzerProjectProvider>.Instance);
 
         _scanCommand = new ScanCommand(
             engine,
+            workspaceEngine,
             solutionProvider,
             projectProvider,
             NullLogger<ScanCommand>.Instance);

@@ -55,20 +55,20 @@
 
 - [X] T010 [P] [US1] Test: `TokenHasher_IdenticalCode_ProducesSameHash` in tests/Lintelligent.AnalyzerEngine.Tests/WorkspaceAnalyzers/CodeDuplication/TokenHasherTests.cs
 - [X] T011 [P] [US1] Test: `TokenHasher_WhitespaceOnlyDifferences_ProducesSameHash` in TokenHasherTests.cs
-- [ ] T012 [P] [US1] Test: `ExactDuplicationFinder_TwoIdenticalMethods_ReturnsOneDuplicationGroup` in ExactDuplicationFinderTests.cs
-- [ ] T013 [P] [US1] Test: `ExactDuplicationFinder_ThreeIdenticalClasses_GroupsAllThreeInstances` in ExactDuplicationFinderTests.cs
-- [ ] T014 [P] [US1] Test: `DuplicationDetector_TwoIdentical15LineMethods_ReportsOneDuplication` in DuplicationDetectorTests.cs
+- [X] T012 [P] [US1] Test: `ExactDuplicationFinder_TwoIdenticalMethods_ReturnsOneDuplicationGroup` in ExactDuplicationFinderTests.cs
+- [X] T013 [P] [US1] Test: `ExactDuplicationFinder_ThreeIdenticalClasses_GroupsAllThreeInstances` in ExactDuplicationFinderTests.cs
+- [X] T014 [P] [US1] Test: `DuplicationDetector_TwoIdentical15LineMethods_ReportsOneDuplication` in DuplicationDetectorTests.cs
 
 ### Implementation for User Story 1
 
-- [ ] T015 [P] [US1] Implement `TokenHasher.HashTokens()` method (Rabin-Karp rolling hash algorithm)
-- [ ] T016 [P] [US1] Implement `TokenHasher.ExtractTokens()` method (from SyntaxTree, excluding trivia/comments)
-- [ ] T017 [US1] Create `ExactDuplicationFinder` class in src/Lintelligent.AnalyzerEngine/WorkspaceAnalyzers/CodeDuplication/ExactDuplicationFinder.cs
-- [ ] T018 [US1] Implement `ExactDuplicationFinder.FindDuplicates()` method (two-pass: hash all, then compare matches)
-- [ ] T019 [US1] Implement `DuplicationGroup.GetSeverityScore()` method (instances.Count × LineCount)
-- [ ] T020 [US1] Create `DuplicationDetector` class implementing `IWorkspaceAnalyzer` in src/Lintelligent.AnalyzerEngine/WorkspaceAnalyzers/CodeDuplication/DuplicationDetector.cs
-- [ ] T021 [US1] Implement `DuplicationDetector.Analyze()` method (orchestrates token extraction, hashing, duplication finding)
-- [ ] T022 [US1] Implement conversion from `DuplicationGroup` to `DiagnosticResult` with message formatting (e.g., "Code duplicated in 3 files: ...")
+- [X] T015 [P] [US1] Implement `TokenHasher.HashTokens()` method (Rabin-Karp rolling hash algorithm)
+- [X] T016 [P] [US1] Implement `TokenHasher.ExtractTokens()` method (from SyntaxTree, excluding trivia/comments)
+- [X] T017 [US1] Create `ExactDuplicationFinder` class in src/Lintelligent.AnalyzerEngine/WorkspaceAnalyzers/CodeDuplication/ExactDuplicationFinder.cs
+- [X] T018 [US1] Implement `ExactDuplicationFinder.FindDuplicates()` method (two-pass: hash all, then compare matches)
+- [X] T019 [US1] Implement `DuplicationGroup.GetSeverityScore()` method (instances.Count × LineCount)
+- [X] T020 [US1] Create `DuplicationDetector` class implementing `IWorkspaceAnalyzer` in src/Lintelligent.AnalyzerEngine/WorkspaceAnalyzers/CodeDuplication/DuplicationDetector.cs
+- [X] T021 [US1] Implement `DuplicationDetector.Analyze()` method (orchestrates token extraction, hashing, duplication finding)
+- [X] T022 [US1] Implement conversion from `DuplicationGroup` to `DiagnosticResult` with message formatting (e.g., "Code duplicated in 3 files: ...")
 
 **Checkpoint**: Exact duplication detection working - can detect identical code blocks and report locations
 

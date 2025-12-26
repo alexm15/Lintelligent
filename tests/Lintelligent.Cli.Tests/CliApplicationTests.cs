@@ -152,7 +152,7 @@ public class CliApplicationTests
         public CommandResult Execute(string[] args)
         {
             if (args.Length > 1 && args[1] == "invalid")
-                throw new ArgumentException("Invalid argument");
+                throw new ArgumentException("Invalid argument", nameof(args));
             return CommandResult.Success("OK");
         }
     }

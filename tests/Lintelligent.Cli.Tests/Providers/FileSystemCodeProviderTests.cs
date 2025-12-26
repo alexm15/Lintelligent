@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Lintelligent.Cli.Tests.Providers;
 
-public class FileSystemCodeProviderTests : IDisposable
+public sealed class FileSystemCodeProviderTests : IDisposable
 {
     private readonly List<string> _createdFiles = [];
     private readonly string _tempDir;

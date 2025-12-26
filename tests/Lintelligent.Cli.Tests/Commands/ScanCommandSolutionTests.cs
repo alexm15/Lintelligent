@@ -143,7 +143,9 @@ public sealed class ScanCommandSolutionTests
         var projectProvider = new BuildalyzerProjectProvider(NullLogger<BuildalyzerProjectProvider>.Instance);
 
         // For now, we need to manually evaluate the project and pass symbols
+#pragma warning disable S1135, MA0026 // TODO documents future --configuration flag feature
         // TODO: Once --configuration flag is implemented, this test can use CLI args
+#pragma warning restore S1135, MA0026
         Project project = await projectProvider.EvaluateProjectAsync(conditionalProjectPath);
 
         var projectDir = Path.GetDirectoryName(conditionalProjectPath);

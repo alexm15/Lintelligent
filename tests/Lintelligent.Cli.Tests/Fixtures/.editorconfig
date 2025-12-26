@@ -1,0 +1,8 @@
+# Test fixtures - disable analyzers for test data
+root = false
+
+[*.cs]
+# Disable all analyzer warnings for test fixture files
+dotnet_diagnostic.MA0016.severity = none
+dotnet_diagnostic.S2325.severity = none
+dotnet_diagnostic.S3881.severity = none

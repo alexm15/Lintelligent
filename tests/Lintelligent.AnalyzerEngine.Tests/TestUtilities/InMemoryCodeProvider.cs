@@ -39,9 +39,10 @@ public class InMemoryCodeProvider : ICodeProvider
     /// <exception cref="ArgumentNullException">
     ///     Thrown if sources is null.
     /// </exception>
-    public InMemoryCodeProvider(Dictionary<string, string> sources)
+    public InMemoryCodeProvider(IReadOnlyDictionary<string, string> sources)
     {
-        _sources = sources ?? throw new ArgumentNullException(nameof(sources));
+        ArgumentNullException.ThrowIfNull(sources);
+        _sources = sources as Dictionary<string, string> ?? new Dictionary<string, string>(sources);
     }
 
     /// <summary>

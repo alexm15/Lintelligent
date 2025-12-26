@@ -19,6 +19,8 @@ Auto-generated from all feature plans. Last updated: 2025-12-23
 - N/A (file-based input only, no persistent storage) (009-solution-project-support)
 - C# 12.0 / .NET 8.0 (020-code-duplication)
 - N/A (in-memory analysis only, no persistence required) (020-code-duplication)
+- C# 12, .NET 10.0 (target framework for implementation), netstandard2.0 (Roslyn analyzer compatibility) + Roslyn SDK (Microsoft.CodeAnalysis 4.12.0), language-ext (detection target, not analyzer dependency) (022-monad-analyzer)
+- N/A (stateless rules) (022-monad-analyzer)
 
 - C# / .NET 10.0 + Microsoft.CodeAnalysis.CSharp 4.12.0 (Roslyn APIs), Microsoft.Extensions.DependencyInjection 10.0.1 (CLI layer only) (001-io-boundary-refactor)
 
@@ -38,9 +40,9 @@ tests/
 C# / .NET 10.0: Follow standard conventions
 
 ## Recent Changes
+- 022-monad-analyzer: Added C# 12, .NET 10.0 (target framework for implementation), netstandard2.0 (Roslyn analyzer compatibility) + Roslyn SDK (Microsoft.CodeAnalysis 4.12.0), language-ext (detection target, not analyzer dependency)
 - 020-code-duplication: Added C# 12.0 / .NET 8.0
 - 009-solution-project-support: Added C# 13 / .NET 10.0 + Buildalyzer (MSBuild wrapper), Microsoft.Build (if needed for advanced scenarios), Microsoft.Extensions.Logging.Abstractions (existing)
-- 006-structured-output-formats: Added C# / .NET 10.0 + Microsoft.CodeAnalysis.Sarif (v4.x), System.Text.Json (built-in)
 
 
 <!-- MANUAL ADDITIONS START -->

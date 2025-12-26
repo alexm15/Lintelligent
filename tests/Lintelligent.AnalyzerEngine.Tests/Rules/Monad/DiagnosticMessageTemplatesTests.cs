@@ -4,22 +4,20 @@ using Xunit;
 namespace Lintelligent.AnalyzerEngine.Tests.Rules.Monad;
 
 /// <summary>
-///     Tests for educational message templates used in monad detection diagnostics.
+///     Tests for short actionable message templates used in monad detection diagnostics.
 /// </summary>
 public class DiagnosticMessageTemplatesTests
 {
     [Fact]
-    public void GetOptionTemplate_IncludesRequiredSections()
+    public void GetOptionTemplate_IncludesRequiredContent()
     {
         // Act
         string template = DiagnosticMessageTemplates.GetOptionTemplate("FindUser", "User", 3);
 
-        // Assert
-        Assert.Contains("### Current Code", template);
-        Assert.Contains("### Suggested Refactoring", template);
-        Assert.Contains("### Benefits", template);
-        Assert.Contains("### When to Apply", template);
-        Assert.Contains("### Additional Resources", template);
+        // Assert - Short message format
+        Assert.Contains("Option<User>", template);
+        Assert.Contains("nullable", template);
+        Assert.Contains("null", template);
     }
 
     [Fact]
@@ -29,17 +27,7 @@ public class DiagnosticMessageTemplatesTests
         string template = DiagnosticMessageTemplates.GetOptionTemplate("FindUser", "User", 3);
 
         // Assert
-        Assert.Contains("Eliminates null reference exceptions", template);
-    }
-
-    [Fact]
-    public void GetOptionTemplate_IncludesMethodName()
-    {
-        // Act
-        string template = DiagnosticMessageTemplates.GetOptionTemplate("FindUser", "User", 3);
-
-        // Assert
-        Assert.Contains("FindUser", template);
+        Assert.Contains("null reference exceptions", template);
     }
 
     [Fact]
@@ -59,21 +47,19 @@ public class DiagnosticMessageTemplatesTests
         string template = DiagnosticMessageTemplates.GetOptionTemplate("FindUser", "User", 5);
 
         // Assert
-        Assert.Contains("(5 found)", template);
+        Assert.Contains("5", template);
+        Assert.Contains("null operations", template);
     }
 
     [Fact]
-    public void GetEitherTemplate_IncludesRequiredSections()
+    public void GetEitherTemplate_IncludesRequiredContent()
     {
         // Act
         string template = DiagnosticMessageTemplates.GetEitherTemplate("ParseData", "FormatException");
 
-        // Assert
-        Assert.Contains("### Current Code", template);
-        Assert.Contains("### Suggested Refactoring", template);
-        Assert.Contains("### Benefits", template);
-        Assert.Contains("### When to Apply", template);
-        Assert.Contains("### Additional Resources", template);
+        // Assert - Short message format
+        Assert.Contains("Either<Error, T>", template);
+        Assert.Contains("error handling", template);
     }
 
     [Fact]
@@ -83,7 +69,7 @@ public class DiagnosticMessageTemplatesTests
         string template = DiagnosticMessageTemplates.GetEitherTemplate("ParseData", "FormatException");
 
         // Assert
-        Assert.Contains("Makes error handling explicit", template);
+        Assert.Contains("explicit", template);
     }
 
     [Fact]
@@ -93,31 +79,29 @@ public class DiagnosticMessageTemplatesTests
         string template = DiagnosticMessageTemplates.GetEitherTemplate("ParseData", "FormatException");
 
         // Assert
-        Assert.Contains("Railway-Oriented Programming", template);
+        Assert.Contains("railway-oriented programming", template);
     }
 
     [Fact]
-    public void GetEitherTemplate_IncludesExceptionType()
+    public void GetEitherTemplate_IncludesErrorHandling()
     {
         // Act
         string template = DiagnosticMessageTemplates.GetEitherTemplate("ParseData", "FormatException");
 
-        // Assert
-        Assert.Contains("FormatException", template);
+        // Assert - Short message doesn't include method/exception names, focuses on pattern
+        Assert.Contains("Either<Error, T>", template);
+        Assert.Contains("explicit error handling", template);
     }
 
     [Fact]
-    public void GetValidationTemplate_IncludesRequiredSections()
+    public void GetValidationTemplate_IncludesRequiredContent()
     {
         // Act
         string template = DiagnosticMessageTemplates.GetValidationTemplate("ValidateUser", 4);
 
-        // Assert
-        Assert.Contains("### Current Code", template);
-        Assert.Contains("### Suggested Refactoring", template);
-        Assert.Contains("### Benefits", template);
-        Assert.Contains("### When to Apply", template);
-        Assert.Contains("### Additional Resources", template);
+        // Assert - Short message format
+        Assert.Contains("Validation<Error, T>", template);
+        Assert.Contains("accumulate errors", template);
     }
 
     [Fact]
@@ -127,7 +111,7 @@ public class DiagnosticMessageTemplatesTests
         string template = DiagnosticMessageTemplates.GetValidationTemplate("ValidateUser", 4);
 
         // Assert
-        Assert.Contains("Accumulates ALL validation errors", template);
+        Assert.Contains("ALL errors", template);
     }
 
     [Fact]
@@ -137,22 +121,19 @@ public class DiagnosticMessageTemplatesTests
         string template = DiagnosticMessageTemplates.GetValidationTemplate("ValidateUser", 6);
 
         // Assert
-        Assert.Contains("6 sequential validations", template);
-        Assert.Contains("(6 found)", template);
+        Assert.Contains("6", template);
+        Assert.Contains("sequential validations", template);
     }
 
     [Fact]
-    public void GetTryTemplate_IncludesRequiredSections()
+    public void GetTryTemplate_IncludesRequiredContent()
     {
         // Act
         string template = DiagnosticMessageTemplates.GetTryTemplate("ReadFile", "IOException");
 
-        // Assert
-        Assert.Contains("### Current Code", template);
-        Assert.Contains("### Suggested Refactoring", template);
-        Assert.Contains("### Benefits", template);
-        Assert.Contains("### When to Apply", template);
-        Assert.Contains("### Additional Resources", template);
+        // Assert - Short message format
+        Assert.Contains("Try<T>", template);
+        Assert.Contains("exception", template);
     }
 
     [Fact]
@@ -172,11 +153,11 @@ public class DiagnosticMessageTemplatesTests
         string template = DiagnosticMessageTemplates.GetTryTemplate("ReadFile", "IOException");
 
         // Assert
-        Assert.Contains("Captures exceptions as values", template);
+        Assert.Contains("captured as a value", template);
     }
 
     [Fact]
-    public void ValidateTemplate_ValidTemplate_ReturnsTrue()
+    public void AllTemplates_AreShortAndActionable()
     {
         // Arrange & Act
         string optionTemplate = DiagnosticMessageTemplates.GetOptionTemplate("Test", "string", 1);

@@ -41,8 +41,8 @@ class TestClass
         results[0].RuleId.Should().Be("LNT200");
         results[0].Severity.Should().Be(Severity.Info);
         results[0].Category.Should().Be(DiagnosticCategories.Functional);
-        results[0].Message.Should().Contain("FindUser");
-        results[0].Message.Should().Contain("string");
+        results[0].Message.Should().Contain("Option<string>");
+        results[0].Message.Should().Contain("nullable");
     }
 
     [Fact]
@@ -206,12 +206,10 @@ class TestClass
         // Act
         var results = _rule.Analyze(tree).ToList();
 
-        // Assert
-        results[0].Message.Should().Contain("### Current Code");
-        results[0].Message.Should().Contain("### Suggested Refactoring");
-        results[0].Message.Should().Contain("### Benefits");
-        results[0].Message.Should().Contain("Eliminates null reference exceptions");
-        results[0].Message.Should().Contain("Option<T>");
+        // Assert - Short actionable message format
+        results[0].Message.Should().Contain("Option<string>");
+        results[0].Message.Should().Contain("nullable");
+        results[0].Message.Should().Contain("null reference exceptions");
     }
 
     [Fact]

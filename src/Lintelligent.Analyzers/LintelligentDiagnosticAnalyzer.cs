@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Reflection;
 using Lintelligent.AnalyzerEngine.Results;
 using Lintelligent.AnalyzerEngine.Rules;
+using Lintelligent.AnalyzerEngine.Rules.Monad;
 using Lintelligent.Analyzers.Adapters;
 using Lintelligent.Analyzers.Metadata;
 using Microsoft.CodeAnalysis;
@@ -64,7 +65,15 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None); // Skip generated code
         context.EnableConcurrentExecution(); // Thread-safe parallel execution
-        context.RegisterSyntaxTreeAction(AnalyzeSyntaxTree);
+        context.RegisterCompilationStartAction(compilationContext =>
+        {
+            // Check if LanguageExt.Core is referenced (required for monad detection)
+            var hasLanguageExt = compilationContext.Compilation.ReferencedAssemblyNames
+                .Any(name => name.Name.Equals("LanguageExt.Core", StringComparison.OrdinalIgnoreCase));
+            
+            compilationContext.RegisterSyntaxTreeAction(treeContext => 
+                AnalyzeSyntaxTree(treeContext, hasLanguageExt));
+        });
 #if !NETSTANDARD2_0
         context.RegisterCompilationStartAction(AnalyzeCompilation);  // Workspace-level analysis
 #endif
@@ -73,14 +82,21 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
     /// <summary>
     ///     Analyzes a syntax tree by executing all rules.
     /// </summary>
-    private static void AnalyzeSyntaxTree(SyntaxTreeAnalysisContext context)
+    private static void AnalyzeSyntaxTree(SyntaxTreeAnalysisContext context, bool hasLanguageExt)
     {
-        AnalyzerConfigOptions configOptions = context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Tree);
+        var configOptions = context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Tree);
+        
+        // Parse monad detection configuration once per syntax tree
+        var monadOptions = MonadDetectionOptions.Parse(configOptions);
 
         foreach (IAnalyzerRule rule in Rules)
         {
             try
             {
+                // Skip monad rules if monad detection is not enabled or LanguageExt.Core not referenced
+                if (IsMonadRule(rule) && (!monadOptions.Enabled || !hasLanguageExt))
+                    continue;
+                
                 // Check EditorConfig for severity override
                 if (configOptions.TryGetValue($"dotnet_diagnostic.{rule.Id}.severity", out var severity) &&
                     SeverityMapper.IsSuppressed(severity))
@@ -275,6 +291,18 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
         context.ReportDiagnostic(diagnostic);
     }
 #endif
+
+    /// <summary>
+    ///     Checks if a rule is a monad detection rule (LNT200-LNT299 range).
+    /// </summary>
+    private static bool IsMonadRule(IAnalyzerRule rule)
+    {
+        // Monad rules are in the LNT200-LNT299 ID range
+        return rule.Id.StartsWith("LNT2", StringComparison.Ordinal) && 
+               rule.Id.Length == 6 && 
+               int.TryParse(rule.Id.Substring(3), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var number) && 
+               number >= 200 && number < 300;
+    }
 
     /// <summary>
     ///     Reports an internal analyzer error as LNT999.

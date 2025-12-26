@@ -1,4 +1,5 @@
-﻿using Lintelligent.AnalyzerEngine.Abstractions;
+﻿using System.Collections.Immutable;
+using Lintelligent.AnalyzerEngine.Abstractions;
 
 namespace Lintelligent.AnalyzerEngine.Results;
 
@@ -27,7 +28,8 @@ public record DiagnosticResult
         string message,
         int lineNumber,
         Severity severity,
-        string category)
+        string category,
+        ImmutableDictionary<string, string>? properties = null)
     {
         ArgumentExceptionPolyfills.ThrowIfNullOrWhiteSpace(filePath, nameof(filePath));
         ArgumentExceptionPolyfills.ThrowIfNullOrWhiteSpace(ruleId, nameof(ruleId));
@@ -59,6 +61,7 @@ public record DiagnosticResult
         LineNumber = lineNumber;
         Severity = severity;
         Category = category;
+        Properties = properties ?? ImmutableDictionary<string, string>.Empty;
     }
 
     public string FilePath { get; init; }
@@ -67,4 +70,10 @@ public record DiagnosticResult
     public int LineNumber { get; init; }
     public Severity Severity { get; init; }
     public string Category { get; init; }
+    
+    /// <summary>
+    ///     Custom properties for extensibility and code fix integration.
+    ///     Example properties: MonadType=Option, ComplexityScore=5, PatternName=try-catch-control-flow
+    /// </summary>
+    public ImmutableDictionary<string, string> Properties { get; init; }
 }

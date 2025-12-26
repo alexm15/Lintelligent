@@ -263,14 +263,12 @@ public sealed class ScanCommand(
         {
             logger?.LogInformation("Running workspace analyzers across {TreeCount} syntax trees", allTrees.Count);
             
-            var context = new WorkspaceContext
-            {
-                Solution = solution,
-                ProjectsByPath = solution.Projects.ToDictionary(
+            var context = new WorkspaceContext(
+                solution,
+                solution.Projects.ToDictionary(
                     p => p.FilePath,
                     p => p,
-                    StringComparer.OrdinalIgnoreCase)
-            };
+                    StringComparer.OrdinalIgnoreCase));
             
             var workspaceResults = workspaceEngine.Analyze(allTrees, context);
             allResults.AddRange(workspaceResults);

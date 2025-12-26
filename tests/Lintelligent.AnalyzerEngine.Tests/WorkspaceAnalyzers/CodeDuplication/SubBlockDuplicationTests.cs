@@ -200,12 +200,12 @@ public class SubBlockDuplicationTests
         var options = new DuplicationOptions(minLines: 3, minTokens: 10);
 
         // Act
-        var groups = ExactDuplicationFinder.FindDuplicates(new[] { tree }, options).ToList();
+        var groups = ExactDuplicationFinder.FindDuplicates([tree], options).ToList();
 
         // Assert - Should find duplicated catch block with rollback pattern
-        var transactionDup = groups.FirstOrDefault(g => 
-            g.Instances.Count == 3 && 
-            g.Instances.Any(i => i.SourceText.Contains("Rollback")));
+        var transactionDup = groups.FirstOrDefault(g =>
+            g.Instances.Count == 3 &&
+            g.Instances.Any(i => i.SourceText.Contains("Rollback", StringComparison.Ordinal)));
             
         transactionDup.Should().NotBeNull("because the rollback pattern appears in all three methods' catch blocks");
         transactionDup!.Instances.Should().HaveCount(3);
@@ -240,7 +240,7 @@ public class SubBlockDuplicationTests
         var options = new DuplicationOptions(minLines: 3, minTokens: 10);
 
         // Act
-        var groups = ExactDuplicationFinder.FindDuplicates(new[] { tree }, options).ToList();
+        var groups = ExactDuplicationFinder.FindDuplicates([tree], options).ToList();
 
         // Assert - May find some duplications from overlapping sequences, but not the whole methods
         groups.Should().BeEmpty("because all methods have unique implementations");
@@ -271,7 +271,7 @@ public class SubBlockDuplicationTests
         var options = new DuplicationOptions(minLines: 3, minTokens: 10);
 
         // Act
-        var groups = ExactDuplicationFinder.FindDuplicates(new[] { tree }, options).ToList();
+        var groups = ExactDuplicationFinder.FindDuplicates([tree], options).ToList();
 
         // Assert - Should not detect because we need minimum 3 statements
         groups.Should().BeEmpty("because the duplicated sequence is only 2 statements (below minimum of 3)");

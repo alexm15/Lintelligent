@@ -33,7 +33,7 @@ public static class ExactDuplicationFinder
         IEnumerable<SyntaxTree> trees,
         DuplicationOptions? options = null)
     {
-        ArgumentNullException.ThrowIfNull(trees);
+        ArgumentNullExceptionPolyfills.ThrowIfNull(trees, nameof(trees));
 
         options ??= new DuplicationOptions();
         var instancesByHash = BuildHashMapping(trees);
@@ -120,8 +120,11 @@ public static class ExactDuplicationFinder
         // Pass 2: Create duplication groups for hashes with 2+ instances
         var groups = new List<DuplicationGroup>();
 
-        foreach (var (hash, instances) in instancesByHash)
+        foreach (var kvp in instancesByHash)
         {
+            var hash = kvp.Key;
+            var instances = kvp.Value;
+            
             if (instances.Count >= 2)
             {
                 // Calculate line count from first instance (all should be identical)

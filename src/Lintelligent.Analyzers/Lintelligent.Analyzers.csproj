@@ -29,8 +29,16 @@
 
     <ItemGroup>
         <!-- Reference AnalyzerEngine (contains IAnalyzerRule implementations) -->
-        <ProjectReference Include="..\Lintelligent.AnalyzerEngine\Lintelligent.AnalyzerEngine.csproj"/>
+        <ProjectReference Include="..\Lintelligent.AnalyzerEngine\Lintelligent.AnalyzerEngine.csproj" PrivateAssets="all" />
     </ItemGroup>
+
+    <!-- Ensure AnalyzerEngine DLL is included when analyzer is loaded -->
+    <Target Name="GetTargetPath" Returns="@(AnalyzerDependency)">
+        <ItemGroup>
+            <AnalyzerDependency Include="$(OutputPath)\$(AssemblyName).dll" />
+            <AnalyzerDependency Include="$(OutputPath)\Lintelligent.AnalyzerEngine.dll" />
+        </ItemGroup>
+    </Target>
 
     <Target Name="PackAnalyzer">
         <ItemGroup>

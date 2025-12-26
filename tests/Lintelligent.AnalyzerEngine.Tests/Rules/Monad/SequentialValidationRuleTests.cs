@@ -180,9 +180,9 @@ class TestClass
         // Act
         var results = _rule.Analyze(tree).ToList();
 
-        // Assert
+        // Assert - Short message uses specific type parameters
         results.Should().HaveCount(1);
-        results[0].Message.Should().Contain("Validation<T>");
+        results[0].Message.Should().Contain("Validation<Error, T>");
     }
 
     [Fact]

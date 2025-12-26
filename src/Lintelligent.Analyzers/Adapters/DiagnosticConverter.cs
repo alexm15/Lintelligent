@@ -29,7 +29,18 @@ public static class DiagnosticConverter
 #endif
 
         Location location = CreateLocation(result.LineNumber, tree);
-        return Diagnostic.Create(descriptor, location, result.Message);
+        
+        // Convert properties to nullable string values for Roslyn API
+        var roslynProperties = result.Properties.IsEmpty 
+            ? null 
+            : result.Properties.ToImmutableDictionary(kvp => kvp.Key, kvp => (string?)kvp.Value);
+        
+        // Pass custom properties to Roslyn diagnostic for code fix provider support
+        return Diagnostic.Create(
+            descriptor, 
+            location, 
+            properties: roslynProperties, 
+            messageArgs: result.Message);
     }
 
     /// <summary>

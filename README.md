@@ -6,6 +6,7 @@ A static code analysis CLI tool for C# projects that detects code quality issues
 
 - 🔍 **Configurable Rules**: Analyze C# code with extensible analyzer rules
 - 🔄 **Code Duplication Detection**: Identify exact duplicated code blocks (whole files and sub-blocks within methods)
+- 🧬 **Monad Detection**: Suggest functional patterns (Option<T>, Either<L,R>, Validation<T>) for safer error handling
 - ⚡ **Severity Filtering**: Filter analysis results by Error/Warning/Info levels
 - 📊 **Category Grouping**: Organize findings by category (Maintainability, Security, Performance, etc.)
 - 🎯 **Multiple Findings**: Rules report all violations in a file, not just the first
@@ -630,6 +631,199 @@ manager.RegisterRule(new NoPublicFieldsRule());
 - Find **all** violations in the file, not just the first
 - Choose appropriate `Severity` (Error for critical issues, Warning for code smells, Info for suggestions)
 - Use `DiagnosticCategories` constants for standard categories or define custom ones
+
+## Monad Detection (Functional Programming)
+
+Lintelligent can suggest safer functional patterns from [language-ext](https://github.com/louthy/language-ext) to improve error handling and eliminate null reference exceptions.
+
+### Enable Monad Detection
+
+Add to your `.editorconfig`:
+
+```ini
+[*.cs]
+# Enable monad detection
+language_ext_monad_detection = true
+
+# Optional: Set complexity thresholds
+language_ext_min_complexity = 3
+```
+
+### Available Monad Detections
+
+#### LNT200: Nullable → Option<T>
+
+Detects nullable return types with multiple null checks and suggests `Option<T>` to eliminate null reference exceptions.
+
+**Before:**
+```csharp
+public User? FindUser(int id)
+{
+    var user = database.Find(id);
+    if (user == null) return null;
+    if (user.IsDeleted) return null;
+    if (!user.IsActive) return null;
+    return user;
+}
+
+// Usage requires null checks everywhere
+var user = FindUser(123);
+if (user != null) 
+{
+    Console.WriteLine(user.Name);
+}
+```
+
+**After:**
+```csharp
+using LanguageExt;
+
+public Option<User> FindUser(int id)
+{
+    var user = database.Find(id);
+    return user switch
+    {
+        null => Option<User>.None,
+        { IsDeleted: true } => Option<User>.None,
+        { IsActive: false } => Option<User>.None,
+        _ => Option<User>.Some(user)
+    };
+}
+
+// Type-safe usage
+FindUser(123).Match(
+    Some: user => Console.WriteLine(user.Name),
+    None: () => Console.WriteLine("User not found")
+);
+```
+
+**Diagnostic**: Triggered when a method has 3+ null operations (configurable via `language_ext_min_complexity`).
+
+#### LNT201: Try/Catch → Either<L, R>
+
+Detects try/catch blocks used for control flow and suggests `Either<L, R>` for railway-oriented programming.
+
+**Before:**
+```csharp
+public decimal CalculatePrice(int quantity, decimal unitPrice)
+{
+    try
+    {
+        if (quantity <= 0) throw new ArgumentException("Invalid quantity");
+        return quantity * unitPrice;
+    }
+    catch (ArgumentException ex)
+    {
+        return 0m; // Error hidden in return value
+    }
+}
+```
+
+**After:**
+```csharp
+using LanguageExt;
+using static LanguageExt.Prelude;
+
+public Either<string, decimal> CalculatePrice(int quantity, decimal unitPrice)
+{
+    if (quantity <= 0) return Left<string, decimal>("Invalid quantity");
+    return Right<string, decimal>(quantity * unitPrice);
+}
+
+// Usage
+var result = CalculatePrice(5, 10.50m);
+result.Match(
+    Right: price => Console.WriteLine($"Total: {price:C}"),
+    Left: error => Console.WriteLine($"Error: {error}")
+);
+```
+
+**Diagnostic**: Triggered when try and catch blocks both contain return statements (control flow pattern).
+
+#### LNT202: Sequential Validation → Validation<T>
+
+Detects sequential validation checks that fail fast and suggests `Validation<T>` to accumulate all errors.
+
+**Before:**
+```csharp
+public User CreateUser(string name, string email, int age)
+{
+    if (string.IsNullOrEmpty(name)) 
+        throw new ValidationException("Name required");
+    
+    if (!email.Contains("@")) 
+        throw new ValidationException("Invalid email");
+    
+    if (age < 18) 
+        throw new ValidationException("Must be 18+");
+    
+    return new User(name, email, age);
+}
+
+// User only sees first error
+```
+
+**After:**
+```csharp
+using LanguageExt;
+using static LanguageExt.Prelude;
+
+public Validation<string, User> CreateUser(string name, string email, int age)
+{
+    var nameValidation = string.IsNullOrEmpty(name)
+        ? Fail<string, string>("Name required")
+        : Success<string, string>(name);
+    
+    var emailValidation = !email.Contains("@")
+        ? Fail<string, string>("Invalid email")
+        : Success<string, string>(email);
+    
+    var ageValidation = age < 18
+        ? Fail<string, int>("Must be 18+")
+        : Success<string, int>(age);
+    
+    return (nameValidation, emailValidation, ageValidation)
+        .Apply((n, e, a) => new User(n, e, a));
+}
+
+// Usage - shows ALL errors at once
+var result = CreateUser("", "invalid", 15);
+result.Match(
+    Succ: user => Console.WriteLine($"Created: {user.Name}"),
+    Fail: errors => Console.WriteLine($"Errors: {string.Join(", ", errors)}")
+);
+// Output: "Errors: Name required, Invalid email, Must be 18+"
+```
+
+**Diagnostic**: Triggered when a method has 2+ sequential validation checks with immediate returns (configurable via `language_ext_min_complexity`).
+
+### Configuration Options
+
+In `.editorconfig`:
+
+```ini
+[*.cs]
+# Enable/disable monad detection
+language_ext_monad_detection = true|false
+
+# Minimum complexity for Option<T> detection (default: 3)
+# Only report methods with N+ null operations
+language_ext_min_complexity = 3
+
+# Minimum validations for Validation<T> detection (default: 2)
+# Only report methods with N+ sequential validations
+language_ext_min_complexity = 2
+```
+
+### Benefits
+
+- **Type Safety**: Errors become part of the type signature
+- **Null Safety**: `Option<T>` eliminates null reference exceptions at compile time
+- **Better UX**: `Validation<T>` shows all errors at once instead of one at a time
+- **Railway-Oriented Programming**: `Either<L, R>` makes error paths explicit
+- **Functional Composition**: Monads compose elegantly with LINQ and language-ext combinators
+
+For more details, see the [language-ext documentation](https://github.com/louthy/language-ext).
 
 ## Testing
 

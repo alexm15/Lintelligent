@@ -50,6 +50,8 @@ public sealed class ScanCommand(
             var targetFramework = ParseTargetFrameworkOption(args);
             var minDuplicationLines = ParseMinDuplicationLinesOption(args);
             var minDuplicationTokens = ParseMinDuplicationTokensOption(args);
+            var enableStructuralSimilarity = ParseEnableStructuralSimilarityOption(args);
+            var minSimilarity = ParseMinSimilarityOption(args);
             _ = ParseFormatOption(args); // TODO: Use format option when implementing output formatting
             _ = ParseOutputOption(args); // TODO: Use output path when implementing file output
 
@@ -58,6 +60,10 @@ public sealed class ScanCommand(
                 duplicationOptions.MinLines = minDuplicationLines.Value;
             if (minDuplicationTokens.HasValue)
                 duplicationOptions.MinTokens = minDuplicationTokens.Value;
+            if (enableStructuralSimilarity)
+                duplicationOptions.EnableStructuralSimilarity = true;
+            if (minSimilarity.HasValue)
+                duplicationOptions.MinSimilarityPercent = minSimilarity.Value;
 
             // Check if path is a solution file
             if (path.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
@@ -454,4 +460,46 @@ public sealed class ScanCommand(
 
         return null; // Default: use DuplicationOptions default (50)
     }
+
+    /// <summary>
+    ///     Parses the --enable-structural-similarity flag from command line arguments.
+    /// </summary>
+    /// <param name="args">Command line arguments.</param>
+    /// <returns>True if structural similarity detection is enabled, false otherwise.</returns>
+    /// <remarks>
+    ///     The --enable-structural-similarity flag enables detection of structurally similar code
+    ///     with different identifiers and literals (e.g., same logic with different variable names).
+    ///     This is more computationally expensive than exact duplication detection.
+    ///     Default: false (disabled)
+    ///     Example usage:
+    ///     - lintelligent scan MySolution.sln --enable-structural-similarity
+    ///     - lintelligent scan MyProject --enable-structural-similarity --min-similarity 90
+    /// </remarks>
+    private static bool ParseEnableStructuralSimilarityOption(string[] args)
+    {
+        return args.Contains("--enable-structural-similarity", StringComparer.Ordinal);
+    }
+
+    /// <summary>
+    ///     Parses the --min-similarity flag from command line arguments.
+    /// </summary>
+    /// <param name="args">Command line arguments.</param>
+    /// <returns>Minimum similarity percentage (0-100) or null if not specified.</returns>
+    /// <remarks>
+    ///     The --min-similarity flag specifies the minimum similarity percentage (0-100)
+    ///     for structural similarity matches. Only applies when --enable-structural-similarity is used.
+    ///     Default: 85.0 (85%)
+    ///     Example usage:
+    ///     - lintelligent scan MySolution.sln --enable-structural-similarity --min-similarity 90
+    ///     - lintelligent scan MyProject --enable-structural-similarity --min-similarity 80
+    /// </remarks>
+    private static double? ParseMinSimilarityOption(string[] args)
+    {
+        for (var i = 0; i < args.Length - 1; i++)
+            if (args[i] == "--min-similarity")
+                return double.TryParse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : null;
+
+        return null; // Default: use DuplicationOptions default (85.0)
+    }
 }
+

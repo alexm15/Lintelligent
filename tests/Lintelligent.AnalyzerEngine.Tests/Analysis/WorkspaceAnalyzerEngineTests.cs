@@ -24,15 +24,15 @@ public sealed class WorkspaceAnalyzerEngineTests
         // Arrange - Create workspace context with 5 projects
         var projects = new[]
         {
-            CreateProject("Project1", @"C:\Solution\Project1\Project1.csproj"),
-            CreateProject("Project2", @"C:\Solution\Project2\Project2.csproj"),
-            CreateProject("Project3", @"C:\Solution\Project3\Project3.csproj"),
-            CreateProject("Project4", @"C:\Solution\Project4\Project4.csproj"),
-            CreateProject("Project5", @"C:\Solution\Project5\Project5.csproj")
+            CreateProject("Project1", Path.GetFullPath(Path.Combine("Solution", "Project1", "Project1.csproj"))),
+            CreateProject("Project2", Path.GetFullPath(Path.Combine("Solution", "Project2", "Project2.csproj"))),
+            CreateProject("Project3", Path.GetFullPath(Path.Combine("Solution", "Project3", "Project3.csproj"))),
+            CreateProject("Project4", Path.GetFullPath(Path.Combine("Solution", "Project4", "Project4.csproj"))),
+            CreateProject("Project5", Path.GetFullPath(Path.Combine("Solution", "Project5", "Project5.csproj")))
         };
 
         var solution = new Solution(
-            filePath: @"C:\Solution\TestSolution.sln",
+            filePath: Path.GetFullPath(Path.Combine("Solution", "TestSolution.sln")),
             name: "TestSolution",
             projects: projects,
             configurations: new[] { "Debug", "Release" });
@@ -210,8 +210,11 @@ public sealed class WorkspaceAnalyzerEngineTests
 
     private static Project CreateProject(string name, string path)
     {
+        // Ensure path is absolute and cross-platform
+        var absolutePath = Path.IsPathRooted(path) ? path : Path.GetFullPath(path);
+        
         return new Project(
-            filePath: path,
+            filePath: absolutePath,
             name: name,
             targetFramework: new TargetFramework("net10.0"),
             allTargetFrameworks: new[] { new TargetFramework("net10.0") },
@@ -225,9 +228,9 @@ public sealed class WorkspaceAnalyzerEngineTests
 
     private static WorkspaceContext CreateMinimalContext()
     {
-        var project = CreateProject("TestProject", @"C:\TestProject\TestProject.csproj");
+        var project = CreateProject("TestProject", Path.GetFullPath(Path.Combine("TestProject", "TestProject.csproj")));
         var solution = new Solution(
-            filePath: @"C:\TestSolution.sln",
+            filePath: Path.GetFullPath("TestSolution.sln"),
             name: "TestSolution",
             projects: new[] { project },
             configurations: new[] { "Debug" });

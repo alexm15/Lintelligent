@@ -5,6 +5,7 @@ A static code analysis CLI tool for C# projects that detects code quality issues
 ## Features
 
 - 🔍 **Configurable Rules**: Analyze C# code with extensible analyzer rules
+- 🔄 **Code Duplication Detection**: Identify exact duplicated code blocks (whole files and sub-blocks within methods)
 - ⚡ **Severity Filtering**: Filter analysis results by Error/Warning/Info levels
 - 📊 **Category Grouping**: Organize findings by category (Maintainability, Security, Performance, etc.)
 - 🎯 **Multiple Findings**: Rules report all violations in a file, not just the first
@@ -13,6 +14,7 @@ A static code analysis CLI tool for C# projects that detects code quality issues
 - 🔌 **Extensible**: Plugin-friendly architecture for IDE integration and custom frontends
 - 🛡️ **Resilient**: Exception handling ensures one faulty rule doesn't crash entire analysis
 - 🔬 **Roslyn Analyzer**: Build-time analysis with instant IDE feedback (zero additional tools)
+- 🌐 **Workspace Analysis**: Cross-file analysis in Roslyn analyzer (duplication detection in IDE)
 
 ## Installation
 
@@ -35,6 +37,7 @@ The Roslyn analyzer automatically integrates with your IDE (Visual Studio, Rider
 - Code navigation (F8 to jump between issues)
 - EditorConfig support for per-project rule configuration
 - Zero build overhead (<2s for 100-file solutions)
+- **Workspace-level analysis**: Cross-file duplication detection (requires .NET 6+)
 
 See the [Analyzer Guide](./specs/019-roslyn-analyzer-bridge/ANALYZER_GUIDE.md) for configuration options.
 
@@ -78,6 +81,31 @@ Analyze a single file:
 ```bash
 dotnet run -- scan /path/to/file.cs
 ```
+
+Detect code duplication (whole files and sub-blocks within methods):
+
+```bash
+dotnet run -- scan /path/to/project  # LNT100 warnings show duplicated code
+```
+
+### Code Duplication Detection
+
+Lintelligent detects exact code duplication at two levels:
+
+1. **Whole-file duplication**: Identical files across your codebase
+2. **Sub-block duplication**: Duplicated statement sequences (3+ statements) within methods
+
+This helps identify:
+- Copy-pasted validation logic
+- Repeated error handling patterns
+- Duplicated transaction/database code
+- Repeated setup/teardown code in tests
+
+**Configuration** (via `.lintelligent.json` or `.editorconfig`):
+- `MinLines`: Minimum lines for whole-file duplication (default: 5)
+- `MinTokens`: Minimum tokens for sub-block duplication (default: 50)
+
+For detailed documentation, see [Code Duplication Detection Guide](./specs/020-code-duplication/README.md).
 
 ### CLI Execution Model
 

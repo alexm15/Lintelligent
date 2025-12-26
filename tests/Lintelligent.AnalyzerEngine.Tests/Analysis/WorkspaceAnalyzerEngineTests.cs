@@ -59,11 +59,11 @@ public sealed class WorkspaceAnalyzerEngineTests
                    """;
         SyntaxTree[] trees = new[]
         {
-            CSharpSyntaxTree.ParseText(code, path: @"C:\Solution\Project1\Test.cs"),
-            CSharpSyntaxTree.ParseText(code, path: @"C:\Solution\Project2\Test.cs"),
-            CSharpSyntaxTree.ParseText(code, path: @"C:\Solution\Project3\Test.cs"),
-            CSharpSyntaxTree.ParseText(code, path: @"C:\Solution\Project4\Test.cs"),
-            CSharpSyntaxTree.ParseText(code, path: @"C:\Solution\Project5\Test.cs")
+            CSharpSyntaxTree.ParseText(code, path: Path.GetFullPath(Path.Combine("Solution", "Project1", "Test.cs"))),
+            CSharpSyntaxTree.ParseText(code, path: Path.GetFullPath(Path.Combine("Solution", "Project2", "Test.cs"))),
+            CSharpSyntaxTree.ParseText(code, path: Path.GetFullPath(Path.Combine("Solution", "Project3", "Test.cs"))),
+            CSharpSyntaxTree.ParseText(code, path: Path.GetFullPath(Path.Combine("Solution", "Project4", "Test.cs"))),
+            CSharpSyntaxTree.ParseText(code, path: Path.GetFullPath(Path.Combine("Solution", "Project5", "Test.cs")))
         };
 
         var engine = new WorkspaceAnalyzerEngine();

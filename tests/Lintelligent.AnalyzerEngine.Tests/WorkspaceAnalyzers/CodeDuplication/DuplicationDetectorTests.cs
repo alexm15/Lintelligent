@@ -208,6 +208,60 @@ public sealed class DuplicationDetectorTests
             "because duplication is a code quality concern");
     }
 
+    [Fact]
+    public void Analyze_ConditionalCompilation_RespectsSymbols()
+    {
+        // Arrange - Create code with conditional compilation that results in different structures
+        var codeWithDebug = """
+            public class ConfigClass
+            {
+                public void Execute()
+                {
+            #if DEBUG
+                    Console.WriteLine("Debug mode");
+                    var debugVar = true;
+            #else
+                    Console.WriteLine("Release mode");
+                    var releaseVar = false;
+            #endif
+                }
+            }
+            """;
+
+        var codeWithRelease = """
+            public class ConfigClass
+            {
+                public void Execute()
+                {
+            #if DEBUG
+                    Console.WriteLine("Debug mode");
+                    var debugVar = true;
+            #else
+                    Console.WriteLine("Release mode");
+                    var releaseVar = false;
+            #endif
+                }
+            }
+            """;
+
+        // Parse with different preprocessor symbols
+        var parseOptionsDebug = CSharpParseOptions.Default.WithPreprocessorSymbols("DEBUG");
+        var parseOptionsRelease = CSharpParseOptions.Default; // No DEBUG symbol
+
+        var tree1 = CSharpSyntaxTree.ParseText(codeWithDebug, parseOptionsDebug, path: "Debug.cs");
+        var tree2 = CSharpSyntaxTree.ParseText(codeWithRelease, parseOptionsRelease, path: "Release.cs");
+
+        var context = CreateWorkspaceContext("TestProject");
+        var detector = new DuplicationDetector();
+
+        // Act
+        var diagnostics = detector.Analyze(new[] { tree1, tree2 }, context).ToList();
+
+        // Assert - Should NOT detect duplication because conditional compilation produces different code
+        diagnostics.Should().BeEmpty(
+            "because conditional compilation results in different effective code");
+    }
+
     private static WorkspaceContext CreateWorkspaceContext(string solutionName, params (string Name, string Path)[] projects)
     {
         // Note: We only need minimal Project instances for testing DuplicationDetector

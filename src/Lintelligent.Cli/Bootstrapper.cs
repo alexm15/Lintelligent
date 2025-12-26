@@ -1,6 +1,7 @@
 using Lintelligent.AnalyzerEngine.Abstractions;
 using Lintelligent.AnalyzerEngine.Analysis;
 using Lintelligent.AnalyzerEngine.Rules;
+using Lintelligent.AnalyzerEngine.WorkspaceAnalyzers.CodeDuplication;
 using Lintelligent.Cli.Commands;
 using Lintelligent.Cli.Providers;
 using Lintelligent.Reporting;
@@ -16,6 +17,7 @@ public static class Bootstrapper
         // so callers (Program or tests) can register explicit, deterministic rules as needed.
         services.AddSingleton<AnalyzerManager>();
         services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
+        services.AddSingleton<WorkspaceAnalyzerEngine>();
 
         // Solution and project providers
         services.AddSingleton<ISolutionProvider, BuildalyzerSolutionProvider>();
@@ -26,5 +28,8 @@ public static class Bootstrapper
 
         // Rules (explicit, deterministic)
         services.AddSingleton<IAnalyzerRule, LongMethodRule>();
+
+        // Workspace Analyzers (explicit, deterministic)
+        services.AddSingleton<IWorkspaceAnalyzer, DuplicationDetector>();
     }
 }

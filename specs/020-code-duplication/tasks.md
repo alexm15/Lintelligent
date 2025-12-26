@@ -82,18 +82,18 @@
 
 ### Tests for User Story 3
 
-- [ ] T023 [P] [US3] Test: `WorkspaceContext_FiveProjects_AllProjectsIncluded` in WorkspaceAnalyzerEngineTests.cs
-- [ ] T024 [P] [US3] Test: `DuplicationDetector_CrossProjectDuplication_IdentifiesProjectNames` in DuplicationDetectorTests.cs
-- [ ] T025 [P] [US3] Test: `DuplicationDetector_ConditionalCompilation_RespectsSymbols` in DuplicationDetectorTests.cs
+- [X] T023 [P] [US3] Test: `WorkspaceContext_FiveProjects_AllProjectsIncluded` in WorkspaceAnalyzerEngineTests.cs
+- [X] T024 [P] [US3] Test: `DuplicationDetector_CrossProjectDuplication_IdentifiesProjectNames` in DuplicationDetectorTests.cs
+- [X] T025 [P] [US3] Test: `DuplicationDetector_ConditionalCompilation_RespectsSymbols` in DuplicationDetectorTests.cs
 
 ### Implementation for User Story 3
 
-- [ ] T026 [US3] Implement `WorkspaceContext` factory method `CreateFromSolution()` that builds ProjectsByPath dictionary
-- [ ] T027 [US3] Implement `WorkspaceAnalyzerEngine.Analyze()` method accepting Solution and IWorkspaceAnalyzer instances
-- [ ] T028 [US3] Enhance `DuplicationInstance` to include `ProjectName` property from workspace context
-- [ ] T029 [US3] Implement `DuplicationGroup.GetAffectedProjects()` method returning unique project names
-- [ ] T030 [US3] Update `ScanCommand.ExecuteAsync()` in src/Lintelligent.Cli/Commands/ScanCommand.cs to orchestrate workspace analysis after single-file rules
-- [ ] T031 [US3] Register `DuplicationDetector` in src/Lintelligent.Cli/Bootstrapper.cs DI container
+- [X] T026 [US3] Implement `WorkspaceContext` factory method `CreateFromSolution()` that builds ProjectsByPath dictionary
+- [X] T027 [US3] Implement `WorkspaceAnalyzerEngine.Analyze()` method accepting Solution and IWorkspaceAnalyzer instances
+- [X] T028 [US3] Enhance `DuplicationInstance` to include `ProjectName` property from workspace context
+- [X] T029 [US3] Implement `DuplicationGroup.GetAffectedProjects()` method returning unique project names
+- [X] T030 [US3] Update `ScanCommand.ExecuteAsync()` in src/Lintelligent.Cli/Commands/ScanCommand.cs to orchestrate workspace analysis after single-file rules
+- [X] T031 [US3] Register `DuplicationDetector` in src/Lintelligent.Cli/Bootstrapper.cs DI container
 
 **Checkpoint**: Multi-project analysis working - cross-project duplications detected and reported with project context
 

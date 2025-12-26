@@ -29,6 +29,7 @@ namespace Lintelligent.Cli.Commands;
 /// </remarks>
 public sealed class ScanCommand(
     AnalyzerEngine.Analysis.AnalyzerEngine engine,
+    AnalyzerEngine.Analysis.WorkspaceAnalyzerEngine workspaceEngine,
     ISolutionProvider? solutionProvider = null,
     IProjectProvider? projectProvider = null,
     ILogger<ScanCommand>? logger = null) : IAsyncCommand
@@ -176,7 +177,24 @@ public sealed class ScanCommand(
     private List<DiagnosticResult> AnalyzeEvaluatedProjects(Solution solution)
     {
         var allResults = new List<DiagnosticResult>();
+        var allTrees = new List<Microsoft.CodeAnalysis.SyntaxTree>();
         
+        // Pass 1: Single-file analysis (existing rules)
+        AnalyzeSingleFileRules(solution, allResults, allTrees);
+
+        logger?.LogInformation("Single-file analysis complete: {Count} diagnostics found", allResults.Count);
+
+        // Pass 2: Workspace-level analysis (duplication detection, etc.)
+        AnalyzeWorkspaceRules(solution, allTrees, allResults);
+
+        return allResults;
+    }
+
+    private void AnalyzeSingleFileRules(
+        Solution solution,
+        List<DiagnosticResult> allResults,
+        List<Microsoft.CodeAnalysis.SyntaxTree> allTrees)
+    {
         foreach (var project in solution.Projects)
         {
             try
@@ -194,9 +212,14 @@ public sealed class ScanCommand(
                     if (projectDir != null)
                     {
                         var codeProvider = new FileSystemCodeProvider(projectDir);
-                        var syntaxTrees = codeProvider.GetSyntaxTrees(project.ConditionalSymbols);
+                        var syntaxTrees = codeProvider.GetSyntaxTrees(project.ConditionalSymbols).ToList();
+                        
+                        // Single-file analysis
                         var results = engine.Analyze(syntaxTrees);
                         allResults.AddRange(results);
+                        
+                        // Collect trees for workspace analysis
+                        allTrees.AddRange(syntaxTrees);
                     }
                 }
             }
@@ -206,9 +229,31 @@ public sealed class ScanCommand(
                 // Continue with other projects
             }
         }
+    }
 
-        logger?.LogInformation("Total diagnostics found: {Count}", allResults.Count);
-        return allResults;
+    private void AnalyzeWorkspaceRules(
+        Solution solution,
+        List<Microsoft.CodeAnalysis.SyntaxTree> allTrees,
+        List<DiagnosticResult> allResults)
+    {
+        if (allTrees.Count > 0 && workspaceEngine.Analyzers.Count > 0)
+        {
+            logger?.LogInformation("Running workspace analyzers across {TreeCount} syntax trees", allTrees.Count);
+            
+            var context = new WorkspaceContext
+            {
+                Solution = solution,
+                ProjectsByPath = solution.Projects.ToDictionary(
+                    p => p.FilePath,
+                    p => p,
+                    StringComparer.OrdinalIgnoreCase)
+            };
+            
+            var workspaceResults = workspaceEngine.Analyze(allTrees, context);
+            allResults.AddRange(workspaceResults);
+            
+            logger?.LogInformation("Workspace analysis complete: {TotalCount} total diagnostics", allResults.Count);
+        }
     }
 
     private List<DiagnosticResult> AnalyzeProjectDirectories(Solution solution)

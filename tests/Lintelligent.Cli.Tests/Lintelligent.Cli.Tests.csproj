@@ -7,6 +7,12 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="4.12.0" />
+        
+        <!-- DOGFOODING: Uncomment to enable Lintelligent analyzer on this project -->
+        <!-- IMPORTANT: Requires the analyzer NuGet package to be published or in local cache -->
+        <!-- To use: 1) Uncomment the line below, 2) Update version to match published package, 3) Run: dotnet restore -->
+        <!-- Note: Does NOT work in CI without publishing package to a feed -->
+        <!--<PackageReference Include="Lintelligent.Analyzers" Version="1.2.0" />-->
     </ItemGroup>
 
     <ItemGroup>

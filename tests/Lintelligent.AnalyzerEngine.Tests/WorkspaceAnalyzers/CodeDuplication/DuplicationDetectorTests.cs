@@ -115,12 +115,12 @@ public sealed class DuplicationDetectorTests
             }
             """;
 
-        var tree1 = CSharpSyntaxTree.ParseText(code, path: @"C:\Project1\Shared.cs");
-        var tree2 = CSharpSyntaxTree.ParseText(code, path: @"C:\Project2\Shared.cs");
+        var tree1 = CSharpSyntaxTree.ParseText(code, path: Path.GetFullPath(Path.Combine("Project1", "Shared.cs")));
+        var tree2 = CSharpSyntaxTree.ParseText(code, path: Path.GetFullPath(Path.Combine("Project2", "Shared.cs")));
 
         var context = CreateWorkspaceContext("Solution", 
-            ("Project1", @"C:\Project1\Project1.csproj"),
-            ("Project2", @"C:\Project2\Project2.csproj"));
+            ("Project1", Path.GetFullPath(Path.Combine("Project1", "Project1.csproj"))),
+            ("Project2", Path.GetFullPath(Path.Combine("Project2", "Project2.csproj"))));
 
         // Use low thresholds to ensure this 8-line code is detected
         var options = new DuplicationOptions { MinLines = 5, MinTokens = 10 };
@@ -273,8 +273,11 @@ public sealed class DuplicationDetectorTests
         {
             // Create a minimal Project with dummy values
             // In real usage, these would come from ISolutionProvider
+            // Ensure paths are absolute and cross-platform
+            var absolutePath = Path.IsPathRooted(p.Path) ? p.Path : Path.GetFullPath(p.Path);
+            
             return new Project(
-                filePath: p.Path,
+                filePath: absolutePath,
                 name: p.Name,
                 targetFramework: new TargetFramework("net10.0"),
                 allTargetFrameworks: new[] { new TargetFramework("net10.0") },
@@ -287,7 +290,7 @@ public sealed class DuplicationDetectorTests
         }).ToList();
 
         var solution = new Solution(
-            filePath: $"C:\\{solutionName}.sln",
+            filePath: Path.GetFullPath(Path.Combine(solutionName + ".sln")),
             name: solutionName,
             projects: projectList,
             configurations: new[] { "Debug", "Release" });
@@ -302,7 +305,8 @@ public sealed class DuplicationDetectorTests
 
     private static WorkspaceContext CreateWorkspaceContext(string projectName)
     {
-        return CreateWorkspaceContext("TestSolution", (projectName, $"C:\\{projectName}\\{projectName}.csproj"));
+        return CreateWorkspaceContext("TestSolution", 
+            (projectName, Path.GetFullPath(Path.Combine(projectName, $"{projectName}.csproj"))));
     }
 
     [Fact]

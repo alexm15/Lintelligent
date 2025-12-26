@@ -77,12 +77,12 @@ public sealed class BuildalyzerProjectProvider(ILogger<BuildalyzerProjectProvide
                 Project evaluated =
                     await EvaluateProjectAsync(project.FilePath, configuration, targetFramework, cancellationToken)
                         .ConfigureAwait(false);
-                return (Success: true, Project: evaluated);
+                return (Success: true, Project: (Project?)evaluated);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to evaluate project: {ProjectPath}", project.FilePath);
-                return (Success: false, Project: null);
+                return (Success: false, Project: (Project?)null);
             }
         });
 

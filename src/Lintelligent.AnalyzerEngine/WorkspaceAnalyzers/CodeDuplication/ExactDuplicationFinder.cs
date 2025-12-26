@@ -1,3 +1,4 @@
+using Lintelligent.AnalyzerEngine.Configuration;
 using Lintelligent.AnalyzerEngine.Utilities;
 using Microsoft.CodeAnalysis;
 
@@ -19,17 +20,22 @@ public static class ExactDuplicationFinder
     /// Finds all exact duplications across the provided syntax trees.
     /// </summary>
     /// <param name="trees">Syntax trees to analyze for duplications.</param>
+    /// <param name="options">Options for filtering duplications (null uses defaults).</param>
     /// <returns>Duplication groups ordered by severity (most severe first).</returns>
     /// <exception cref="ArgumentNullException">If <paramref name="trees"/> is null.</exception>
-    public static IEnumerable<DuplicationGroup> FindDuplicates(IEnumerable<SyntaxTree> trees)
+    public static IEnumerable<DuplicationGroup> FindDuplicates(
+        IEnumerable<SyntaxTree> trees,
+        DuplicationOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(trees);
 
+        options ??= new DuplicationOptions();
         var instancesByHash = BuildHashMapping(trees);
-        return CreateDuplicationGroups(instancesByHash);
+        return CreateDuplicationGroups(instancesByHash, options);
     }
 
-    private static Dictionary<ulong, List<DuplicationInstance>> BuildHashMapping(IEnumerable<SyntaxTree> trees)
+    private static Dictionary<ulong, List<DuplicationInstance>> BuildHashMapping(
+        IEnumerable<SyntaxTree> trees)
     {
 
         // Pass 1: Hash all trees and build hash → instances mapping
@@ -74,7 +80,8 @@ public static class ExactDuplicationFinder
     }
 
     private static IEnumerable<DuplicationGroup> CreateDuplicationGroups(
-        Dictionary<ulong, List<DuplicationInstance>> instancesByHash)
+        Dictionary<ulong, List<DuplicationInstance>> instancesByHash,
+        DuplicationOptions options)
     {
         // Pass 2: Create duplication groups for hashes with 2+ instances
         var groups = new List<DuplicationGroup>();
@@ -87,8 +94,12 @@ public static class ExactDuplicationFinder
                 var lineCount = instances[0].Location.End.Line - instances[0].Location.Start.Line + 1;
                 var tokenCount = instances[0].TokenCount;
 
-                var group = new DuplicationGroup(hash, instances, lineCount, tokenCount);
-                groups.Add(group);
+                // Apply threshold filtering: report if meets MinLines OR MinTokens
+                if (lineCount >= options.MinLines || tokenCount >= options.MinTokens)
+                {
+                    var group = new DuplicationGroup(hash, instances, lineCount, tokenCount);
+                    groups.Add(group);
+                }
             }
         }
 

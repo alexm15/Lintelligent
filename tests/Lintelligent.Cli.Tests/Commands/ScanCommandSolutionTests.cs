@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.Analysis;
+using Lintelligent.AnalyzerEngine.Configuration;
 using Lintelligent.AnalyzerEngine.Rules;
 using Lintelligent.Cli.Commands;
 using Lintelligent.Cli.Providers;
@@ -19,12 +20,14 @@ public sealed class ScanCommandSolutionTests
         analyzerManager.RegisterRule(new LongMethodRule());
         var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(analyzerManager);
         var workspaceEngine = new AnalyzerEngine.Analysis.WorkspaceAnalyzerEngine();
+        var duplicationOptions = new DuplicationOptions();
         var solutionProvider = new BuildalyzerSolutionProvider(NullLogger<BuildalyzerSolutionProvider>.Instance);
         var projectProvider = new BuildalyzerProjectProvider(NullLogger<BuildalyzerProjectProvider>.Instance);
 
         _scanCommand = new ScanCommand(
             engine,
             workspaceEngine,
+            duplicationOptions,
             solutionProvider,
             projectProvider,
             NullLogger<ScanCommand>.Instance);

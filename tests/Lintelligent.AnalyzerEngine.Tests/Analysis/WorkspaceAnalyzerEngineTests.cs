@@ -1,7 +1,6 @@
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.Abstractions;
-using Lintelligent.AnalyzerEngine.Analysis;
-using Lintelligent.AnalyzerEngine.Results;
+using Lintelligent.AnalyzerEngine.Analysis;using Lintelligent.AnalyzerEngine.Configuration;using Lintelligent.AnalyzerEngine.Results;
 using Lintelligent.AnalyzerEngine.WorkspaceAnalyzers.CodeDuplication;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
@@ -47,8 +46,16 @@ public sealed class WorkspaceAnalyzerEngineTests
                 StringComparer.OrdinalIgnoreCase)
         };
 
-        // Create 5 syntax trees (one per project) with identical code
-        var code = "public class TestClass { void Method() { int x = 42; } }";
+        // Create 5 syntax trees (one per project) with identical code (multi-line to ensure detection)
+        var code = """
+            public class TestClass
+            {
+                void Method()
+                {
+                    int x = 42;
+                }
+            }
+            """;
         var trees = new[]
         {
             CSharpSyntaxTree.ParseText(code, path: @"C:\Solution\Project1\Test.cs"),
@@ -59,7 +66,8 @@ public sealed class WorkspaceAnalyzerEngineTests
         };
 
         var engine = new WorkspaceAnalyzerEngine();
-        engine.RegisterAnalyzer(new DuplicationDetector());
+        var options = new DuplicationOptions { MinLines = 1, MinTokens = 1 }; // Low thresholds to detect this small code
+        engine.RegisterAnalyzer(new DuplicationDetector(options));
 
         // Act
         var diagnostics = engine.Analyze(trees, context).ToList();

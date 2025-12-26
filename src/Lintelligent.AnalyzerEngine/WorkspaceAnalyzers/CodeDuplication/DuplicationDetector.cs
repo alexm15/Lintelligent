@@ -1,4 +1,5 @@
 using Lintelligent.AnalyzerEngine.Abstractions;
+using Lintelligent.AnalyzerEngine.Configuration;
 using Lintelligent.AnalyzerEngine.Results;
 using Microsoft.CodeAnalysis;
 
@@ -16,6 +17,23 @@ namespace Lintelligent.AnalyzerEngine.WorkspaceAnalyzers.CodeDuplication;
 /// </remarks>
 public sealed class DuplicationDetector : IWorkspaceAnalyzer
 {
+    private readonly DuplicationOptions _options;
+
+    /// <summary>
+    /// Initializes a new instance with default options.
+    /// </summary>
+    public DuplicationDetector() : this(new DuplicationOptions())
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance with specified options.
+    /// </summary>
+    public DuplicationDetector(DuplicationOptions options)
+    {
+        _options = options ?? throw new ArgumentNullException(nameof(options));
+    }
+
     /// <inheritdoc />
     public string Id => "DUP001";
 
@@ -39,12 +57,12 @@ public sealed class DuplicationDetector : IWorkspaceAnalyzer
         return AnalyzeCore(trees, context);
     }
 
-    private static IEnumerable<DiagnosticResult> AnalyzeCore(
+    private IEnumerable<DiagnosticResult> AnalyzeCore(
         IReadOnlyList<SyntaxTree> trees,
         WorkspaceContext context)
     {
         // Find all duplication groups using token-based exact matching
-        var groups = ExactDuplicationFinder.FindDuplicates(trees);
+        var groups = ExactDuplicationFinder.FindDuplicates(trees, _options);
 
         // Convert each group to a diagnostic result
         foreach (var group in groups)

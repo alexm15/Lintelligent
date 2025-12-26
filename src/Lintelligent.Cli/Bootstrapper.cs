@@ -1,5 +1,6 @@
 using Lintelligent.AnalyzerEngine.Abstractions;
 using Lintelligent.AnalyzerEngine.Analysis;
+using Lintelligent.AnalyzerEngine.Configuration;
 using Lintelligent.AnalyzerEngine.Rules;
 using Lintelligent.AnalyzerEngine.WorkspaceAnalyzers.CodeDuplication;
 using Lintelligent.Cli.Commands;
@@ -29,7 +30,9 @@ public static class Bootstrapper
         // Rules (explicit, deterministic)
         services.AddSingleton<IAnalyzerRule, LongMethodRule>();
 
-        // Workspace Analyzers (explicit, deterministic)
-        services.AddSingleton<IWorkspaceAnalyzer, DuplicationDetector>();
+        // Duplication detection configuration and analyzers
+        services.AddSingleton(new DuplicationOptions()); // Default options, will be overridden by CLI flags
+        services.AddSingleton<IWorkspaceAnalyzer>(sp => 
+            new DuplicationDetector(sp.GetRequiredService<DuplicationOptions>()));
     }
 }

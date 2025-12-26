@@ -1,4 +1,5 @@
 ﻿using Lintelligent.AnalyzerEngine.Abstractions;
+using Lintelligent.AnalyzerEngine.Configuration;
 using Lintelligent.AnalyzerEngine.ProjectModel;
 using Lintelligent.AnalyzerEngine.Results;
 using Lintelligent.Cli.Infrastructure;
@@ -30,12 +31,15 @@ namespace Lintelligent.Cli.Commands;
 public sealed class ScanCommand(
     AnalyzerEngine.Analysis.AnalyzerEngine engine,
     AnalyzerEngine.Analysis.WorkspaceAnalyzerEngine workspaceEngine,
+    DuplicationOptions duplicationOptions,
     ISolutionProvider? solutionProvider = null,
     IProjectProvider? projectProvider = null,
     ILogger<ScanCommand>? logger = null) : IAsyncCommand
 {
     /// <inheritdoc/>
+#pragma warning disable MA0051 // Method is too long - CLI argument parsing requires multiple options
     public async Task<CommandResult> ExecuteAsync(string[] args)
+#pragma warning restore MA0051
     {
         try
         {
@@ -44,8 +48,16 @@ public sealed class ScanCommand(
             var groupBy = ParseGroupByOption(args);
             var configuration = ParseConfigurationOption(args);
             var targetFramework = ParseTargetFrameworkOption(args);
+            var minDuplicationLines = ParseMinDuplicationLinesOption(args);
+            var minDuplicationTokens = ParseMinDuplicationTokensOption(args);
             _ = ParseFormatOption(args); // TODO: Use format option when implementing output formatting
             _ = ParseOutputOption(args); // TODO: Use output path when implementing file output
+
+            // Apply CLI flag overrides to DuplicationOptions (CLI takes precedence)
+            if (minDuplicationLines.HasValue)
+                duplicationOptions.MinLines = minDuplicationLines.Value;
+            if (minDuplicationTokens.HasValue)
+                duplicationOptions.MinTokens = minDuplicationTokens.Value;
 
             // Check if path is a solution file
             if (path.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
@@ -91,7 +103,12 @@ public sealed class ScanCommand(
         }
     }
 
-    private async Task<CommandResult> AnalyzeSolutionAsync(string solutionPath, Severity? severityFilter, string? groupBy, string configuration, string? targetFramework)
+    private async Task<CommandResult> AnalyzeSolutionAsync(
+        string solutionPath,
+        Severity? severityFilter,
+        string? groupBy,
+        string configuration,
+        string? targetFramework)
     {
         logger?.LogInformation("Analyzing solution: {SolutionPath} with configuration: {Configuration}", solutionPath, configuration);
 
@@ -390,5 +407,51 @@ public sealed class ScanCommand(
                 return args[i + 1];
 
         return null; // Default: use first available target framework
+    }
+
+    /// <summary>
+    ///     Parses the --min-duplication-lines flag from command line arguments.
+    /// </summary>
+    /// <param name="args">Command line arguments.</param>
+    /// <returns>Minimum line count for duplication detection or null if not specified.</returns>
+    /// <remarks>
+    ///     The --min-duplication-lines flag specifies the minimum number of lines required
+    ///     for code to be reported as a duplication. Duplications with fewer lines will be
+    ///     filtered out unless they meet the token threshold.
+    ///     Default: 10 lines (if not specified)
+    ///     Example usage:
+    ///     - lintelligent scan MySolution.sln --min-duplication-lines 15
+    ///     - lintelligent scan MyProject --min-duplication-lines 5
+    /// </remarks>
+    private static int? ParseMinDuplicationLinesOption(string[] args)
+    {
+        for (var i = 0; i < args.Length - 1; i++)
+            if (args[i] == "--min-duplication-lines")
+                return int.TryParse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : null;
+
+        return null; // Default: use DuplicationOptions default (10)
+    }
+
+    /// <summary>
+    ///     Parses the --min-duplication-tokens flag from command line arguments.
+    /// </summary>
+    /// <param name="args">Command line arguments.</param>
+    /// <returns>Minimum token count for duplication detection or null if not specified.</returns>
+    /// <remarks>
+    ///     The --min-duplication-tokens flag specifies the minimum number of tokens required
+    ///     for code to be reported as a duplication. This allows detection of token-dense
+    ///     duplications even if they have few lines.
+    ///     Default: 50 tokens (if not specified)
+    ///     Example usage:
+    ///     - lintelligent scan MySolution.sln --min-duplication-tokens 100
+    ///     - lintelligent scan MyProject --min-duplication-tokens 30
+    /// </remarks>
+    private static int? ParseMinDuplicationTokensOption(string[] args)
+    {
+        for (var i = 0; i < args.Length - 1; i++)
+            if (args[i] == "--min-duplication-tokens")
+                return int.TryParse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : null;
+
+        return null; // Default: use DuplicationOptions default (50)
     }
 }

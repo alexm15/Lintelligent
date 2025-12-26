@@ -4,6 +4,14 @@
         <TargetFramework>net10.0</TargetFramework>
     </PropertyGroup>
 
+    <!-- DOGFOODING: Uncomment to enable Lintelligent analyzer on this project -->
+    <!-- IMPORTANT: Requires the analyzer NuGet package to be published or in local cache -->
+    <!-- To use: 1) Uncomment the ItemGroup below, 2) Update version to match published package, 3) Run: dotnet restore -->
+    <!-- Note: Does NOT work in CI without publishing package to a feed -->
+    <!--<ItemGroup>
+        <PackageReference Include="Lintelligent.Analyzers" Version="1.2.0" />
+    </ItemGroup>-->
+
     <ItemGroup>
         <ProjectReference Include="..\..\src\Lintelligent.AnalyzerEngine\Lintelligent.AnalyzerEngine.csproj"/>
         <ProjectReference Include="..\..\src\Lintelligent.Reporting\Lintelligent.Reporting.csproj"/>

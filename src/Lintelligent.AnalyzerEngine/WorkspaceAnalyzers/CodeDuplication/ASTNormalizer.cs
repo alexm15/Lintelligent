@@ -37,17 +37,11 @@ public class AstNormalizer
         return rewriter.Visit(root);
     }
 
-    private sealed class IdentifierNormalizingRewriter : CSharpSyntaxRewriter
+    private sealed class IdentifierNormalizingRewriter(
+        Dictionary<string, string> identifierMapping,
+        Func<int> getNextId)
+        : CSharpSyntaxRewriter
     {
-        private readonly Func<int> _getNextId;
-        private readonly Dictionary<string, string> _identifierMapping;
-
-        public IdentifierNormalizingRewriter(Dictionary<string, string> identifierMapping, Func<int> getNextId)
-        {
-            _identifierMapping = identifierMapping;
-            _getNextId = getNextId;
-        }
-
         public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
         {
             var originalName = node.Identifier.Text;
@@ -56,11 +50,10 @@ public class AstNormalizer
             if (SyntaxFacts.GetKeywordKind(originalName) != SyntaxKind.None)
                 return base.VisitIdentifierName(node);
 
-            if (!_identifierMapping.TryGetValue(originalName, out var normalizedName))
-            {
-                normalizedName = $"id_{_getNextId()}";
-                _identifierMapping[originalName] = normalizedName;
-            }
+            if (identifierMapping.TryGetValue(originalName, out var normalizedName))
+                return node.WithIdentifier(SyntaxFactory.Identifier(normalizedName));
+            normalizedName = $"id_{getNextId()}";
+            identifierMapping[originalName] = normalizedName;
 
             return node.WithIdentifier(SyntaxFactory.Identifier(normalizedName));
         }
@@ -69,10 +62,10 @@ public class AstNormalizer
         {
             var originalName = node.Identifier.Text;
 
-            if (!_identifierMapping.TryGetValue(originalName, out var normalizedName))
+            if (!identifierMapping.TryGetValue(originalName, out var normalizedName))
             {
-                normalizedName = $"id_{_getNextId()}";
-                _identifierMapping[originalName] = normalizedName;
+                normalizedName = $"id_{getNextId()}";
+                identifierMapping[originalName] = normalizedName;
             }
 
             return node.WithIdentifier(SyntaxFactory.Identifier(normalizedName));
@@ -82,10 +75,10 @@ public class AstNormalizer
         {
             var originalName = node.Identifier.Text;
 
-            if (!_identifierMapping.TryGetValue(originalName, out var normalizedName))
+            if (!identifierMapping.TryGetValue(originalName, out var normalizedName))
             {
-                normalizedName = $"id_{_getNextId()}";
-                _identifierMapping[originalName] = normalizedName;
+                normalizedName = $"id_{getNextId()}";
+                identifierMapping[originalName] = normalizedName;
             }
 
             return node.WithIdentifier(SyntaxFactory.Identifier(normalizedName));
@@ -95,10 +88,10 @@ public class AstNormalizer
         {
             var originalName = node.Identifier.Text;
 
-            if (!_identifierMapping.TryGetValue(originalName, out var normalizedName))
+            if (!identifierMapping.TryGetValue(originalName, out var normalizedName))
             {
-                normalizedName = $"id_{_getNextId()}";
-                _identifierMapping[originalName] = normalizedName;
+                normalizedName = $"id_{getNextId()}";
+                identifierMapping[originalName] = normalizedName;
             }
 
             return base.VisitMethodDeclaration(node.WithIdentifier(SyntaxFactory.Identifier(normalizedName)));

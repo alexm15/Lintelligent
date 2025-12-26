@@ -42,7 +42,9 @@ public class ExceptionSwallowingRule : IAnalyzerRule
         if (fileName.EndsWith(".Designer.cs", StringComparison.OrdinalIgnoreCase) ||
             fileName.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) ||
             fileName.Contains(".Generated."))
+        {
             return true;
+        }
 
         SyntaxNode root = tree.GetRoot();
         IEnumerable<SyntaxTrivia> leadingTrivia = root.GetLeadingTrivia().Take(10);

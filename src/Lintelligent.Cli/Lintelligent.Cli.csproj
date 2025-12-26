@@ -12,8 +12,10 @@
 
 
     <ItemGroup>
+        <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-70" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1"/>
         <PackageReference Include="Buildalyzer" Version="8.0.0"/>
+        <PackageReference Include="Lintelligent.Analyzers" Version="1.2.0" />
     </ItemGroup>
 
 

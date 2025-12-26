@@ -88,13 +88,16 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
         
         // Parse monad detection configuration once per syntax tree
         var monadOptions = MonadDetectionOptions.Parse(configOptions);
+        
+        // Auto-enable monad detection if LanguageExt.Core is referenced (unless explicitly disabled)
+        var monadDetectionEnabled = hasLanguageExt && (monadOptions.Enabled || !configOptions.TryGetValue("language_ext_monad_detection", out _));
 
         foreach (IAnalyzerRule rule in Rules)
         {
             try
             {
                 // Skip monad rules if monad detection is not enabled or LanguageExt.Core not referenced
-                if (IsMonadRule(rule) && (!monadOptions.Enabled || !hasLanguageExt))
+                if (IsMonadRule(rule) && !monadDetectionEnabled)
                     continue;
                 
                 // Check EditorConfig for severity override

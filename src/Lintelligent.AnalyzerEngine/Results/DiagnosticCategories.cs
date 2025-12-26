@@ -58,6 +58,12 @@ public static class DiagnosticCategories
     public const string Documentation = "Documentation";
 
     /// <summary>
+    ///     Functional programming opportunities.
+    ///     Examples: nullable to Option&lt;T&gt;, try/catch to Either&lt;L, R&gt;, monad patterns.
+    /// </summary>
+    public const string Functional = "Functional";
+
+    /// <summary>
     ///     General issues not fitting other categories.
     ///     Use sparingly - prefer specific categories when applicable.
     /// </summary>

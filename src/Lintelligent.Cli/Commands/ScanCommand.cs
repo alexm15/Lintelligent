@@ -44,7 +44,7 @@ public sealed class ScanCommand(
         try
         {
             var path = args.Length > 1 ? args[1] : ".";
-            var severityFilter = ParseSeverityFilter(args);
+            Severity? severityFilter = ParseSeverityFilter(args);
             var groupBy = ParseGroupByOption(args);
             var configuration = ParseConfigurationOption(args);
             var targetFramework = ParseTargetFrameworkOption(args);
@@ -140,16 +140,16 @@ public sealed class ScanCommand(
         string? groupBy)
     {
         var analysisStart = DateTime.UtcNow;
-        
+
         // Evaluate all projects to get metadata (ConditionalSymbols, TargetFrameworks, etc.)
         var evaluatedSolution = await projectProvider!.EvaluateAllProjectsAsync(
             solution,
             configuration,
             targetFramework
         );
-        
+
         logger?.LogInformation("Successfully evaluated {Count} projects", evaluatedSolution.Projects.Count);
-        
+
         // T116: Log dependency graph information
         var depGraph = evaluatedSolution.GetDependencyGraph();
         var totalReferences = depGraph.Values.Sum(refs => refs.Count);
@@ -201,7 +201,7 @@ public sealed class ScanCommand(
     {
         var allResults = new List<DiagnosticResult>();
         var allTrees = new List<Microsoft.CodeAnalysis.SyntaxTree>();
-        
+
         // Pass 1: Single-file analysis (existing rules)
         AnalyzeSingleFileRules(solution, allResults, allTrees);
 
@@ -236,11 +236,11 @@ public sealed class ScanCommand(
                     {
                         var codeProvider = new FileSystemCodeProvider(projectDir);
                         var syntaxTrees = codeProvider.GetSyntaxTrees(project.ConditionalSymbols).ToList();
-                        
+
                         // Single-file analysis
                         var results = engine.Analyze(syntaxTrees);
                         allResults.AddRange(results);
-                        
+
                         // Collect trees for workspace analysis
                         allTrees.AddRange(syntaxTrees);
                     }
@@ -262,17 +262,17 @@ public sealed class ScanCommand(
         if (allTrees.Count > 0 && workspaceEngine.Analyzers.Count > 0)
         {
             logger?.LogInformation("Running workspace analyzers across {TreeCount} syntax trees", allTrees.Count);
-            
+
             var context = new WorkspaceContext(
                 solution,
                 solution.Projects.ToDictionary(
                     p => p.FilePath,
                     p => p,
                     StringComparer.OrdinalIgnoreCase));
-            
+
             var workspaceResults = workspaceEngine.Analyze(allTrees, context);
             allResults.AddRange(workspaceResults);
-            
+
             logger?.LogInformation("Workspace analysis complete: {TotalCount} total diagnostics", allResults.Count);
         }
     }
@@ -280,7 +280,7 @@ public sealed class ScanCommand(
     private List<DiagnosticResult> AnalyzeProjectDirectories(Solution solution)
     {
         var allResults = new List<DiagnosticResult>();
-        
+
         foreach (var project in solution.Projects)
         {
             try
@@ -335,7 +335,7 @@ public sealed class ScanCommand(
 
         return null;
     }
-    
+
     private static string ParseFormatOption(string[] args)
     {
         for (var i = 0; i < args.Length - 1; i++)
@@ -353,7 +353,7 @@ public sealed class ScanCommand(
 
         return "markdown"; // Default format
     }
-    
+
     private static string? ParseOutputOption(string[] args)
     {
         for (var i = 0; i < args.Length - 1; i++)
@@ -362,7 +362,7 @@ public sealed class ScanCommand(
 
         return null; // Default: stdout
     }
-    
+
     /// <summary>
     ///     Parses the --configuration flag from command line arguments.
     /// </summary>
@@ -376,7 +376,7 @@ public sealed class ScanCommand(
     ///     - Debug: typically defines DEBUG and TRACE symbols
     ///     - Release: typically defines RELEASE symbol
     ///     Custom configurations may define different symbols based on project settings.
-    ///     
+    ///
     ///     Example usage:
     ///     - lintelligent scan MySolution.sln --configuration Debug
     ///     - lintelligent scan MyProject.csproj --configuration Release

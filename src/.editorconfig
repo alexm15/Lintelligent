@@ -82,7 +82,7 @@ csharp_style_conditional_delegate_call = true:warning
 dotnet_style_prefer_conditional_expression_over_return = false:silent
 
 # Code block preferences
-csharp_prefer_braces = true:suggestion
+csharp_prefer_braces = when_multiline:suggestion
 csharp_prefer_simple_using_statement = true:suggestion
 csharp_style_prefer_method_group_conversion = true:suggestion
 csharp_prefer_static_local_function = true:warning

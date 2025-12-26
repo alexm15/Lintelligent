@@ -12,6 +12,13 @@ insert_final_newline = true
 # Code files
 [*.{cs,vb}]
 
+#### Lintelligent Monad Detection ####
+build_property.language_ext_monad_detection = true
+build_property.language_ext_min_complexity = 3
+dotnet_diagnostic.LNT200.severity = warning
+dotnet_diagnostic.LNT201.severity = warning  
+dotnet_diagnostic.LNT202.severity = warning
+
 #### Naming Conventions ####
 
 # Async methods must end with Async

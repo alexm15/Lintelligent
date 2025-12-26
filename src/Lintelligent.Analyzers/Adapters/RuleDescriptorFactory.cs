@@ -9,6 +9,7 @@ namespace Lintelligent.Analyzers.Adapters;
 /// </summary>
 public static class RuleDescriptorFactory
 {
+#pragma warning disable S1075 // URIs should not be hardcoded - These are documentation links
     private const string BaseHelpUrl =
         "https://github.com/YourOrg/Lintelligent/blob/main/specs/005-core-rule-library/rules-documentation.md";
 
@@ -23,6 +24,15 @@ public static class RuleDescriptorFactory
         ["LNT007"] = "lnt007-exception-swallowing",
         ["LNT008"] = "lnt008-missing-xml-documentation"
     };
+    
+    private static readonly Dictionary<string, string> MonadRuleUrls = new(StringComparer.Ordinal)
+    {
+        ["LNT200"] = "https://github.com/louthy/language-ext/wiki/How-to-handle-errors-in-a-functional-way#optional-results",
+        ["LNT201"] = "https://github.com/louthy/language-ext/wiki/How-to-handle-errors-in-a-functional-way#eitherl-r",
+        ["LNT202"] = "https://github.com/louthy/language-ext/wiki/How-to-handle-errors-in-a-functional-way#generalising-to-other-alternative-value-types",
+        ["LNT203"] = "https://github.com/louthy/language-ext/wiki/How-to-handle-errors-in-a-functional-way#generalising-to-other-alternative-value-types"
+    };
+#pragma warning restore S1075
 
     /// <summary>
     ///     Creates a DiagnosticDescriptor from an IAnalyzerRule.
@@ -52,6 +62,11 @@ public static class RuleDescriptorFactory
     /// </summary>
     public static string GetHelpLinkUri(string ruleId)
     {
+        // Check if it's a monad detection rule - link directly to LanguageExt docs
+        if (MonadRuleUrls.TryGetValue(ruleId, out var monadUrl))
+            return monadUrl;
+        
+        // Check if it's a standard rule with an anchor
         return RuleAnchors.TryGetValue(ruleId, out var anchor)
             ? $"{BaseHelpUrl}#{anchor}"
             : BaseHelpUrl;

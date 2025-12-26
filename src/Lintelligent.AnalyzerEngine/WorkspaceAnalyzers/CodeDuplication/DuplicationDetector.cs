@@ -120,11 +120,10 @@ public sealed class DuplicationDetector : IWorkspaceAnalyzer
         {
             // Check if file path is under project directory
             var projectDir = Path.GetDirectoryName(project.FilePath);
-            if (projectDir != null && instance.FilePath.StartsWith(projectDir, StringComparison.OrdinalIgnoreCase))
-            {
-                projectName = project.Name;
-                break;
-            }
+            if (projectDir == null ||
+                !instance.FilePath.StartsWith(projectDir, StringComparison.OrdinalIgnoreCase)) continue;
+            projectName = project.Name;
+            break;
         }
 
         return new DuplicationInstance(

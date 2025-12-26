@@ -137,14 +137,16 @@ class TestClass
     public async Task Analyze_WithLanguageExtCore_NoExceptions()
     {
         // Arrange
-        var testCode = @"
-class TestClass
-{
-    void Method()
-    {
-        var x = 42;
-    }
-}";
+        var testCode = """
+
+                       class TestClass
+                       {
+                           void Method()
+                           {
+                               var x = 42;
+                           }
+                       }
+                       """;
 
         // Act & Assert: Should not throw any analyzer exceptions (LNT999)
         ImmutableArray<Diagnostic> diagnostics = await GetDiagnosticsAsync(testCode, includeLanguageExt: true);

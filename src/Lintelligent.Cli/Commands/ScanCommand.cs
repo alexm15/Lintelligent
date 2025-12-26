@@ -31,6 +31,7 @@ namespace Lintelligent.Cli.Commands;
 ///     The command is responsible for file system access (via FileSystemCodeProvider).
 ///     The AnalyzerEngine core performs no IO operations, maintaining constitutional compliance.
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "LNT005:God Class", Justification = "Command classes coordinate multiple concerns by design")]
 public sealed class ScanCommand(
     AnalyzerEngine.Analysis.AnalyzerEngine engine,
     WorkspaceAnalyzerEngine workspaceEngine,

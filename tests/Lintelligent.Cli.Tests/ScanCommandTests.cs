@@ -1,8 +1,10 @@
 ﻿using System.Reflection;
 using Lintelligent.AnalyzerEngine.Abstractions;
 using Lintelligent.AnalyzerEngine.Analysis;
+using Lintelligent.AnalyzerEngine.Configuration;
 using Lintelligent.AnalyzerEngine.Results;
 using Lintelligent.AnalyzerEngine.Rules;
+using Lintelligent.AnalyzerEngine.WorkspaceAnalyzers.CodeDuplication;
 using Lintelligent.Cli.Commands;
 using Lintelligent.Cli.Infrastructure;
 using Lintelligent.Reporting;
@@ -30,6 +32,8 @@ public class ScanCommandTests
                 {
                     services.AddSingleton<AnalyzerManager>();
                     services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
+                    services.AddSingleton<WorkspaceAnalyzerEngine>();
+                    services.AddSingleton(new DuplicationOptions()); // Required by ScanCommand
                     services.AddSingleton<IAnalyzerRule, AlwaysReportRule>();
                     services.AddTransient<ScanCommand>();
                 })
@@ -136,6 +140,8 @@ public class ScanCommandTests
     {
         services.AddSingleton<AnalyzerManager>();
         services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
+        services.AddSingleton<WorkspaceAnalyzerEngine>();
+        services.AddSingleton(new DuplicationOptions()); // Required by ScanCommand
         services.AddTransient<ScanCommand>();
     }
 
@@ -149,6 +155,116 @@ public class ScanCommandTests
         public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
         {
             yield return new DiagnosticResult(tree.FilePath, Id, Description, 1, Severity, Category);
+        }
+    }
+
+    [Fact]
+    public void ScanCommand_MinDuplicationLinesFlag_FiltersByLineCount()
+    {
+        // Test verifies that --min-duplication-lines flag filters duplications
+        var temp = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(temp);
+        try
+        {
+            // Create two files with 8-line duplication
+            var code = """
+                public class TestClass
+                {
+                    void Method()
+                    {
+                        int x = 42;
+                        int y = 84;
+                    }
+                }
+                """;
+            File.WriteAllText(Path.Combine(temp, "File1.cs"), code);
+            File.WriteAllText(Path.Combine(temp, "File2.cs"), code);
+
+            var builder = new CliApplicationBuilder();
+            builder.ConfigureServices(services =>
+            {
+                services.AddSingleton<AnalyzerManager>();
+                services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
+                var workspaceEngine = new WorkspaceAnalyzerEngine();
+                services.AddSingleton(workspaceEngine);
+                
+                // Register DuplicationOptions with low default (would detect 8-line duplication)
+                var options = new DuplicationOptions { MinLines = 5, MinTokens = 10 };
+                services.AddSingleton(options);
+                services.AddTransient<ScanCommand>();
+                
+                // Register DuplicationDetector that uses the same options instance
+                workspaceEngine.RegisterAnalyzer(new DuplicationDetector(options));
+            });
+            builder.AddCommand<ScanCommand>();
+
+            using var app = builder.Build();
+
+            // Act - Execute with --min-duplication-lines 15 (CLI flag overrides default 5)
+            var result = app.Execute(["scan", temp, "--min-duplication-lines", "15"]);
+
+            // Assert - Should succeed with no duplications reported (filtered by CLI threshold)
+            Assert.Equal(0, result.ExitCode);
+            Assert.DoesNotContain("DUP001", result.Output);
+        }
+        finally
+        {
+            Directory.Delete(temp, true);
+        }
+    }
+
+    [Fact]
+    public void ScanCommand_CLIFlagOverridesConfig_CLITakesPrecedence()
+    {
+        // Test verifies CLI flags override default configuration
+        var temp = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(temp);
+        try
+        {
+            // Create two files with 8-line duplication
+            var code = """
+                public class TestClass
+                {
+                    void Method()
+                    {
+                        int x = 42;
+                        int y = 84;
+                    }
+                }
+                """;
+            File.WriteAllText(Path.Combine(temp, "File1.cs"), code);
+            File.WriteAllText(Path.Combine(temp, "File2.cs"), code);
+
+            var builder = new CliApplicationBuilder();
+            builder.ConfigureServices(services =>
+            {
+                services.AddSingleton<AnalyzerManager>();
+                services.AddSingleton<AnalyzerEngine.Analysis.AnalyzerEngine>();
+                var workspaceEngine = new WorkspaceAnalyzerEngine();
+                services.AddSingleton(workspaceEngine);
+                
+                // Register DuplicationOptions with low defaults (would detect 8-line duplication)
+                var options = new DuplicationOptions { MinLines = 5, MinTokens = 10 };
+                services.AddSingleton(options);
+                services.AddTransient<ScanCommand>();
+                
+                // Register DuplicationDetector that uses the same options instance
+                workspaceEngine.RegisterAnalyzer(new DuplicationDetector(options));
+            });
+            builder.AddCommand<ScanCommand>();
+
+            using var app = builder.Build();
+
+            // Act - Execute with CLI flags that raise thresholds (should override low config defaults)
+            var result = app.Execute(["scan", temp, "--min-duplication-lines", "20", "--min-duplication-tokens", "100"]);
+
+            // Assert - Should succeed with no duplications reported (CLI flags override config)
+            Assert.Equal(0, result.ExitCode);
+            Assert.DoesNotContain("DUP001", result.Output);
+        }
+        finally
+        {
+            Directory.Delete(temp, true);
         }
     }
 }

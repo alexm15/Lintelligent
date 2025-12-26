@@ -232,6 +232,52 @@ public class JsonFormatterTests
         _formatter.FormatName.Should().Be("json");
     }
 
+    [Fact]
+    public void JsonFormatter_DuplicationResults_IncludesLocationsAndTokenCounts()
+    {
+        // Arrange - Create duplication results with detailed information
+        var results = new[]
+        {
+            CreateDiagnosticResult(
+                "src/ProjectA/Calculator.cs",
+                Severity.Warning,
+                "Code Quality",
+                25,
+                "DUP001",
+                "Code duplicated in 3 files (15 lines, 200 tokens): ProjectA/Calculator.cs, ProjectB/Math.cs, ProjectC/Utils.cs"),
+            CreateDiagnosticResult(
+                "src/ProjectB/DataProcessor.cs",
+                Severity.Warning,
+                "Code Quality",
+                10,
+                "DUP001",
+                "Code duplicated in 2 files (8 lines, 95 tokens): ProjectB/DataProcessor.cs, ProjectC/Handler.cs")
+        };
+
+        // Act
+        var json = _formatter.Format(results);
+
+        // Assert
+        using var doc = JsonDocument.Parse(json);
+        var violations = doc.RootElement.GetProperty("violations");
+        
+        violations.GetArrayLength().Should().Be(2);
+        
+        // First duplication
+        var dup1 = violations[0];
+        dup1.GetProperty("ruleId").GetString().Should().Be("DUP001");
+        dup1.GetProperty("message").GetString().Should().Contain("3 files");
+        dup1.GetProperty("message").GetString().Should().Contain("15 lines");
+        dup1.GetProperty("message").GetString().Should().Contain("200 tokens");
+        dup1.GetProperty("lineNumber").GetInt32().Should().Be(25);
+        
+        // Second duplication
+        var dup2 = violations[1];
+        dup2.GetProperty("message").GetString().Should().Contain("2 files");
+        dup2.GetProperty("message").GetString().Should().Contain("8 lines");
+        dup2.GetProperty("message").GetString().Should().Contain("95 tokens");
+    }
+
     // Helper method
     private static DiagnosticResult CreateDiagnosticResult(
         string filePath,

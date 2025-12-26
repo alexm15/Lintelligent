@@ -5,6 +5,7 @@ using Lintelligent.AnalyzerEngine.Results;
 using Lintelligent.Cli.Infrastructure;
 using Lintelligent.Cli.Providers;
 using Lintelligent.Reporting;
+using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 
 #pragma warning disable MA0006 // Use string.Equals instead of == operator
@@ -76,10 +77,10 @@ public sealed class ScanCommand(
 
             // Original directory-based analysis
             var codeProvider = new FileSystemCodeProvider(path);
-            var syntaxTrees = codeProvider.GetSyntaxTrees();
+            IEnumerable<SyntaxTree> syntaxTrees = codeProvider.GetSyntaxTrees();
 
             // Analyze syntax trees (no IO in engine)
-            var results = engine.Analyze(syntaxTrees);
+            IEnumerable<DiagnosticResult> results = engine.Analyze(syntaxTrees);
 
             // Filter by severity if specified
             if (severityFilter.HasValue) results = results.Where(r => r.Severity == severityFilter.Value);
@@ -91,7 +92,7 @@ public sealed class ScanCommand(
             var report = groupBy switch
             {
                 "category" => ReportGenerator.GenerateMarkdownGroupedByCategory(materializedResults),
-                _ => ReportGenerator.GenerateMarkdown(materializedResults)
+                _ => ReportGenerator.GenerateMarkdown(materializedResults),
             };
 
             // Return success with report in Output
@@ -119,7 +120,7 @@ public sealed class ScanCommand(
         logger?.LogInformation("Analyzing solution: {SolutionPath} with configuration: {Configuration}", solutionPath, configuration);
 
         // Parse solution to get project list
-        var solution = await solutionProvider!.ParseSolutionAsync(solutionPath);
+        Solution solution = await solutionProvider!.ParseSolutionAsync(solutionPath);
         logger?.LogInformation("Found {ProjectCount} projects in solution", solution.Projects.Count);
 
         // Check if we have project provider for metadata extraction
@@ -139,10 +140,10 @@ public sealed class ScanCommand(
         Severity? severityFilter,
         string? groupBy)
     {
-        var analysisStart = DateTime.UtcNow;
+        DateTime analysisStart = DateTime.UtcNow;
 
         // Evaluate all projects to get metadata (ConditionalSymbols, TargetFrameworks, etc.)
-        var evaluatedSolution = await projectProvider!.EvaluateAllProjectsAsync(
+        Solution evaluatedSolution = await projectProvider!.EvaluateAllProjectsAsync(
             solution,
             configuration,
             targetFramework
@@ -151,16 +152,16 @@ public sealed class ScanCommand(
         logger?.LogInformation("Successfully evaluated {Count} projects", evaluatedSolution.Projects.Count);
 
         // T116: Log dependency graph information
-        var depGraph = evaluatedSolution.GetDependencyGraph();
+        IReadOnlyDictionary<string, IReadOnlyList<string>> depGraph = evaluatedSolution.GetDependencyGraph();
         var totalReferences = depGraph.Values.Sum(refs => refs.Count);
         logger?.LogInformation("Dependency graph: {ProjectCount} projects, {ReferenceCount} project references",
             depGraph.Count, totalReferences);
 
         // Analyze each evaluated project with its conditional symbols
-        var allResults = AnalyzeEvaluatedProjects(evaluatedSolution);
+        List<DiagnosticResult> allResults = AnalyzeEvaluatedProjects(evaluatedSolution);
 
         // Filter by severity if specified
-        var filteredResults = severityFilter.HasValue
+        List<DiagnosticResult> filteredResults = severityFilter.HasValue
             ? allResults.Where(r => r.Severity == severityFilter.Value).ToList()
             : allResults;
 
@@ -171,7 +172,7 @@ public sealed class ScanCommand(
             _ => ReportGenerator.GenerateMarkdown(filteredResults)
         };
 
-        var totalDuration = DateTime.UtcNow - analysisStart;
+        TimeSpan totalDuration = DateTime.UtcNow - analysisStart;
         logger?.LogInformation("Total analysis completed in {Duration}ms: {DiagnosticCount} diagnostics",
             totalDuration.TotalMilliseconds, filteredResults.Count);
 
@@ -180,10 +181,10 @@ public sealed class ScanCommand(
 
     private CommandResult AnalyzeSolutionDirectories(Solution solution, Severity? severityFilter, string? groupBy)
     {
-        var allResultsFallback = AnalyzeProjectDirectories(solution);
+        List<DiagnosticResult> allResultsFallback = AnalyzeProjectDirectories(solution);
 
         // Filter by severity if specified
-        var filteredResultsFallback = severityFilter.HasValue
+        List<DiagnosticResult> filteredResultsFallback = severityFilter.HasValue
             ? allResultsFallback.Where(r => r.Severity == severityFilter.Value).ToList()
             : allResultsFallback;
 
@@ -191,7 +192,7 @@ public sealed class ScanCommand(
         var reportFallback = groupBy switch
         {
             "category" => ReportGenerator.GenerateMarkdownGroupedByCategory(filteredResultsFallback),
-            _ => ReportGenerator.GenerateMarkdown(filteredResultsFallback)
+            _ => ReportGenerator.GenerateMarkdown(filteredResultsFallback),
         };
 
         return CommandResult.Success(reportFallback);
@@ -200,7 +201,7 @@ public sealed class ScanCommand(
     private List<DiagnosticResult> AnalyzeEvaluatedProjects(Solution solution)
     {
         var allResults = new List<DiagnosticResult>();
-        var allTrees = new List<Microsoft.CodeAnalysis.SyntaxTree>();
+        var allTrees = new List<SyntaxTree>();
 
         // Pass 1: Single-file analysis (existing rules)
         AnalyzeSingleFileRules(solution, allResults, allTrees);
@@ -216,35 +217,31 @@ public sealed class ScanCommand(
     private void AnalyzeSingleFileRules(
         Solution solution,
         List<DiagnosticResult> allResults,
-        List<Microsoft.CodeAnalysis.SyntaxTree> allTrees)
+        List<SyntaxTree> allTrees)
     {
-        foreach (var project in solution.Projects)
+        foreach (Project project in solution.Projects)
         {
             try
             {
                 // Use CompileItems from the project if available, otherwise fallback to directory scan
-                if (project.CompileItems.Count > 0)
-                {
-                    logger?.LogInformation(
-                        "Analyzing project: {ProjectName} with {SymbolCount} conditional symbols",
-                        project.Name,
-                        project.ConditionalSymbols.Count);
+                if (project.CompileItems is {Count: <= 0}) continue;
+                logger?.LogInformation(
+                    "Analyzing project: {ProjectName} with {SymbolCount} conditional symbols",
+                    project.Name,
+                    project.ConditionalSymbols.Count);
 
-                    // Get syntax trees for the project's source files with conditional symbols
-                    var projectDir = Path.GetDirectoryName(project.FilePath);
-                    if (projectDir != null)
-                    {
-                        var codeProvider = new FileSystemCodeProvider(projectDir);
-                        var syntaxTrees = codeProvider.GetSyntaxTrees(project.ConditionalSymbols).ToList();
+                // Get syntax trees for the project's source files with conditional symbols
+                var projectDir = Path.GetDirectoryName(project.FilePath);
+                if (projectDir == null) continue;
+                var codeProvider = new FileSystemCodeProvider(projectDir);
+                var syntaxTrees = codeProvider.GetSyntaxTrees(project.ConditionalSymbols).ToList();
 
-                        // Single-file analysis
-                        var results = engine.Analyze(syntaxTrees);
-                        allResults.AddRange(results);
+                // Single-file analysis
+                IEnumerable<DiagnosticResult> results = engine.Analyze(syntaxTrees);
+                allResults.AddRange(results);
 
-                        // Collect trees for workspace analysis
-                        allTrees.AddRange(syntaxTrees);
-                    }
-                }
+                // Collect trees for workspace analysis
+                allTrees.AddRange(syntaxTrees);
             }
             catch (Exception ex)
             {
@@ -256,32 +253,30 @@ public sealed class ScanCommand(
 
     private void AnalyzeWorkspaceRules(
         Solution solution,
-        List<Microsoft.CodeAnalysis.SyntaxTree> allTrees,
+        List<SyntaxTree> allTrees,
         List<DiagnosticResult> allResults)
     {
-        if (allTrees.Count > 0 && workspaceEngine.Analyzers.Count > 0)
-        {
-            logger?.LogInformation("Running workspace analyzers across {TreeCount} syntax trees", allTrees.Count);
+        if (allTrees.Count == 0 || workspaceEngine.Analyzers.Count == 0) return;
+        logger?.LogInformation("Running workspace analyzers across {TreeCount} syntax trees", allTrees.Count);
 
-            var context = new WorkspaceContext(
-                solution,
-                solution.Projects.ToDictionary(
-                    p => p.FilePath,
-                    p => p,
-                    StringComparer.OrdinalIgnoreCase));
+        var context = new WorkspaceContext(
+            solution,
+            solution.Projects.ToDictionary(
+                p => p.FilePath,
+                p => p,
+                StringComparer.OrdinalIgnoreCase));
 
-            var workspaceResults = workspaceEngine.Analyze(allTrees, context);
-            allResults.AddRange(workspaceResults);
+        IEnumerable<DiagnosticResult> workspaceResults = workspaceEngine.Analyze(allTrees, context);
+        allResults.AddRange(workspaceResults);
 
-            logger?.LogInformation("Workspace analysis complete: {TotalCount} total diagnostics", allResults.Count);
-        }
+        logger?.LogInformation("Workspace analysis complete: {TotalCount} total diagnostics", allResults.Count);
     }
 
     private List<DiagnosticResult> AnalyzeProjectDirectories(Solution solution)
     {
         var allResults = new List<DiagnosticResult>();
 
-        foreach (var project in solution.Projects)
+        foreach (Project project in solution.Projects)
         {
             try
             {
@@ -294,8 +289,8 @@ public sealed class ScanCommand(
 
                 logger?.LogInformation("Analyzing project: {ProjectName}", project.Name);
                 var codeProvider = new FileSystemCodeProvider(projectDir);
-                var syntaxTrees = codeProvider.GetSyntaxTrees();
-                var results = engine.Analyze(syntaxTrees);
+                IEnumerable<SyntaxTree> syntaxTrees = codeProvider.GetSyntaxTrees();
+                IEnumerable<DiagnosticResult> results = engine.Analyze(syntaxTrees);
                 allResults.AddRange(results);
             }
             catch (Exception ex)
@@ -312,14 +307,18 @@ public sealed class ScanCommand(
     private static Severity? ParseSeverityFilter(string[] args)
     {
         for (var i = 0; i < args.Length - 1; i++)
+        {
             if (args[i] == "--severity")
+            {
                 return args[i + 1].ToLowerInvariant() switch
                 {
                     "error" => Severity.Error,
                     "warning" => Severity.Warning,
                     "info" => Severity.Info,
-                    _ => null
+                    _ => null,
                 };
+            }
+        }
 
         return null;
     }
@@ -327,11 +326,11 @@ public sealed class ScanCommand(
     private static string? ParseGroupByOption(string[] args)
     {
         for (var i = 0; i < args.Length - 1; i++)
-            if (args[i] == "--group-by")
-            {
-                var value = args[i + 1].ToLowerInvariant();
-                return value == "category" ? value : null;
-            }
+        {
+            if (args[i] != "--group-by") continue;
+            var value = args[i + 1].ToLowerInvariant();
+            return value == "category" ? value : null;
+        }
 
         return null;
     }
@@ -339,17 +338,17 @@ public sealed class ScanCommand(
     private static string ParseFormatOption(string[] args)
     {
         for (var i = 0; i < args.Length - 1; i++)
-            if (args[i] == "--format")
+        {
+            if (args[i] != "--format") continue;
+            var value = args[i + 1].ToLowerInvariant();
+            var validFormats = new[] { "json", "sarif", "markdown" };
+            if (!validFormats.Contains(value))
             {
-                var value = args[i + 1].ToLowerInvariant();
-                var validFormats = new[] { "json", "sarif", "markdown" };
-                if (!validFormats.Contains(value))
-                {
-                    throw new ArgumentException(
-                        $"Invalid format '{value}'. Valid formats: {string.Join(", ", validFormats)}");
-                }
-                return value;
+                throw new ArgumentException(
+                    $"Invalid format '{value}'. Valid formats: {string.Join(", ", validFormats)}");
             }
+            return value;
+        }
 
         return "markdown"; // Default format
     }
@@ -357,8 +356,10 @@ public sealed class ScanCommand(
     private static string? ParseOutputOption(string[] args)
     {
         for (var i = 0; i < args.Length - 1; i++)
+        {
             if (args[i] == "--output")
                 return args[i + 1];
+        }
 
         return null; // Default: stdout
     }
@@ -385,8 +386,10 @@ public sealed class ScanCommand(
     private static string ParseConfigurationOption(string[] args)
     {
         for (var i = 0; i < args.Length - 1; i++)
-            if (args[i] == "--configuration" || args[i] == "-c")
+        {
+            if (string.Equals(args[i], "--configuration", StringComparison.Ordinal) || args[i] == "-c")
                 return args[i + 1];
+        }
 
         return "Debug"; // Default configuration
     }
@@ -407,8 +410,10 @@ public sealed class ScanCommand(
     private static string? ParseTargetFrameworkOption(string[] args)
     {
         for (var i = 0; i < args.Length - 1; i++)
-            if (args[i] == "--target-framework" || args[i] == "-f")
+        {
+            if (string.Equals(args[i], "--target-framework", StringComparison.Ordinal) || args[i] == "-f")
                 return args[i + 1];
+        }
 
         return null; // Default: use first available target framework
     }
@@ -430,8 +435,10 @@ public sealed class ScanCommand(
     private static int? ParseMinDuplicationLinesOption(string[] args)
     {
         for (var i = 0; i < args.Length - 1; i++)
+        {
             if (args[i] == "--min-duplication-lines")
                 return int.TryParse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : null;
+        }
 
         return null; // Default: use DuplicationOptions default (10)
     }
@@ -453,8 +460,10 @@ public sealed class ScanCommand(
     private static int? ParseMinDuplicationTokensOption(string[] args)
     {
         for (var i = 0; i < args.Length - 1; i++)
+        {
             if (args[i] == "--min-duplication-tokens")
                 return int.TryParse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : null;
+        }
 
         return null; // Default: use DuplicationOptions default (50)
     }
@@ -494,8 +503,10 @@ public sealed class ScanCommand(
     private static double? ParseMinSimilarityOption(string[] args)
     {
         for (var i = 0; i < args.Length - 1; i++)
+        {
             if (args[i] == "--min-similarity")
                 return double.TryParse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : null;
+        }
 
         return null; // Default: use DuplicationOptions default (85.0)
     }

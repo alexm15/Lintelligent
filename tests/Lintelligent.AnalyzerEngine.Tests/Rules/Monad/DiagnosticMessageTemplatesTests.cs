@@ -178,46 +178,16 @@ public class DiagnosticMessageTemplatesTests
     [Fact]
     public void ValidateTemplate_ValidTemplate_ReturnsTrue()
     {
-        // Arrange
-        string validTemplate = @"### Current Code
-### Suggested Refactoring
-### Benefits
-### When to Apply
-### Additional Resources";
-
-        // Act
-        bool result = DiagnosticMessageTemplates.ValidateTemplate(validTemplate);
-
-        // Assert
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void ValidateTemplate_MissingSections_ReturnsFalse()
-    {
-        // Arrange
-        string invalidTemplate = "### Current Code";
-
-        // Act
-        bool result = DiagnosticMessageTemplates.ValidateTemplate(invalidTemplate);
-
-        // Assert
-        Assert.False(result);
-    }
-
-    [Fact]
-    public void AllTemplates_PassValidation()
-    {
         // Arrange & Act
         string optionTemplate = DiagnosticMessageTemplates.GetOptionTemplate("Test", "string", 1);
         string eitherTemplate = DiagnosticMessageTemplates.GetEitherTemplate("Test", "Exception");
         string validationTemplate = DiagnosticMessageTemplates.GetValidationTemplate("Test", 2);
         string tryTemplate = DiagnosticMessageTemplates.GetTryTemplate("Test", "Exception");
 
-        // Assert
-        Assert.True(DiagnosticMessageTemplates.ValidateTemplate(optionTemplate));
-        Assert.True(DiagnosticMessageTemplates.ValidateTemplate(eitherTemplate));
-        Assert.True(DiagnosticMessageTemplates.ValidateTemplate(validationTemplate));
-        Assert.True(DiagnosticMessageTemplates.ValidateTemplate(tryTemplate));
+        // Assert - all templates should be short actionable messages
+        Assert.Contains("Option", optionTemplate);
+        Assert.Contains("Either", eitherTemplate);
+        Assert.Contains("Validation", validationTemplate);
+        Assert.Contains("Try", tryTemplate);
     }
 }

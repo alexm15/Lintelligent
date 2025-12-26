@@ -21,13 +21,10 @@ jobs:
         with:
           dotnet-version: '10.0.x'
           
-      - name: Build Analyzer (creates NuGet package for local cache)
-        run: dotnet build src/Lintelligent.Analyzers/Lintelligent.Analyzers.csproj --configuration Release
-          
       - name: Restore dependencies
         run: dotnet restore
         
-      - name: Build solution
+      - name: Build
         run: dotnet build --no-restore --configuration Release
         
       - name: Run tests with coverage

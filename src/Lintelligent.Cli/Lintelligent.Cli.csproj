@@ -14,10 +14,6 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
         <PackageReference Include="Buildalyzer" Version="8.0.0" />
-        <PackageReference Include="Lintelligent.Analyzers" Version="1.1.0">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
     </ItemGroup>
 
 

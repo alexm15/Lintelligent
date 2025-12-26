@@ -1,9 +1,10 @@
 // ReSharper disable once CheckNamespace
+
 namespace System;
 
 /// <summary>
-/// Polyfills for argument validation methods in netstandard2.0.
-/// Also available in net10.0 to ensure compatibility when analyzer (netstandard2.0) is loaded in test context.
+///     Polyfills for argument validation methods in netstandard2.0.
+///     Also available in net10.0 to ensure compatibility when analyzer (netstandard2.0) is loaded in test context.
 /// </summary>
 internal static class ArgumentExceptionPolyfills
 {
@@ -16,8 +17,10 @@ internal static class ArgumentExceptionPolyfills
         }
     }
 #else
-    public static void ThrowIfNullOrWhiteSpace(string? value, string paramName) 
-        => ArgumentException.ThrowIfNullOrWhiteSpace(value, paramName);
+    public static void ThrowIfNullOrWhiteSpace(string? value, string paramName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(value, paramName);
+    }
 #endif
 }
 
@@ -33,7 +36,9 @@ internal static class ArgumentNullExceptionPolyfills
     }
 #else
     public static void ThrowIfNull(object? value, string paramName)
-        => ArgumentNullException.ThrowIfNull(value, paramName);
+    {
+        ArgumentNullException.ThrowIfNull(value, paramName);
+    }
 #endif
 }
 
@@ -46,7 +51,9 @@ internal static class EnumPolyfills
     }
 #else
     public static bool IsDefined<TEnum>(TEnum value) where TEnum : struct, Enum
-        => Enum.IsDefined<TEnum>(value);
+    {
+        return Enum.IsDefined(value);
+    }
 #endif
 }
 
@@ -64,6 +71,8 @@ internal static class MathPolyfills
     }
 #else
     public static int Clamp(int value, int min, int max)
-        => Math.Clamp(value, min, max);
+    {
+        return Math.Clamp(value, min, max);
+    }
 #endif
 }

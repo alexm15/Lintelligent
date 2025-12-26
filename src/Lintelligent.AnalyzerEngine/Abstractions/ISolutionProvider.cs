@@ -3,12 +3,12 @@ using Lintelligent.AnalyzerEngine.ProjectModel;
 namespace Lintelligent.AnalyzerEngine.Abstractions;
 
 /// <summary>
-/// Provides solution file parsing capabilities.
+///     Provides solution file parsing capabilities.
 /// </summary>
 public interface ISolutionProvider
 {
     /// <summary>
-    /// Parses a Visual Studio solution file to extract project paths and configurations.
+    ///     Parses a Visual Studio solution file to extract project paths and configurations.
     /// </summary>
     /// <param name="solutionPath">Absolute path to the .sln file.</param>
     /// <param name="cancellationToken">Cancellation token.</param>

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Lintelligent.AnalyzerEngine.ProjectModel;
 using Lintelligent.Cli.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
@@ -21,7 +22,7 @@ public sealed class BuildalyzerSolutionProviderTests
         var solutionPath = Path.GetFullPath(Path.Combine("Fixtures", "TestSolution.sln"));
 
         // Act
-        var solution = await _provider.ParseSolutionAsync(solutionPath);
+        Solution solution = await _provider.ParseSolutionAsync(solutionPath);
 
         // Assert
         solution.Should().NotBeNull();
@@ -42,7 +43,7 @@ public sealed class BuildalyzerSolutionProviderTests
         var solutionPath = Path.GetFullPath(Path.Combine("Fixtures", "TestSolution.sln"));
 
         // Act
-        var solution = await _provider.ParseSolutionAsync(solutionPath);
+        Solution solution = await _provider.ParseSolutionAsync(solutionPath);
 
         // Assert
         solution.Projects.Should().AllSatisfy(p =>
@@ -59,7 +60,7 @@ public sealed class BuildalyzerSolutionProviderTests
         var solutionPath = "NonExistent.sln";
 
         // Act
-        var act = async () => await _provider.ParseSolutionAsync(solutionPath);
+        Func<Task<Solution>> act = async () => await _provider.ParseSolutionAsync(solutionPath);
 
         // Assert
         await act.Should().ThrowAsync<FileNotFoundException>()
@@ -70,7 +71,7 @@ public sealed class BuildalyzerSolutionProviderTests
     public async Task ParseSolutionAsync_NullPath_ThrowsArgumentException()
     {
         // Act
-        var act = async () => await _provider.ParseSolutionAsync(null!);
+        Func<Task<Solution>> act = async () => await _provider.ParseSolutionAsync(null!);
 
         // Assert
         await act.Should().ThrowAsync<ArgumentException>()
@@ -81,7 +82,7 @@ public sealed class BuildalyzerSolutionProviderTests
     public async Task ParseSolutionAsync_EmptyPath_ThrowsArgumentException()
     {
         // Act
-        var act = async () => await _provider.ParseSolutionAsync(string.Empty);
+        Func<Task<Solution>> act = async () => await _provider.ParseSolutionAsync(string.Empty);
 
         // Assert
         await act.Should().ThrowAsync<ArgumentException>()
@@ -98,7 +99,7 @@ public sealed class BuildalyzerSolutionProviderTests
             await File.WriteAllTextAsync(tempFile, "This is not a valid solution file content");
 
             // Act
-            var act = async () => await _provider.ParseSolutionAsync(tempFile);
+            Func<Task<Solution>> act = async () => await _provider.ParseSolutionAsync(tempFile);
 
             // Assert
             await act.Should().ThrowAsync<InvalidOperationException>()

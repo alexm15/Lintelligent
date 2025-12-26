@@ -15,7 +15,8 @@ public class FilteringCodeProviderTests
     public void Constructor_NullInnerProvider_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => new FilteringCodeProvider(null!, _ => true));
+        ArgumentNullException exception =
+            Assert.Throws<ArgumentNullException>(() => new FilteringCodeProvider(null!, _ => true));
         exception.ParamName.Should().Be("innerProvider");
     }
 
@@ -27,7 +28,8 @@ public class FilteringCodeProviderTests
         var innerProvider = new InMemoryCodeProvider(sources);
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => new FilteringCodeProvider(innerProvider, null!));
+        ArgumentNullException exception =
+            Assert.Throws<ArgumentNullException>(() => new FilteringCodeProvider(innerProvider, null!));
         exception.ParamName.Should().Be("predicate");
     }
 
@@ -193,7 +195,7 @@ public class FilteringCodeProviderTests
         var filter = new FilteringCodeProvider(innerProvider, _ => true);
 
         // Act - Call GetSyntaxTrees but don't enumerate
-        var enumerable = filter.GetSyntaxTrees();
+        IEnumerable<SyntaxTree> enumerable = filter.GetSyntaxTrees();
 
         // Assert - Should not throw
         enumerable.Should().NotBeNull();
@@ -245,7 +247,8 @@ public class FilteringCodeProviderTests
             tree =>
             {
                 var name = Path.GetFileName(tree.FilePath);
-                return (name.StartsWith('a') || name.StartsWith('b')) && name.EndsWith("Test.cs", StringComparison.Ordinal);
+                return (name.StartsWith('a') || name.StartsWith('b')) &&
+                       name.EndsWith("Test.cs", StringComparison.Ordinal);
             });
 
         // Act

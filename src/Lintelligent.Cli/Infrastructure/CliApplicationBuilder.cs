@@ -83,7 +83,7 @@ public sealed class CliApplicationBuilder
 
         _isBuilt = true;
 
-        var serviceProvider = _services.BuildServiceProvider();
+        ServiceProvider serviceProvider = _services.BuildServiceProvider();
         return new CliApplication(serviceProvider, _commandTypes);
     }
 }

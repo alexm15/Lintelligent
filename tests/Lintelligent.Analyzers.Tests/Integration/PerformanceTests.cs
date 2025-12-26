@@ -1,17 +1,17 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Xunit;
 
 namespace Lintelligent.Analyzers.Tests.Integration;
 
 /// <summary>
-/// Performance tests to ensure analyzer overhead meets requirements.
+///     Performance tests to ensure analyzer overhead meets requirements.
 /// </summary>
 /// <remarks>
-/// SC-003 requires: Roslyn analyzer build overhead <10% for 100-file solution (~2s max)
+///     SC-003 requires: Roslyn analyzer build overhead <10% for 100- file solution (~2 s max)
 /// </remarks>
 public class PerformanceTests
 {
@@ -20,31 +20,31 @@ public class PerformanceTests
     {
         // Arrange: Create 10 files with moderate complexity
         var syntaxTrees = new List<SyntaxTree>();
-        for (int i = 0; i < 10; i++)
+        for (var i = 0; i < 10; i++)
         {
             var source = GenerateTestFile(i);
-            var tree = CSharpSyntaxTree.ParseText(source, path: $"TestFile{i}.cs");
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(source, path: $"TestFile{i}.cs");
             syntaxTrees.Add(tree);
         }
 
-        var compilation = CSharpCompilation.Create("TestAssembly")
+        CSharpCompilation compilation = CSharpCompilation.Create("TestAssembly")
             .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
             .AddSyntaxTrees(syntaxTrees);
 
         // Act: Measure analysis time
         var stopwatch = Stopwatch.StartNew();
-        
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
+
+        CompilationWithAnalyzers compilationWithAnalyzers = compilation.WithAnalyzers(
             ImmutableArray.Create<DiagnosticAnalyzer>(new LintelligentDiagnosticAnalyzer()));
-        
-        var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
-        
+
+        ImmutableArray<Diagnostic> diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+
         stopwatch.Stop();
 
         // Assert: Should complete quickly (<2.5s for 10 files, accommodating CI overhead)
-        Assert.True(stopwatch.ElapsedMilliseconds < 2500, 
+        Assert.True(stopwatch.ElapsedMilliseconds < 2500,
             $"Analysis took {stopwatch.ElapsedMilliseconds}ms (expected <2500ms)");
-        
+
         // Verify diagnostics were produced (sanity check)
         Assert.NotEmpty(diagnostics);
     }
@@ -53,35 +53,32 @@ public class PerformanceTests
     public async Task Analyze_LargeFile_DoesNotExceedTimeLimit()
     {
         // Arrange: Large file with 50 classes, 10 methods each
-        var sourceBuilder = new System.Text.StringBuilder();
-        for (int c = 0; c < 50; c++)
+        var sourceBuilder = new StringBuilder();
+        for (var c = 0; c < 50; c++)
         {
             sourceBuilder.AppendLine($"public class Class{c} {{");
-            for (int m = 0; m < 10; m++)
-            {
-                sourceBuilder.AppendLine($"    public void Method{m}() {{ var x = 1; }}");
-            }
+            for (var m = 0; m < 10; m++) sourceBuilder.AppendLine($"    public void Method{m}() {{ var x = 1; }}");
             sourceBuilder.AppendLine("}");
         }
 
         var source = sourceBuilder.ToString();
-        var syntaxTree = CSharpSyntaxTree.ParseText(source, path: "LargeFile.cs");
-        var compilation = CSharpCompilation.Create("TestAssembly")
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source, path: "LargeFile.cs");
+        CSharpCompilation compilation = CSharpCompilation.Create("TestAssembly")
             .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
             .AddSyntaxTrees(syntaxTree);
 
         // Act: Measure analysis time
         var stopwatch = Stopwatch.StartNew();
-        
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
+
+        CompilationWithAnalyzers compilationWithAnalyzers = compilation.WithAnalyzers(
             ImmutableArray.Create<DiagnosticAnalyzer>(new LintelligentDiagnosticAnalyzer()));
-        
-        var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
-        
+
+        ImmutableArray<Diagnostic> diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+
         stopwatch.Stop();
 
         // Assert: Should complete quickly (<1.5s for large file, accommodating CI overhead)
-        Assert.True(stopwatch.ElapsedMilliseconds < 1500, 
+        Assert.True(stopwatch.ElapsedMilliseconds < 1500,
             $"Analysis took {stopwatch.ElapsedMilliseconds}ms (expected <1500ms)");
     }
 
@@ -90,38 +87,38 @@ public class PerformanceTests
     {
         // Arrange: Create 20 files
         var syntaxTrees = new List<SyntaxTree>();
-        for (int i = 0; i < 20; i++)
+        for (var i = 0; i < 20; i++)
         {
             var source = GenerateTestFile(i);
-            var tree = CSharpSyntaxTree.ParseText(source, path: $"ParallelTest{i}.cs");
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(source, path: $"ParallelTest{i}.cs");
             syntaxTrees.Add(tree);
         }
 
-        var compilation = CSharpCompilation.Create("TestAssembly")
+        CSharpCompilation compilation = CSharpCompilation.Create("TestAssembly")
             .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
             .AddSyntaxTrees(syntaxTrees);
 
         // Act: Measure analysis time
         var stopwatch = Stopwatch.StartNew();
-        
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
+
+        CompilationWithAnalyzers compilationWithAnalyzers = compilation.WithAnalyzers(
             ImmutableArray.Create<DiagnosticAnalyzer>(new LintelligentDiagnosticAnalyzer()));
-        
-        var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
-        
+
+        ImmutableArray<Diagnostic> diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+
         stopwatch.Stop();
 
         // Assert: Should complete in <4s for 20 files (benefit from EnableConcurrentExecution, CI overhead)
-        Assert.True(stopwatch.ElapsedMilliseconds < 4000, 
+        Assert.True(stopwatch.ElapsedMilliseconds < 4000,
             $"Analysis took {stopwatch.ElapsedMilliseconds}ms (expected <4000ms)");
-        
+
         // Verify diagnostics from all files
         var fileCount = diagnostics.Select(d => d.Location.SourceTree?.FilePath).Distinct().Count();
         Assert.True(fileCount > 0, "Should have diagnostics from multiple files");
     }
 
     /// <summary>
-    /// Generates a test file with various code patterns to trigger different rules.
+    ///     Generates a test file with various code patterns to trigger different rules.
     /// </summary>
     private static string GenerateTestFile(int index)
     {

@@ -1,16 +1,16 @@
+using Lintelligent.AnalyzerEngine.Results;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using Lintelligent.AnalyzerEngine.Results;
 
 namespace Lintelligent.Analyzers.Adapters;
 
 /// <summary>
-/// Converts Lintelligent DiagnosticResult to Roslyn Diagnostic.
+///     Converts Lintelligent DiagnosticResult to Roslyn Diagnostic.
 /// </summary>
 public static class DiagnosticConverter
 {
     /// <summary>
-    /// Converts a DiagnosticResult to a Roslyn Diagnostic.
+    ///     Converts a DiagnosticResult to a Roslyn Diagnostic.
     /// </summary>
     /// <param name="result">The diagnostic result from IAnalyzerRule.</param>
     /// <param name="tree">The syntax tree being analyzed.</param>
@@ -28,25 +28,22 @@ public static class DiagnosticConverter
         ArgumentNullException.ThrowIfNull(descriptor);
 #endif
 
-        var location = CreateLocation(result.LineNumber, tree);
+        Location location = CreateLocation(result.LineNumber, tree);
         return Diagnostic.Create(descriptor, location, result.Message);
     }
 
     /// <summary>
-    /// Creates a Roslyn Location from a 1-indexed line number.
+    ///     Creates a Roslyn Location from a 1-indexed line number.
     /// </summary>
     /// <remarks>
-    /// DiagnosticResult uses 1-indexed line numbers (user-friendly).
-    /// Roslyn Location uses 0-indexed line numbers (API convention).
-    /// This method handles the conversion and bounds checking.
+    ///     DiagnosticResult uses 1-indexed line numbers (user-friendly).
+    ///     Roslyn Location uses 0-indexed line numbers (API convention).
+    ///     This method handles the conversion and bounds checking.
     /// </remarks>
     public static Location CreateLocation(int lineNumber, SyntaxTree tree)
     {
-        var text = tree.GetText();
-        if (text.Lines.Count == 0)
-        {
-            return Location.None;  // Empty file edge case
-        }
+        SourceText text = tree.GetText();
+        if (text.Lines.Count == 0) return Location.None; // Empty file edge case
 
         // Convert 1-indexed to 0-indexed, clamp to valid range
 #if NETSTANDARD2_0
@@ -54,13 +51,13 @@ public static class DiagnosticConverter
 #else
         var roslynLine = Math.Clamp(lineNumber - 1, 0, text.Lines.Count - 1);
 #endif
-        var textLine = text.Lines[roslynLine];
+        TextLine textLine = text.Lines[roslynLine];
 
         return Location.Create(tree, textLine.Span);
     }
 
     /// <summary>
-    /// Gets the line span for a location (for testing).
+    ///     Gets the line span for a location (for testing).
     /// </summary>
     public static FileLinePositionSpan GetLineSpan(Location location)
     {

@@ -1,34 +1,33 @@
 using Lintelligent.AnalyzerEngine.Configuration;
 using Lintelligent.AnalyzerEngine.Utilities;
-using Microsoft.CodeAnalysis;
 
 namespace Lintelligent.AnalyzerEngine.WorkspaceAnalyzers.CodeDuplication;
 
 /// <summary>
-/// Detects exact code duplications across syntax trees using token-based hashing.
-/// Implements two-pass algorithm: hash all code blocks, then group matches.
-/// Detects both whole-file duplications and statement sequences within methods.
+///     Detects exact code duplications across syntax trees using token-based hashing.
+///     Implements two-pass algorithm: hash all code blocks, then group matches.
+///     Detects both whole-file duplications and statement sequences within methods.
 /// </summary>
 /// <remarks>
-/// Algorithm (RT-004 from research):
-/// Pass 1: Hash all files AND extract statement sequences, build hash → instances mapping  
-/// Pass 2: For hashes with 2+ instances, create DuplicationGroups
-/// Memory: ~10MB per 100k LOC (hash table only, trees stay in memory externally)
-/// Granularity: Detects duplicated code at multiple levels:
-/// - Whole files (entire syntax trees)
-/// - Statement sequences within methods (minimum 3 consecutive statements)
-/// - Constructors, property accessors, and other code blocks
+///     Algorithm (RT-004 from research):
+///     Pass 1: Hash all files AND extract statement sequences, build hash → instances mapping
+///     Pass 2: For hashes with 2+ instances, create DuplicationGroups
+///     Memory: ~10MB per 100k LOC (hash table only, trees stay in memory externally)
+///     Granularity: Detects duplicated code at multiple levels:
+///     - Whole files (entire syntax trees)
+///     - Statement sequences within methods (minimum 3 consecutive statements)
+///     - Constructors, property accessors, and other code blocks
 /// </remarks>
 public static class ExactDuplicationFinder
 {
     /// <summary>
-    /// Finds all exact duplications across the provided syntax trees.
-    /// Detects both whole-file duplications and duplicated statement sequences within methods.
+    ///     Finds all exact duplications across the provided syntax trees.
+    ///     Detects both whole-file duplications and duplicated statement sequences within methods.
     /// </summary>
     /// <param name="trees">Syntax trees to analyze for duplications.</param>
     /// <param name="options">Options for filtering duplications (null uses defaults).</param>
     /// <returns>Duplication groups ordered by severity (most severe first).</returns>
-    /// <exception cref="ArgumentNullException">If <paramref name="trees"/> is null.</exception>
+    /// <exception cref="ArgumentNullException">If <paramref name="trees" /> is null.</exception>
     public static IEnumerable<DuplicationGroup> FindDuplicates(
         IEnumerable<SyntaxTree> trees,
         DuplicationOptions? options = null)
@@ -36,7 +35,7 @@ public static class ExactDuplicationFinder
         ArgumentNullExceptionPolyfills.ThrowIfNull(trees, nameof(trees));
 
         options ??= new DuplicationOptions();
-        var instancesByHash = BuildHashMapping(trees);
+        Dictionary<ulong, List<DuplicationInstance>> instancesByHash = BuildHashMapping(trees);
         return CreateDuplicationGroups(instancesByHash, options);
     }
 
@@ -46,15 +45,15 @@ public static class ExactDuplicationFinder
         // Pass 1: Hash all trees and statement sequences, build hash → instances mapping
         var instancesByHash = new Dictionary<ulong, List<DuplicationInstance>>();
 
-        foreach (var tree in trees)
+        foreach (SyntaxTree tree in trees)
         {
             // Hash whole files (original behavior)
             var hash = TokenHasher.HashTree(tree);
             var filePath = tree.FilePath;
 
             // Get root and location
-            var root = tree.GetRoot();
-            var location = root.GetLocation().GetLineSpan();
+            SyntaxNode root = tree.GetRoot();
+            FileLinePositionSpan location = root.GetLocation().GetLineSpan();
 
             // Extract tokens for token count
             var tokens = TokenHasher.ExtractTokens(tree).ToList();
@@ -73,18 +72,18 @@ public static class ExactDuplicationFinder
                 sourceText);
 
             AddToHashMapping(instancesByHash, hash, instance);
-            
+
             // Also hash statement sequences within methods (NEW: sub-block detection)
-            foreach (var sequence in StatementSequenceExtractor.ExtractSequences(tree, minStatements: 3))
+            foreach (StatementSequence sequence in StatementSequenceExtractor.ExtractSequences(tree))
             {
                 var sequenceTokens = sequence.ExtractTokens().ToList();
                 var sequenceHash = TokenHasher.HashTokens(sequenceTokens);
                 var sequenceTokenCount = sequenceTokens.Count;
-                
+
                 // Reconstruct source text from statements
-                var sequenceSource = string.Join(Environment.NewLine, 
+                var sequenceSource = string.Join(Environment.NewLine,
                     sequence.Statements.Select(s => s.ToFullString()));
-                
+
                 var sequenceInstance = new DuplicationInstance(
                     sequence.FilePath,
                     sequence.Context, // e.g., "Method: CreateUser"
@@ -92,24 +91,25 @@ public static class ExactDuplicationFinder
                     sequenceTokenCount,
                     sequenceHash,
                     sequenceSource);
-                    
+
                 AddToHashMapping(instancesByHash, sequenceHash, sequenceInstance);
             }
         }
 
         return instancesByHash;
     }
-    
+
     private static void AddToHashMapping(
         Dictionary<ulong, List<DuplicationInstance>> mapping,
         ulong hash,
         DuplicationInstance instance)
     {
-        if (!mapping.TryGetValue(hash, out var instances))
+        if (!mapping.TryGetValue(hash, out List<DuplicationInstance>? instances))
         {
             instances = new List<DuplicationInstance>();
             mapping[hash] = instances;
         }
+
         instances.Add(instance);
     }
 
@@ -120,11 +120,11 @@ public static class ExactDuplicationFinder
         // Pass 2: Create duplication groups for hashes with 2+ instances
         var groups = new List<DuplicationGroup>();
 
-        foreach (var kvp in instancesByHash)
+        foreach (KeyValuePair<ulong, List<DuplicationInstance>> kvp in instancesByHash)
         {
             var hash = kvp.Key;
-            var instances = kvp.Value;
-            
+            List<DuplicationInstance> instances = kvp.Value;
+
             if (instances.Count >= 2)
             {
                 // Calculate line count from first instance (all should be identical)

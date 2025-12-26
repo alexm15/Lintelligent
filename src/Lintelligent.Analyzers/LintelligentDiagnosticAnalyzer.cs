@@ -1,25 +1,25 @@
-using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Reflection;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
-using Lintelligent.AnalyzerEngine.Abstractions;
+using Lintelligent.AnalyzerEngine.Results;
 using Lintelligent.AnalyzerEngine.Rules;
 using Lintelligent.Analyzers.Adapters;
 using Lintelligent.Analyzers.Metadata;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Lintelligent.Analyzers;
 
 /// <summary>
-/// Main Roslyn diagnostic analyzer that wraps all Lintelligent IAnalyzerRule implementations.
+///     Main Roslyn diagnostic analyzer that wraps all Lintelligent IAnalyzerRule implementations.
 /// </summary>
 /// <remarks>
-/// This analyzer:
-/// - Discovers all IAnalyzerRule implementations via reflection at initialization
-/// - Creates DiagnosticDescriptor for each rule
-/// - Executes all rules on each syntax tree during compilation
-/// - Supports EditorConfig severity overrides (dotnet_diagnostic.{ruleId}.severity)
-/// - Skips generated code automatically
-/// - Reports internal errors as LNT999 without crashing
+///     This analyzer:
+///     - Discovers all IAnalyzerRule implementations via reflection at initialization
+///     - Creates DiagnosticDescriptor for each rule
+///     - Executes all rules on each syntax tree during compilation
+///     - Supports EditorConfig severity overrides (dotnet_diagnostic.{ruleId}.severity)
+///     - Skips generated code automatically
+///     - Reports internal errors as LNT999 without crashing
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
@@ -27,26 +27,30 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
     private static readonly IAnalyzerRule[] Rules = DiscoverRules();
 #if !NETSTANDARD2_0
     private static readonly IWorkspaceAnalyzer[] WorkspaceAnalyzers = DiscoverWorkspaceAnalyzers();
-    private static readonly DiagnosticDescriptor[] WorkspaceDescriptors = CreateWorkspaceDescriptors(WorkspaceAnalyzers);
-    private static readonly Dictionary<string, DiagnosticDescriptor> WorkspaceDescriptorMap = WorkspaceDescriptors.ToDictionary(d => d.Id, StringComparer.Ordinal);
+    private static readonly DiagnosticDescriptor[] WorkspaceDescriptors =
+ CreateWorkspaceDescriptors(WorkspaceAnalyzers);
+    private static readonly Dictionary<string, DiagnosticDescriptor> WorkspaceDescriptorMap =
+ WorkspaceDescriptors.ToDictionary(d => d.Id, StringComparer.Ordinal);
 #endif
     private static readonly DiagnosticDescriptor[] Descriptors = CreateDescriptors(Rules);
-    private static readonly Dictionary<string, DiagnosticDescriptor> DescriptorMap = Descriptors.ToDictionary(d => d.Id, StringComparer.Ordinal);
-    
+
+    private static readonly Dictionary<string, DiagnosticDescriptor> DescriptorMap =
+        Descriptors.ToDictionary(d => d.Id, StringComparer.Ordinal);
+
     // Internal error descriptor for LNT999
     private static readonly DiagnosticDescriptor InternalErrorDescriptor = new(
-        id: "LNT999",
-        title: "Internal Analyzer Error",
-        messageFormat: "Analyzer error in {0}: {1}",
-        category: "InternalError",
-        defaultSeverity: DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: "An internal error occurred while running the analyzer. This may indicate a bug in the analyzer.");
+        "LNT999",
+        "Internal Analyzer Error",
+        "Analyzer error in {0}: {1}",
+        "InternalError",
+        DiagnosticSeverity.Warning,
+        true,
+        "An internal error occurred while running the analyzer. This may indicate a bug in the analyzer.");
 
     /// <summary>
-    /// Gets the set of diagnostic descriptors supported by this analyzer.
+    ///     Gets the set of diagnostic descriptors supported by this analyzer.
     /// </summary>
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics 
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
 #if !NETSTANDARD2_0
         => ImmutableArray.Create(Descriptors.Concat(WorkspaceDescriptors).Append(InternalErrorDescriptor).ToArray());
 #else
@@ -54,12 +58,12 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
 #endif
 
     /// <summary>
-    /// Initializes the analyzer and registers callbacks.
+    ///     Initializes the analyzer and registers callbacks.
     /// </summary>
     public override void Initialize(AnalysisContext context)
     {
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);  // Skip generated code
-        context.EnableConcurrentExecution();  // Thread-safe parallel execution
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None); // Skip generated code
+        context.EnableConcurrentExecution(); // Thread-safe parallel execution
         context.RegisterSyntaxTreeAction(AnalyzeSyntaxTree);
 #if !NETSTANDARD2_0
         context.RegisterCompilationStartAction(AnalyzeCompilation);  // Workspace-level analysis
@@ -67,30 +71,28 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Analyzes a syntax tree by executing all rules.
+    ///     Analyzes a syntax tree by executing all rules.
     /// </summary>
     private static void AnalyzeSyntaxTree(SyntaxTreeAnalysisContext context)
     {
-        var configOptions = context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Tree);
+        AnalyzerConfigOptions configOptions = context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Tree);
 
-        foreach (var rule in Rules)
+        foreach (IAnalyzerRule rule in Rules)
         {
             try
             {
                 // Check EditorConfig for severity override
-                if (configOptions.TryGetValue($"dotnet_diagnostic.{rule.Id}.severity", out var severity) && 
+                if (configOptions.TryGetValue($"dotnet_diagnostic.{rule.Id}.severity", out var severity) &&
                     SeverityMapper.IsSuppressed(severity))
-                {
-                    continue;  // Suppressed via EditorConfig
-                }
+                    continue; // Suppressed via EditorConfig
 
                 // Execute rule analysis
-                var results = rule.Analyze(context.Tree);
-                var descriptor = DescriptorMap[rule.Id];
+                IEnumerable<DiagnosticResult> results = rule.Analyze(context.Tree);
+                DiagnosticDescriptor? descriptor = DescriptorMap[rule.Id];
 
-                foreach (var result in results)
+                foreach (DiagnosticResult? result in results)
                 {
-                    var diagnostic = DiagnosticConverter.Convert(result, context.Tree, descriptor);
+                    Diagnostic diagnostic = DiagnosticConverter.Convert(result, context.Tree, descriptor);
                     context.ReportDiagnostic(diagnostic);
                 }
             }
@@ -103,18 +105,18 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Discovers all IAnalyzerRule implementations in the AnalyzerEngine assembly.
+    ///     Discovers all IAnalyzerRule implementations in the AnalyzerEngine assembly.
     /// </summary>
     private static IAnalyzerRule[] DiscoverRules()
     {
-        var ruleInterface = typeof(IAnalyzerRule);
-        var assembly = ruleInterface.Assembly;
+        Type ruleInterface = typeof(IAnalyzerRule);
+        Assembly assembly = ruleInterface.Assembly;
 
-        var ruleTypes = assembly.GetTypes()
+        IEnumerable<Type> ruleTypes = assembly.GetTypes()
             .Where(t => ruleInterface.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
 
         var rules = new List<IAnalyzerRule>();
-        foreach (var ruleType in ruleTypes)
+        foreach (Type? ruleType in ruleTypes)
         {
             try
             {
@@ -128,7 +130,7 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
             catch (Exception ex)
             {
                 // Log discovery failure (MSBuild diagnostic output)
-                System.Diagnostics.Debug.WriteLine($"[Lintelligent] Failed to load rule {ruleType.Name}: {ex.Message}");
+                Debug.WriteLine($"[Lintelligent] Failed to load rule {ruleType.Name}: {ex.Message}");
             }
         }
 
@@ -144,7 +146,7 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Creates DiagnosticDescriptor for each rule.
+    ///     Creates DiagnosticDescriptor for each rule.
     /// </summary>
     private static DiagnosticDescriptor[] CreateDescriptors(IAnalyzerRule[] rules)
     {
@@ -229,7 +231,8 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
                 projects: new[] { project },
                 configurations: new[] { "Debug" });
 
-            var projectsByPath = new Dictionary<string, Lintelligent.AnalyzerEngine.ProjectModel.Project>(StringComparer.OrdinalIgnoreCase)
+            var projectsByPath =
+ new Dictionary<string, Lintelligent.AnalyzerEngine.ProjectModel.Project>(StringComparer.OrdinalIgnoreCase)
             {
                 { project.FilePath, project }
             };
@@ -274,7 +277,7 @@ public class LintelligentDiagnosticAnalyzer : DiagnosticAnalyzer
 #endif
 
     /// <summary>
-    /// Reports an internal analyzer error as LNT999.
+    ///     Reports an internal analyzer error as LNT999.
     /// </summary>
     private static void ReportInternalError(SyntaxTreeAnalysisContext context, string ruleId, string error)
     {

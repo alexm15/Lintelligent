@@ -1,4 +1,5 @@
 using Buildalyzer;
+using Buildalyzer.Environment;
 using Lintelligent.AnalyzerEngine.Abstractions;
 using Lintelligent.AnalyzerEngine.ProjectModel;
 using Microsoft.Extensions.Logging;
@@ -6,18 +7,19 @@ using Microsoft.Extensions.Logging;
 namespace Lintelligent.Cli.Providers;
 
 /// <summary>
-/// Implements project evaluation using Buildalyzer to extract compilation settings from MSBuild projects.
+///     Implements project evaluation using Buildalyzer to extract compilation settings from MSBuild projects.
 /// </summary>
 public sealed class BuildalyzerProjectProvider(ILogger<BuildalyzerProjectProvider> logger) : IProjectProvider
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public async Task<Project> EvaluateProjectAsync(
         string projectPath,
         string configuration = "Debug",
         string? targetFramework = null,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Evaluating project: {ProjectPath} (Configuration: {Configuration})", projectPath, configuration);
+        logger.LogInformation("Evaluating project: {ProjectPath} (Configuration: {Configuration})", projectPath,
+            configuration);
 
         if (!File.Exists(projectPath))
             throw new FileNotFoundException($"Project file not found: {projectPath}", projectPath);
@@ -25,30 +27,28 @@ public sealed class BuildalyzerProjectProvider(ILogger<BuildalyzerProjectProvide
         return await Task.Run(() =>
         {
             var manager = new AnalyzerManager();
-            var analyzer = manager.GetProject(projectPath);
-            
-            var environmentOptions = new Buildalyzer.Environment.EnvironmentOptions
-            {
-                DesignTime = false,
-                Restore = false
-            };
-            
+            IProjectAnalyzer analyzer = manager.GetProject(projectPath);
+
+            var environmentOptions = new EnvironmentOptions {DesignTime = false, Restore = false};
+
             // Add Configuration to global properties
             environmentOptions.GlobalProperties.Add("Configuration", configuration);
-            
-            var results = analyzer.Build(environmentOptions);
+
+            IAnalyzerResults results = analyzer.Build(environmentOptions);
 
             if (results.Count == 0)
-                throw new InvalidOperationException($"Project evaluation failed for {projectPath}. No build results returned.");
+                throw new InvalidOperationException(
+                    $"Project evaluation failed for {projectPath}. No build results returned.");
 
             // Convert results to list (IAnalyzerResults is a collection of IAnalyzerResult)
             var resultsList = results.ToList();
-            
+
             if (resultsList.Count == 0)
-                throw new InvalidOperationException($"Project evaluation failed for {projectPath}. All build results were null.");
+                throw new InvalidOperationException(
+                    $"Project evaluation failed for {projectPath}. All build results were null.");
 
             // Select target framework: specified, or first available
-            var selectedResult = SelectTargetFrameworkResult(resultsList, targetFramework, projectPath);
+            IAnalyzerResult selectedResult = SelectTargetFrameworkResult(resultsList, targetFramework, projectPath);
 
             logger.LogInformation("Selected target framework: {TargetFramework}", selectedResult.TargetFramework);
 
@@ -56,43 +56,45 @@ public sealed class BuildalyzerProjectProvider(ILogger<BuildalyzerProjectProvide
         }, cancellationToken).ConfigureAwait(false);
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public async Task<Solution> EvaluateAllProjectsAsync(
         Solution solution,
         string configuration = "Debug",
         string? targetFramework = null,
         CancellationToken cancellationToken = default)
     {
-        var startTime = DateTime.UtcNow;
-        logger.LogInformation("Evaluating {ProjectCount} projects from solution: {SolutionName}", 
+        DateTime startTime = DateTime.UtcNow;
+        logger.LogInformation("Evaluating {ProjectCount} projects from solution: {SolutionName}",
             solution.Projects.Count, solution.Name);
 
         var evaluatedProjects = new List<Project>();
 
         // Evaluate projects in parallel with error handling
-        var tasks = solution.Projects.Select(async project =>
+        IEnumerable<Task<(bool Success, Project? Project)>> tasks = solution.Projects.Select(async project =>
         {
             try
             {
-                var evaluated = await EvaluateProjectAsync(project.FilePath, configuration, targetFramework, cancellationToken).ConfigureAwait(false);
+                Project evaluated =
+                    await EvaluateProjectAsync(project.FilePath, configuration, targetFramework, cancellationToken)
+                        .ConfigureAwait(false);
                 return (Success: true, Project: evaluated);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to evaluate project: {ProjectPath}", project.FilePath);
-                return (Success: false, Project: (Project?)null);
+                return (Success: false, Project: null);
             }
         });
 
-        var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+        (bool Success, Project? Project)[] results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
-        foreach (var (success, project) in results)
+        foreach ((var success, Project? project) in results)
         {
             if (success && project != null)
                 evaluatedProjects.Add(project);
         }
 
-        var duration = DateTime.UtcNow - startTime;
+        TimeSpan duration = DateTime.UtcNow - startTime;
         logger.LogInformation("Successfully evaluated {EvaluatedCount} of {TotalCount} projects in {Duration}ms",
             evaluatedProjects.Count, solution.Projects.Count, duration.TotalMilliseconds);
 
@@ -109,8 +111,8 @@ public sealed class BuildalyzerProjectProvider(ILogger<BuildalyzerProjectProvide
         return new Solution(solution.FilePath, solution.Name, evaluatedProjects, solution.Configurations);
     }
 
-    private static Buildalyzer.IAnalyzerResult SelectTargetFrameworkResult(
-        IReadOnlyList<Buildalyzer.IAnalyzerResult> results,
+    private static IAnalyzerResult SelectTargetFrameworkResult(
+        IReadOnlyList<IAnalyzerResult> results,
         string? targetFramework,
         string projectPath)
     {
@@ -121,7 +123,7 @@ public sealed class BuildalyzerProjectProvider(ILogger<BuildalyzerProjectProvide
         }
 
         // Find matching target framework
-        var match = results.FirstOrDefault(r =>
+        IAnalyzerResult? match = results.FirstOrDefault(r =>
             r.TargetFramework?.Equals(targetFramework, StringComparison.OrdinalIgnoreCase) == true);
 
         if (match == null)
@@ -136,65 +138,62 @@ public sealed class BuildalyzerProjectProvider(ILogger<BuildalyzerProjectProvide
     }
 
     private Project CreateProjectFromResult(
-        Buildalyzer.IAnalyzerResult result,
-        IReadOnlyList<Buildalyzer.IAnalyzerResult> allResults,
+        IAnalyzerResult result,
+        IReadOnlyList<IAnalyzerResult> allResults,
         string projectPath,
         string configuration)
     {
-        var targetFramework = ExtractTargetFramework(result);
+        TargetFramework targetFramework = ExtractTargetFramework(result);
         var allTargetFrameworks = allResults.Select(r => ExtractTargetFramework(r)).Distinct().ToList();
-        var conditionalSymbols = ExtractConditionalSymbols(result);
-        var compileItems = ExtractSourceFiles(result, projectPath);
-        var projectReferences = ExtractProjectReferences(result, projectPath);
+        List<string> conditionalSymbols = ExtractConditionalSymbols(result);
+        List<CompileItem> compileItems = ExtractSourceFiles(result, projectPath);
+        List<ProjectReference> projectReferences = ExtractProjectReferences(result, projectPath);
         var platform = result.Properties.TryGetValue("Platform", out var platformValue) ? platformValue : "AnyCPU";
-        var outputType = result.Properties.TryGetValue("OutputType", out var outputTypeValue) ? outputTypeValue : "Library";
+        var outputType = result.Properties.TryGetValue("OutputType", out var outputTypeValue)
+            ? outputTypeValue
+            : "Library";
 
-        logger.LogInformation("Project {ProjectName}: {SourceFileCount} source files, {SymbolCount} symbols, {ReferenceCount} project references",
-            Path.GetFileNameWithoutExtension(projectPath), compileItems.Count, conditionalSymbols.Count, projectReferences.Count);
+        logger.LogInformation(
+            "Project {ProjectName}: {SourceFileCount} source files, {SymbolCount} symbols, {ReferenceCount} project references",
+            Path.GetFileNameWithoutExtension(projectPath), compileItems.Count, conditionalSymbols.Count,
+            projectReferences.Count);
 
         return new Project(
-            filePath: projectPath,
-            name: Path.GetFileNameWithoutExtension(projectPath),
-            targetFramework: targetFramework,
-            allTargetFrameworks: allTargetFrameworks,
-            conditionalSymbols: conditionalSymbols,
-            configuration: configuration,
-            platform: platform,
-            outputType: outputType,
-            compileItems: compileItems,
-            projectReferences: projectReferences
+            projectPath,
+            Path.GetFileNameWithoutExtension(projectPath),
+            targetFramework,
+            allTargetFrameworks,
+            conditionalSymbols,
+            configuration,
+            platform,
+            outputType,
+            compileItems,
+            projectReferences
         );
     }
 
-    private static TargetFramework ExtractTargetFramework(Buildalyzer.IAnalyzerResult result)
+    private static TargetFramework ExtractTargetFramework(IAnalyzerResult result)
     {
         // Extract target framework from Properties dictionary (TargetFramework or TargetFrameworkMoniker)
         string targetFrameworkMoniker;
         if (result.Properties.TryGetValue("TargetFramework", out var tfm) && !string.IsNullOrWhiteSpace(tfm))
-        {
             targetFrameworkMoniker = tfm;
-        }
-        else if (result.Properties.TryGetValue("TargetFrameworkMoniker", out var tfMoniker) && !string.IsNullOrWhiteSpace(tfMoniker))
-        {
+        else if (result.Properties.TryGetValue("TargetFrameworkMoniker", out var tfMoniker) &&
+                 !string.IsNullOrWhiteSpace(tfMoniker))
             targetFrameworkMoniker = tfMoniker;
-        }
         else
-        {
             targetFrameworkMoniker = "net8.0"; // Fallback
-        }
 
         return new TargetFramework(targetFrameworkMoniker);
     }
 
-    private static List<string> ExtractConditionalSymbols(Buildalyzer.IAnalyzerResult result)
+    private static List<string> ExtractConditionalSymbols(IAnalyzerResult result)
     {
         // Try PreprocessorSymbols first, fall back to parsing DefineConstants
-        if (result.PreprocessorSymbols is { Length: > 0 })
-        {
-            return result.PreprocessorSymbols.ToList();
-        }
+        if (result.PreprocessorSymbols is {Length: > 0}) return result.PreprocessorSymbols.ToList();
 
-        if (result.Properties.TryGetValue("DefineConstants", out var defineConstants) && !string.IsNullOrWhiteSpace(defineConstants))
+        if (result.Properties.TryGetValue("DefineConstants", out var defineConstants) &&
+            !string.IsNullOrWhiteSpace(defineConstants))
         {
             // Parse DefineConstants: symbols are semicolon-separated
             return defineConstants
@@ -207,12 +206,12 @@ public sealed class BuildalyzerProjectProvider(ILogger<BuildalyzerProjectProvide
         return new List<string>();
     }
 
-    private static List<CompileItem> ExtractSourceFiles(Buildalyzer.IAnalyzerResult result, string projectPath)
+    private static List<CompileItem> ExtractSourceFiles(IAnalyzerResult result, string projectPath)
     {
         var projectDir = Path.GetDirectoryName(projectPath) ?? string.Empty;
-        
+
         // Try SourceFiles first (full build), then fall back to Compile items (design-time)
-        if (result.SourceFiles is { Length: > 0 })
+        if (result.SourceFiles is {Length: > 0})
         {
             return result.SourceFiles
                 .Select(filePath => CreateCompileItem(filePath, projectPath))
@@ -220,7 +219,7 @@ public sealed class BuildalyzerProjectProvider(ILogger<BuildalyzerProjectProvide
         }
 
         // Fall back to Items collection
-        if (result.Items.TryGetValue("Compile", out var compileItems) && compileItems.Length > 0)
+        if (result.Items.TryGetValue("Compile", out IProjectItem[]? compileItems) && compileItems.Length > 0)
         {
             return compileItems
                 .Select(item => item.ItemSpec)
@@ -248,16 +247,14 @@ public sealed class BuildalyzerProjectProvider(ILogger<BuildalyzerProjectProvide
         if (isInProjectDirectory)
         {
             // DefaultGlob: file in project directory, no originalIncludePath
-            return new CompileItem(filePath, CompileItemInclusionType.DefaultGlob, null);
+            return new CompileItem(filePath, CompileItemInclusionType.DefaultGlob);
         }
-        else
-        {
-            // LinkedFile: file outside project directory, originalIncludePath is the file path
-            return new CompileItem(filePath, CompileItemInclusionType.LinkedFile, filePath);
-        }
+
+        // LinkedFile: file outside project directory, originalIncludePath is the file path
+        return new CompileItem(filePath, CompileItemInclusionType.LinkedFile, filePath);
     }
 
-    private static List<ProjectReference> ExtractProjectReferences(Buildalyzer.IAnalyzerResult result, string projectPath)
+    private static List<ProjectReference> ExtractProjectReferences(IAnalyzerResult result, string projectPath)
     {
         var projectDir = Path.GetDirectoryName(projectPath) ?? string.Empty;
         var references = new List<ProjectReference>();

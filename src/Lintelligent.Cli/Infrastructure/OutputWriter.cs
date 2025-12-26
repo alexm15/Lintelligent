@@ -3,18 +3,18 @@ using System.Text;
 namespace Lintelligent.Cli.Infrastructure;
 
 /// <summary>
-/// Handles writing formatted output to files or stdout.
+///     Handles writing formatted output to files or stdout.
 /// </summary>
 /// <remarks>
-/// Constitutional Compliance:
-/// - I/O operations confined to CLI layer
-/// - Formatters remain pure (no side effects)
-/// - Testable via in-memory streams
+///     Constitutional Compliance:
+///     - I/O operations confined to CLI layer
+///     - Formatters remain pure (no side effects)
+///     - Testable via in-memory streams
 /// </remarks>
 public class OutputWriter
 {
     /// <summary>
-    /// Writes content to the specified output destination.
+    ///     Writes content to the specified output destination.
     /// </summary>
     /// <param name="content">Formatted content to write.</param>
     /// <param name="outputPath">File path or "-" for stdout. Null means stdout.</param>
@@ -33,17 +33,14 @@ public class OutputWriter
         ValidateOutputPath(outputPath);
 
         // Warn if file exists
-        if (File.Exists(outputPath))
-        {
-            Console.WriteLine($"Warning: Overwriting existing file: {outputPath}");
-        }
+        if (File.Exists(outputPath)) Console.WriteLine($"Warning: Overwriting existing file: {outputPath}");
 
         // Write to file (atomic: temp file → rename)
         var tempPath = Path.GetTempFileName();
         try
         {
             File.WriteAllText(tempPath, content, Encoding.UTF8);
-            File.Move(tempPath, outputPath, overwrite: true);
+            File.Move(tempPath, outputPath, true);
         }
         catch
         {

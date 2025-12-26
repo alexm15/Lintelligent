@@ -1,9 +1,10 @@
-namespace Lintelligent.AnalyzerEngine.Tests.WorkspaceAnalyzers.CodeDuplication;
-
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.WorkspaceAnalyzers.CodeDuplication;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
+
+namespace Lintelligent.AnalyzerEngine.Tests.WorkspaceAnalyzers.CodeDuplication;
 
 public class SimilarityDetectorTests
 {
@@ -35,14 +36,14 @@ public class SimilarityDetectorTests
                     }
                     """;
 
-        var tree1 = CSharpSyntaxTree.ParseText(code1);
-        var tree2 = CSharpSyntaxTree.ParseText(code2);
+        SyntaxTree tree1 = CSharpSyntaxTree.ParseText(code1);
+        SyntaxTree tree2 = CSharpSyntaxTree.ParseText(code2);
 
         var normalizer = new AstNormalizer();
 
         // Act
-        var normalized1 = normalizer.NormalizeIdentifiers(tree1.GetRoot());
-        var normalized2 = normalizer.NormalizeIdentifiers(tree2.GetRoot());
+        SyntaxNode normalized1 = normalizer.NormalizeIdentifiers(tree1.GetRoot());
+        SyntaxNode normalized2 = normalizer.NormalizeIdentifiers(tree2.GetRoot());
         var similarity = SimilarityDetector.CalculateSimilarity(normalized1, normalized2);
 
         // Assert
@@ -73,14 +74,14 @@ public class SimilarityDetectorTests
                     }
                     """;
 
-        var tree1 = CSharpSyntaxTree.ParseText(code1);
-        var tree2 = CSharpSyntaxTree.ParseText(code2);
+        SyntaxTree tree1 = CSharpSyntaxTree.ParseText(code1);
+        SyntaxTree tree2 = CSharpSyntaxTree.ParseText(code2);
 
         var normalizer = new AstNormalizer();
 
         // Act
-        var normalized1 = normalizer.NormalizeIdentifiers(tree1.GetRoot());
-        var normalized2 = normalizer.NormalizeIdentifiers(tree2.GetRoot());
+        SyntaxNode normalized1 = normalizer.NormalizeIdentifiers(tree1.GetRoot());
+        SyntaxNode normalized2 = normalizer.NormalizeIdentifiers(tree2.GetRoot());
         var similarity = SimilarityDetector.CalculateSimilarity(normalized1, normalized2);
 
         // Assert
@@ -118,16 +119,16 @@ public class SimilarityDetectorTests
                                 }
                                 """;
 
-        var tree1 = CSharpSyntaxTree.ParseText(highSimilarityCode);
-        var tree2 = CSharpSyntaxTree.ParseText(mediumSimilarityCode);
-        var tree3 = CSharpSyntaxTree.ParseText(lowSimilarityCode);
+        SyntaxTree tree1 = CSharpSyntaxTree.ParseText(highSimilarityCode);
+        SyntaxTree tree2 = CSharpSyntaxTree.ParseText(mediumSimilarityCode);
+        SyntaxTree tree3 = CSharpSyntaxTree.ParseText(lowSimilarityCode);
 
         var normalizer = new AstNormalizer();
 
         // Act
-        var normalized1 = normalizer.NormalizeIdentifiers(tree1.GetRoot());
-        var normalized2 = normalizer.NormalizeIdentifiers(tree2.GetRoot());
-        var normalized3 = normalizer.NormalizeIdentifiers(tree3.GetRoot());
+        SyntaxNode normalized1 = normalizer.NormalizeIdentifiers(tree1.GetRoot());
+        SyntaxNode normalized2 = normalizer.NormalizeIdentifiers(tree2.GetRoot());
+        SyntaxNode normalized3 = normalizer.NormalizeIdentifiers(tree3.GetRoot());
 
         var similarity12 = SimilarityDetector.CalculateSimilarity(normalized1, normalized2);
         var similarity13 = SimilarityDetector.CalculateSimilarity(normalized1, normalized3);

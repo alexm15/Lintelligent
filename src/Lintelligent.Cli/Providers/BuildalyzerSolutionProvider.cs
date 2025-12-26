@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Lintelligent.Cli.Providers;
 
 /// <summary>
-/// Parses Visual Studio solution files using Microsoft.Build.Construction.
+///     Parses Visual Studio solution files using Microsoft.Build.Construction.
 /// </summary>
 public sealed class BuildalyzerSolutionProvider : ISolutionProvider
 {
@@ -30,8 +30,8 @@ public sealed class BuildalyzerSolutionProvider : ISolutionProvider
             _logger.LogInformation("Parsing solution: {SolutionPath}", solutionPath);
 
             var solutionFile = SolutionFile.Parse(solutionPath);
-            var projects = ExtractProjects(solutionFile, solutionPath);
-            var configurations = ExtractConfigurations(solutionFile);
+            List<Project> projects = ExtractProjects(solutionFile, solutionPath);
+            List<string> configurations = ExtractConfigurations(solutionFile);
 
             var solutionName = Path.GetFileNameWithoutExtension(solutionPath);
             _logger.LogInformation(
@@ -41,16 +41,13 @@ public sealed class BuildalyzerSolutionProvider : ISolutionProvider
                 configurations.Count);
 
             // T117: Handle empty solution
-            if (projects.Count == 0)
-            {
-                _logger.LogWarning("Solution {SolutionName} contains no projects", solutionName);
-            }
+            if (projects.Count == 0) _logger.LogWarning("Solution {SolutionName} contains no projects", solutionName);
 
             var solution = new Solution(
-                filePath: Path.GetFullPath(solutionPath),
-                name: solutionName,
-                projects: projects,
-                configurations: configurations
+                Path.GetFullPath(solutionPath),
+                solutionName,
+                projects,
+                configurations
             );
 
             return Task.FromResult(solution);
@@ -81,16 +78,16 @@ public sealed class BuildalyzerSolutionProvider : ISolutionProvider
         var targetFramework = new TargetFramework("net8.0");
 
         return new Project(
-            filePath: absoluteProjectPath,
-            name: projectInSolution.ProjectName,
-            targetFramework: targetFramework,
-            allTargetFrameworks: new List<TargetFramework> { targetFramework }, // Include at least one
-            conditionalSymbols: new List<string>(),
-            configuration: "Debug",
-            platform: "AnyCPU",
-            outputType: "Library",
-            compileItems: new List<CompileItem>(),
-            projectReferences: new List<ProjectReference>()
+            absoluteProjectPath,
+            projectInSolution.ProjectName,
+            targetFramework,
+            new List<TargetFramework> {targetFramework}, // Include at least one
+            new List<string>(),
+            "Debug",
+            "AnyCPU",
+            "Library",
+            new List<CompileItem>(),
+            new List<ProjectReference>()
         );
     }
 

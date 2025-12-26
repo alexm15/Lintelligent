@@ -1,13 +1,12 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System.Collections.Immutable;
-using Lintelligent.Analyzers;
 
 namespace Lintelligent.Analyzers.Tests.Integration;
 
 /// <summary>
-/// Integration tests verifying all 8 Lintelligent rules execute correctly via Roslyn analyzer.
+///     Integration tests verifying all 8 Lintelligent rules execute correctly via Roslyn analyzer.
 /// </summary>
 public class AllRulesIntegrationTests
 {
@@ -28,8 +27,9 @@ class TestClass
         var y = string.Empty; var z = string.Empty;
     }
 }";
-        var diagnostics = await GetDiagnosticsAsync(testCode);
-        AssertSingleDiagnostic(diagnostics, "LNT001", DiagnosticSeverity.Warning, "Method 'LongMethod' has 26 statements");
+        ImmutableArray<Diagnostic> diagnostics = await GetDiagnosticsAsync(testCode);
+        AssertSingleDiagnostic(diagnostics, "LNT001", DiagnosticSeverity.Warning,
+            "Method 'LongMethod' has 26 statements");
     }
 
     [Fact]
@@ -42,8 +42,9 @@ class TestClass
     {
     }
 }";
-        var diagnostics = await GetDiagnosticsAsync(testCode);
-        AssertSingleDiagnostic(diagnostics, "LNT002", DiagnosticSeverity.Warning, "Method 'MethodWithManyParams' has 6 parameters");
+        ImmutableArray<Diagnostic> diagnostics = await GetDiagnosticsAsync(testCode);
+        AssertSingleDiagnostic(diagnostics, "LNT002", DiagnosticSeverity.Warning,
+            "Method 'MethodWithManyParams' has 6 parameters");
     }
 
     [Fact]
@@ -69,7 +70,7 @@ class TestClass
         }
     }
 }";
-        var diagnostics = await GetDiagnosticsAsync(testCode);
+        ImmutableArray<Diagnostic> diagnostics = await GetDiagnosticsAsync(testCode);
         AssertSingleDiagnostic(diagnostics, "LNT003", DiagnosticSeverity.Warning, "Conditional nesting depth is 4");
     }
 
@@ -84,7 +85,7 @@ class TestClass
         var x = 42;
     }
 }";
-        var diagnostics = await GetDiagnosticsAsync(testCode);
+        ImmutableArray<Diagnostic> diagnostics = await GetDiagnosticsAsync(testCode);
         AssertSingleDiagnostic(diagnostics, "LNT004", DiagnosticSeverity.Info, "Magic number '42'");
     }
 
@@ -100,7 +101,7 @@ class GodClass
     void M16() {} void M17() {} void M18() {} void M19() {} void M20() {}
     void M21() {}
 }";
-        var diagnostics = await GetDiagnosticsAsync(testCode);
+        ImmutableArray<Diagnostic> diagnostics = await GetDiagnosticsAsync(testCode);
         AssertSingleDiagnostic(diagnostics, "LNT005", DiagnosticSeverity.Warning, "Class 'GodClass' has 21 methods");
     }
 
@@ -114,8 +115,9 @@ class TestClass
     {
     }
 }";
-        var diagnostics = await GetDiagnosticsAsync(testCode);
-        AssertSingleDiagnostic(diagnostics, "LNT006", DiagnosticSeverity.Info, "Private method 'UnusedMethod' is never used");
+        ImmutableArray<Diagnostic> diagnostics = await GetDiagnosticsAsync(testCode);
+        AssertSingleDiagnostic(diagnostics, "LNT006", DiagnosticSeverity.Info,
+            "Private method 'UnusedMethod' is never used");
     }
 
     [Fact]
@@ -135,7 +137,7 @@ class TestClass
         }
     }
 }";
-        var diagnostics = await GetDiagnosticsAsync(testCode);
+        ImmutableArray<Diagnostic> diagnostics = await GetDiagnosticsAsync(testCode);
         AssertSingleDiagnostic(diagnostics, "LNT007", DiagnosticSeverity.Warning, "Empty catch block");
     }
 
@@ -150,11 +152,13 @@ public class TestClass
     {
     }
 }";
-        var diagnostics = await GetDiagnosticsAsync(testCode);
-        AssertSingleDiagnostic(diagnostics, "LNT008", DiagnosticSeverity.Info, "Public method 'PublicMethodWithoutDocs' is missing XML documentation");
+        ImmutableArray<Diagnostic> diagnostics = await GetDiagnosticsAsync(testCode);
+        AssertSingleDiagnostic(diagnostics, "LNT008", DiagnosticSeverity.Info,
+            "Public method 'PublicMethodWithoutDocs' is missing XML documentation");
     }
 
-    private static void AssertSingleDiagnostic(ImmutableArray<Diagnostic> diagnostics, string expectedId, DiagnosticSeverity expectedSeverity, string expectedMessageFragment)
+    private static void AssertSingleDiagnostic(ImmutableArray<Diagnostic> diagnostics, string expectedId,
+        DiagnosticSeverity expectedSeverity, string expectedMessageFragment)
     {
         var exceptions = diagnostics.Where(d => d.Id == "LNT999").ToList();
         if (exceptions.Any())
@@ -164,7 +168,7 @@ public class TestClass
         }
 
         Assert.Single(diagnostics);
-        var diagnostic = diagnostics[0];
+        Diagnostic diagnostic = diagnostics[0];
         Assert.Equal(expectedId, diagnostic.Id);
         Assert.Equal(expectedSeverity, diagnostic.Severity);
         Assert.Contains(expectedMessageFragment, diagnostic.GetMessage());
@@ -172,17 +176,17 @@ public class TestClass
 
     private static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(string source)
     {
-        var syntaxTree = CSharpSyntaxTree.ParseText(source, path: "Test.cs");  // Provide file path for testing
-        
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source, path: "Test.cs"); // Provide file path for testing
+
         var compilation = CSharpCompilation.Create(
             "TestCompilation",
-            new[] { syntaxTree },
+            new[] {syntaxTree},
             new[]
             {
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location)
             });
 
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
+        CompilationWithAnalyzers compilationWithAnalyzers = compilation.WithAnalyzers(
             ImmutableArray.Create<DiagnosticAnalyzer>(new LintelligentDiagnosticAnalyzer()));
 
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();

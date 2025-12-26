@@ -3,11 +3,11 @@ using Microsoft.CodeAnalysis.Text;
 namespace Lintelligent.AnalyzerEngine.WorkspaceAnalyzers.CodeDuplication;
 
 /// <summary>
-/// Represents a single occurrence of duplicated code.
+///     Represents a single occurrence of duplicated code.
 /// </summary>
 /// <remarks>
-/// Immutable record type for thread-safety and determinism.
-/// Used to track individual instances that are grouped into DuplicationGroup.
+///     Immutable record type for thread-safety and determinism.
+///     Used to track individual instances that are grouped into DuplicationGroup.
 /// </remarks>
 /// <param name="FilePath">Absolute path to the file containing the duplication</param>
 /// <param name="ProjectName">Name of the project containing this instance</param>
@@ -22,4 +22,3 @@ public record DuplicationInstance(
     int TokenCount,
     ulong Hash,
     string SourceText);
-

@@ -22,24 +22,24 @@ public class ComplexConditionalRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    if (a)
-                    {
-                        if (b)
-                        {
-                            if (c)
-                            {
-                                // Depth 3 - OK
-                            }
-                        }
-                    }
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           if (a)
+                           {
+                               if (b)
+                               {
+                                   if (c)
+                                   {
+                                       // Depth 3 - OK
+                                   }
+                               }
+                           }
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -53,27 +53,27 @@ public class ComplexConditionalRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    if (a)
-                    {
-                        if (b)
-                        {
-                            if (c)
-                            {
-                                if (d)
-                                {
-                                    // Depth 4 - VIOLATION
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           if (a)
+                           {
+                               if (b)
+                               {
+                                   if (c)
+                                   {
+                                       if (d)
+                                       {
+                                           // Depth 4 - VIOLATION
+                                       }
+                                   }
+                               }
+                           }
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -96,26 +96,26 @@ public class ComplexConditionalRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    if (a)
-                    {
-                    }
-                    else if (b)
-                    {
-                    }
-                    else if (c)
-                    {
-                    }
-                    else if (d)
-                    {
-                    }
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           if (a)
+                           {
+                           }
+                           else if (b)
+                           {
+                           }
+                           else if (c)
+                           {
+                           }
+                           else if (d)
+                           {
+                           }
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -129,29 +129,29 @@ public class ComplexConditionalRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    if (a)
-                    {
-                        switch (x)
-                        {
-                            case 1:
-                                if (b)
-                                {
-                                    if (c)
-                                    {
-                                        // if=1, switch=2, if=3, if=4 - VIOLATION
-                                    }
-                                }
-                                break;
-                        }
-                    }
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           if (a)
+                           {
+                               switch (x)
+                               {
+                                   case 1:
+                                       if (b)
+                                       {
+                                           if (c)
+                                           {
+                                               // if=1, switch=2, if=3, if=4 - VIOLATION
+                                           }
+                                       }
+                                       break;
+                               }
+                           }
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -176,27 +176,27 @@ public class ComplexConditionalRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    if (a)
-                    {
-                        if (b)
-                        {
-                            if (c)
-                            {
-                                if (d)
-                                {
-                                    // Depth 4 - but in generated file
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code, "Form1.Designer.cs");
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           if (a)
+                           {
+                               if (b)
+                               {
+                                   if (c)
+                                   {
+                                       if (d)
+                                       {
+                                           // Depth 4 - but in generated file
+                                       }
+                                   }
+                               }
+                           }
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code, "Form1.Designer.cs");
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();

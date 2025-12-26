@@ -1,68 +1,10 @@
 namespace Lintelligent.AnalyzerEngine.ProjectModel;
 
 /// <summary>
-/// Represents an evaluated .NET project with compilation settings.
+///     Represents an evaluated .NET project with compilation settings.
 /// </summary>
 public sealed class Project
 {
-    /// <summary>
-    /// Absolute path to the project file (.csproj, .vbproj, .fsproj).
-    /// </summary>
-    public string FilePath { get; }
-
-    /// <summary>
-    /// Project name (file name without extension).
-    /// </summary>
-    public string Name { get; }
-
-    /// <summary>
-    /// Target framework for this evaluation (e.g., net8.0, net472).
-    /// For multi-targeted projects, this is the selected framework.
-    /// </summary>
-    public TargetFramework TargetFramework { get; }
-
-    /// <summary>
-    /// All target frameworks this project can build for.
-    /// For single-targeted projects, contains one element.
-    /// </summary>
-    public IReadOnlyList<TargetFramework> AllTargetFrameworks { get; }
-
-    /// <summary>
-    /// Conditional compilation symbols (e.g., DEBUG, TRACE, CUSTOM_FEATURE).
-    /// Extracted from DefineConstants for the current configuration.
-    /// </summary>
-    public IReadOnlyList<string> ConditionalSymbols { get; }
-
-    /// <summary>
-    /// Build configuration (e.g., Debug, Release, Custom).
-    /// </summary>
-    public string Configuration { get; }
-
-    /// <summary>
-    /// Platform (e.g., AnyCPU, x64, ARM).
-    /// </summary>
-    public string Platform { get; }
-
-    /// <summary>
-    /// Project output type (Exe, Library, WinExe).
-    /// </summary>
-    public string OutputType { get; }
-
-    /// <summary>
-    /// Source files to be analyzed (after Include/Remove evaluation).
-    /// </summary>
-    public IReadOnlyList<CompileItem> CompileItems { get; }
-
-    /// <summary>
-    /// Other projects referenced by this project.
-    /// </summary>
-    public IReadOnlyList<ProjectReference> ProjectReferences { get; }
-
-    /// <summary>
-    /// Indicates if this project is multi-targeted.
-    /// </summary>
-    public bool IsMultiTargeted => AllTargetFrameworks.Count > 1;
-
     public Project(
         string filePath,
         string name,
@@ -96,10 +38,12 @@ public sealed class Project
             throw new ArgumentNullException(nameof(projectReferences));
 
         if (allTargetFrameworks.Count == 0)
-            throw new ArgumentException("Project must have at least one target framework.", nameof(allTargetFrameworks));
+            throw new ArgumentException("Project must have at least one target framework.",
+                nameof(allTargetFrameworks));
 
         if (!allTargetFrameworks.Contains(targetFramework))
-            throw new ArgumentException("Selected target framework must be in AllTargetFrameworks list.", nameof(targetFramework));
+            throw new ArgumentException("Selected target framework must be in AllTargetFrameworks list.",
+                nameof(targetFramework));
 
         if (string.IsNullOrWhiteSpace(configuration))
             throw new ArgumentException("Configuration cannot be null or empty.", nameof(configuration));
@@ -122,6 +66,64 @@ public sealed class Project
         ProjectReferences = projectReferences;
     }
 
+    /// <summary>
+    ///     Absolute path to the project file (.csproj, .vbproj, .fsproj).
+    /// </summary>
+    public string FilePath { get; }
+
+    /// <summary>
+    ///     Project name (file name without extension).
+    /// </summary>
+    public string Name { get; }
+
+    /// <summary>
+    ///     Target framework for this evaluation (e.g., net8.0, net472).
+    ///     For multi-targeted projects, this is the selected framework.
+    /// </summary>
+    public TargetFramework TargetFramework { get; }
+
+    /// <summary>
+    ///     All target frameworks this project can build for.
+    ///     For single-targeted projects, contains one element.
+    /// </summary>
+    public IReadOnlyList<TargetFramework> AllTargetFrameworks { get; }
+
+    /// <summary>
+    ///     Conditional compilation symbols (e.g., DEBUG, TRACE, CUSTOM_FEATURE).
+    ///     Extracted from DefineConstants for the current configuration.
+    /// </summary>
+    public IReadOnlyList<string> ConditionalSymbols { get; }
+
+    /// <summary>
+    ///     Build configuration (e.g., Debug, Release, Custom).
+    /// </summary>
+    public string Configuration { get; }
+
+    /// <summary>
+    ///     Platform (e.g., AnyCPU, x64, ARM).
+    /// </summary>
+    public string Platform { get; }
+
+    /// <summary>
+    ///     Project output type (Exe, Library, WinExe).
+    /// </summary>
+    public string OutputType { get; }
+
+    /// <summary>
+    ///     Source files to be analyzed (after Include/Remove evaluation).
+    /// </summary>
+    public IReadOnlyList<CompileItem> CompileItems { get; }
+
+    /// <summary>
+    ///     Other projects referenced by this project.
+    /// </summary>
+    public IReadOnlyList<ProjectReference> ProjectReferences { get; }
+
+    /// <summary>
+    ///     Indicates if this project is multi-targeted.
+    /// </summary>
+    public bool IsMultiTargeted => AllTargetFrameworks.Count > 1;
+
     private static bool IsAbsolutePath(string path)
     {
         if (string.IsNullOrWhiteSpace(path))
@@ -141,12 +143,13 @@ public sealed class Project
             // Windows
             return root.Length > 1 || root.Equals("\\\\\\\\", StringComparison.Ordinal);
         }
-        else
-        {
-            // Unix
-            return root.Equals("/", StringComparison.Ordinal);
-        }
+
+        // Unix
+        return root.Equals("/", StringComparison.Ordinal);
     }
 
-    public override string ToString() => $"{Name} ({TargetFramework})";
+    public override string ToString()
+    {
+        return $"{Name} ({TargetFramework})";
+    }
 }

@@ -1,42 +1,42 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
-    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-    
-    <!-- NuGet Packaging -->
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <DevelopmentDependency>true</DevelopmentDependency>
-    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
-    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackAnalyzer</TargetsForTfmSpecificContentInPackage>
-    
-    <!-- Package Metadata -->
-    <PackageId>Lintelligent.Analyzers</PackageId>
-    <Version>1.1.0</Version>
-    <Authors>Lintelligent Team</Authors>
-    <Description>Roslyn analyzer integration for Lintelligent code quality rules (LNT001-LNT008) with workspace-level duplication detection (LNT100)</Description>
-    <PackageTags>roslyn analyzer code-quality static-analysis duplication-detection</PackageTags>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 
-  <ItemGroup>
-    <!-- Roslyn Analyzer APIs -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />
-  </ItemGroup>
+        <!-- NuGet Packaging -->
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <DevelopmentDependency>true</DevelopmentDependency>
+        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackAnalyzer</TargetsForTfmSpecificContentInPackage>
 
-  <ItemGroup>
-    <!-- Reference AnalyzerEngine (contains IAnalyzerRule implementations) -->
-    <ProjectReference Include="..\Lintelligent.AnalyzerEngine\Lintelligent.AnalyzerEngine.csproj" />
-  </ItemGroup>
+        <!-- Package Metadata -->
+        <PackageId>Lintelligent.Analyzers</PackageId>
+        <Version>1.1.0</Version>
+        <Authors>Lintelligent Team</Authors>
+        <Description>Roslyn analyzer integration for Lintelligent code quality rules (LNT001-LNT008) with workspace-level duplication detection (LNT100)</Description>
+        <PackageTags>roslyn analyzer code-quality static-analysis duplication-detection</PackageTags>
+    </PropertyGroup>
 
-  <Target Name="PackAnalyzer">
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).dll" PackagePath="analyzers/dotnet/cs" />
-      <TfmSpecificPackageFile Include="$(OutputPath)\Lintelligent.AnalyzerEngine.dll" PackagePath="analyzers/dotnet/cs" />
+        <!-- Roslyn Analyzer APIs -->
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" PrivateAssets="all"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all"/>
     </ItemGroup>
-  </Target>
+
+    <ItemGroup>
+        <!-- Reference AnalyzerEngine (contains IAnalyzerRule implementations) -->
+        <ProjectReference Include="..\Lintelligent.AnalyzerEngine\Lintelligent.AnalyzerEngine.csproj"/>
+    </ItemGroup>
+
+    <Target Name="PackAnalyzer">
+        <ItemGroup>
+            <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).dll" PackagePath="analyzers/dotnet/cs"/>
+            <TfmSpecificPackageFile Include="$(OutputPath)\Lintelligent.AnalyzerEngine.dll" PackagePath="analyzers/dotnet/cs"/>
+        </ItemGroup>
+    </Target>
 
 </Project>

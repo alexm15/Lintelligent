@@ -1,8 +1,8 @@
-namespace Lintelligent.AnalyzerEngine.Tests.ProjectModel;
-
-using Lintelligent.AnalyzerEngine.ProjectModel;
 using FluentAssertions;
+using Lintelligent.AnalyzerEngine.ProjectModel;
 using Xunit;
+
+namespace Lintelligent.AnalyzerEngine.Tests.ProjectModel;
 
 public class SolutionTests
 {
@@ -12,54 +12,54 @@ public class SolutionTests
         // Arrange - Create Solution with ProjectA → ProjectB dependency
         var projectBPath = Path.GetFullPath(@"C:\Projects\ProjectB\ProjectB.csproj");
         var projectAPath = Path.GetFullPath(@"C:\Projects\ProjectA\ProjectA.csproj");
-        
+
         var projectBRef = new ProjectReference(projectBPath, "ProjectB");
         var targetFramework = new TargetFramework("net8.0");
-        
+
         var projectB = new Project(
-            filePath: projectBPath,
-            name: "ProjectB",
-            targetFramework: targetFramework,
-            allTargetFrameworks: new[] { targetFramework },
-            conditionalSymbols: Array.Empty<string>(),
-            configuration: "Debug",
-            platform: "AnyCPU",
-            outputType: "Library",
-            compileItems: Array.Empty<CompileItem>(),
-            projectReferences: Array.Empty<ProjectReference>());
-        
+            projectBPath,
+            "ProjectB",
+            targetFramework,
+            new[] {targetFramework},
+            Array.Empty<string>(),
+            "Debug",
+            "AnyCPU",
+            "Library",
+            Array.Empty<CompileItem>(),
+            Array.Empty<ProjectReference>());
+
         var projectA = new Project(
-            filePath: projectAPath,
-            name: "ProjectA",
-            targetFramework: targetFramework,
-            allTargetFrameworks: new[] { targetFramework },
-            conditionalSymbols: Array.Empty<string>(),
-            configuration: "Debug",
-            platform: "AnyCPU",
-            outputType: "Library",
-            compileItems: Array.Empty<CompileItem>(),
-            projectReferences: new[] { projectBRef });
-        
+            projectAPath,
+            "ProjectA",
+            targetFramework,
+            new[] {targetFramework},
+            Array.Empty<string>(),
+            "Debug",
+            "AnyCPU",
+            "Library",
+            Array.Empty<CompileItem>(),
+            new[] {projectBRef});
+
         var solution = new Solution(
             Path.GetFullPath(@"C:\Projects\TestSolution.sln"),
             "TestSolution",
-            new[] { projectA, projectB },
-            new[] { "Debug", "Release" });
+            new[] {projectA, projectB},
+            new[] {"Debug", "Release"});
 
         // Act
-        var graph = solution.GetDependencyGraph();
+        IReadOnlyDictionary<string, IReadOnlyList<string>> graph = solution.GetDependencyGraph();
 
         // Assert
         graph.Should().NotBeNull();
-        graph.Should().HaveCount(2, because: "solution has 2 projects");
-        
-        graph.Should().ContainKey(projectAPath, because: "ProjectA is in the solution");
-        graph.Should().ContainKey(projectBPath, because: "ProjectB is in the solution");
-        
-        graph[projectAPath].Should().HaveCount(1, because: "ProjectA references one project");
-        graph[projectAPath].Should().Contain(projectBPath, because: "ProjectA references ProjectB");
-        
-        graph[projectBPath].Should().BeEmpty(because: "ProjectB has no project references");
+        graph.Should().HaveCount(2, "solution has 2 projects");
+
+        graph.Should().ContainKey(projectAPath, "ProjectA is in the solution");
+        graph.Should().ContainKey(projectBPath, "ProjectB is in the solution");
+
+        graph[projectAPath].Should().HaveCount(1, "ProjectA references one project");
+        graph[projectAPath].Should().Contain(projectBPath, "ProjectA references ProjectB");
+
+        graph[projectBPath].Should().BeEmpty("ProjectB has no project references");
     }
 
     [Fact]
@@ -69,39 +69,39 @@ public class SolutionTests
         var projectAPath = Path.GetFullPath(@"C:\Projects\ProjectA\ProjectA.csproj");
         var projectBPath = Path.GetFullPath(@"C:\Projects\ProjectB\ProjectB.csproj");
         var targetFramework = new TargetFramework("net8.0");
-        
+
         var projectA = new Project(
-            filePath: projectAPath,
-            name: "ProjectA",
-            targetFramework: targetFramework,
-            allTargetFrameworks: new[] { targetFramework },
-            conditionalSymbols: Array.Empty<string>(),
-            configuration: "Debug",
-            platform: "AnyCPU",
-            outputType: "Library",
-            compileItems: Array.Empty<CompileItem>(),
-            projectReferences: Array.Empty<ProjectReference>());
-        
+            projectAPath,
+            "ProjectA",
+            targetFramework,
+            new[] {targetFramework},
+            Array.Empty<string>(),
+            "Debug",
+            "AnyCPU",
+            "Library",
+            Array.Empty<CompileItem>(),
+            Array.Empty<ProjectReference>());
+
         var projectB = new Project(
-            filePath: projectBPath,
-            name: "ProjectB",
-            targetFramework: targetFramework,
-            allTargetFrameworks: new[] { targetFramework },
-            conditionalSymbols: Array.Empty<string>(),
-            configuration: "Debug",
-            platform: "AnyCPU",
-            outputType: "Library",
-            compileItems: Array.Empty<CompileItem>(),
-            projectReferences: Array.Empty<ProjectReference>());
-        
+            projectBPath,
+            "ProjectB",
+            targetFramework,
+            new[] {targetFramework},
+            Array.Empty<string>(),
+            "Debug",
+            "AnyCPU",
+            "Library",
+            Array.Empty<CompileItem>(),
+            Array.Empty<ProjectReference>());
+
         var solution = new Solution(
             Path.GetFullPath(@"C:\Projects\TestSolution.sln"),
             "TestSolution",
-            new[] { projectA, projectB },
-            new[] { "Debug" });
+            new[] {projectA, projectB},
+            new[] {"Debug"});
 
         // Act
-        var graph = solution.GetDependencyGraph();
+        IReadOnlyDictionary<string, IReadOnlyList<string>> graph = solution.GetDependencyGraph();
 
         // Assert
         graph.Should().NotBeNull();

@@ -30,12 +30,12 @@ public static class ReportGenerator
 
     public static string GenerateMarkdownGroupedByCategory(IEnumerable<DiagnosticResult> results)
     {
-        var grouped = results.GroupBy(r => r.Category)
+        IOrderedEnumerable<IGrouping<string, DiagnosticResult>> grouped = results.GroupBy(r => r.Category)
             .OrderBy(g => g.Key);
 
         var output = "# Lintelligent Report\n\n";
 
-        foreach (var group in grouped)
+        foreach (IGrouping<string, DiagnosticResult> group in grouped)
         {
             output += $"## {group.Key}\n\n";
             output += CollectOutput(group);

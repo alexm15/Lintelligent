@@ -60,7 +60,7 @@ public class FileSystemCodeProvider : ICodeProvider
         // Check if root path is a single file
         if (File.Exists(_rootPath))
         {
-            var tree = ParseFile(_rootPath, conditionalSymbols);
+            SyntaxTree? tree = ParseFile(_rootPath, conditionalSymbols);
             if (tree != null) yield return tree;
             yield break;
         }
@@ -87,7 +87,7 @@ public class FileSystemCodeProvider : ICodeProvider
         // Parse each file and yield syntax tree
         foreach (var file in files)
         {
-            var tree = ParseFile(file, conditionalSymbols);
+            SyntaxTree? tree = ParseFile(file, conditionalSymbols);
             if (tree != null) yield return tree;
         }
     }
@@ -97,14 +97,14 @@ public class FileSystemCodeProvider : ICodeProvider
         try
         {
             var sourceCode = File.ReadAllText(filePath);
-            
+
             // Create parse options with conditional symbols if provided
-            var parseOptions = conditionalSymbols is { Count: > 0 }
+            CSharpParseOptions parseOptions = conditionalSymbols is {Count: > 0}
                 ? new CSharpParseOptions(LanguageVersion.Latest)
                     .WithPreprocessorSymbols(conditionalSymbols)
                 : new CSharpParseOptions(LanguageVersion.Latest);
-            
-            return CSharpSyntaxTree.ParseText(sourceCode, parseOptions, path: filePath);
+
+            return CSharpSyntaxTree.ParseText(sourceCode, parseOptions, filePath);
         }
         catch (FileNotFoundException)
         {

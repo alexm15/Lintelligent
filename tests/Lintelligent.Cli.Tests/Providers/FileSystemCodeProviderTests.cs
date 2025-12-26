@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Lintelligent.Cli.Providers;
+using Microsoft.CodeAnalysis;
 using Xunit;
 
 namespace Lintelligent.Cli.Tests.Providers;
@@ -41,7 +42,7 @@ public class FileSystemCodeProviderTests : IDisposable
     public void Constructor_NullPath_ThrowsArgumentException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => new FileSystemCodeProvider(null!));
+        ArgumentException exception = Assert.Throws<ArgumentException>(() => new FileSystemCodeProvider(null!));
         exception.ParamName.Should().Be("rootPath");
     }
 
@@ -49,7 +50,7 @@ public class FileSystemCodeProviderTests : IDisposable
     public void Constructor_EmptyPath_ThrowsArgumentException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => new FileSystemCodeProvider(string.Empty));
+        ArgumentException exception = Assert.Throws<ArgumentException>(() => new FileSystemCodeProvider(string.Empty));
         exception.ParamName.Should().Be("rootPath");
     }
 
@@ -57,7 +58,7 @@ public class FileSystemCodeProviderTests : IDisposable
     public void Constructor_WhitespacePath_ThrowsArgumentException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => new FileSystemCodeProvider("   "));
+        ArgumentException exception = Assert.Throws<ArgumentException>(() => new FileSystemCodeProvider("   "));
         exception.ParamName.Should().Be("rootPath");
     }
 
@@ -143,7 +144,7 @@ public class FileSystemCodeProviderTests : IDisposable
 
         // Redirect console output to capture warnings
         using var sw = new StringWriter();
-        var originalOut = Console.Out;
+        TextWriter originalOut = Console.Out;
         Console.SetOut(sw);
 
         try
@@ -174,7 +175,7 @@ public class FileSystemCodeProviderTests : IDisposable
 
         // Redirect console output to capture warnings
         using var sw = new StringWriter();
-        var originalOut = Console.Out;
+        TextWriter originalOut = Console.Out;
         Console.SetOut(sw);
 
         try
@@ -221,7 +222,7 @@ public class FileSystemCodeProviderTests : IDisposable
         var provider = new FileSystemCodeProvider(_tempDir);
 
         // Act - Call GetSyntaxTrees but don't iterate
-        var enumerable = provider.GetSyntaxTrees();
+        IEnumerable<SyntaxTree> enumerable = provider.GetSyntaxTrees();
 
         // Assert - This should not throw even if we haven't materialized
         enumerable.Should().NotBeNull();
@@ -295,7 +296,7 @@ public class FileSystemCodeProviderTests : IDisposable
 
         // Assert
         trees.Should().ContainSingle();
-        var tree = trees[0];
+        SyntaxTree tree = trees[0];
         tree.GetRoot().Should().NotBeNull();
         tree.ToString().Should().Contain("TestClass");
         tree.ToString().Should().Contain("TestMethod");

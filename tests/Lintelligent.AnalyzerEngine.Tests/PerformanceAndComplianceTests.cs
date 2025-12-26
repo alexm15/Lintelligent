@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.Analysis;
 using Lintelligent.AnalyzerEngine.Rules;
@@ -28,6 +29,7 @@ public class PerformanceAndComplianceTests
         var sources = new Dictionary<string, string>();
 
         for (var i = 0; i < fileCount; i++)
+        {
             sources[$"File{i}.cs"] = $$"""
 
                                        namespace Test{{i}}
@@ -40,6 +42,7 @@ public class PerformanceAndComplianceTests
                                            }
                                        }
                                        """;
+        }
 
         var provider = new InMemoryCodeProvider(sources);
         var manager = new AnalyzerManager();
@@ -110,7 +113,7 @@ public class PerformanceAndComplianceTests
     public void Constitution_PrincipleI_AnalyzerEngineHasNoIODependencies()
     {
         // Arrange - Get AnalyzerEngine assembly
-        var engineAssembly = typeof(AnalyzerEngine.Analysis.AnalyzerEngine).Assembly;
+        Assembly engineAssembly = typeof(AnalyzerEngine.Analysis.AnalyzerEngine).Assembly;
 
         // Act - Get all referenced assemblies
         var referencedAssemblies = engineAssembly.GetReferencedAssemblies()
@@ -270,6 +273,7 @@ public class PerformanceAndComplianceTests
 
         for (var i = 0; i < fileCount; i++)
             // Create files with 5 long methods each (will generate 5 findings per file)
+        {
             sources[$"File{i}.cs"] = $$"""
                                        namespace Test{{i}}
                                        {
@@ -402,6 +406,7 @@ public class PerformanceAndComplianceTests
                                            }
                                        }
                                        """;
+        }
 
         var provider = new InMemoryCodeProvider(sources);
         var manager = new AnalyzerManager();
@@ -446,6 +451,7 @@ public class PerformanceAndComplianceTests
         var sources = new Dictionary<string, string>();
 
         for (var i = 0; i < fileCount; i++)
+        {
             sources[$"File{i}.cs"] = $$"""
                                        namespace Test{{i}}
                                        {
@@ -457,6 +463,7 @@ public class PerformanceAndComplianceTests
                                            }
                                        }
                                        """;
+        }
 
         var provider = new InMemoryCodeProvider(sources);
         var manager = new AnalyzerManager();
@@ -532,6 +539,7 @@ public class PerformanceAndComplianceTests
         var sources = new Dictionary<string, string>();
 
         for (var i = 0; i < fileCount; i++)
+        {
             sources[$"File{i}.cs"] = $$"""
                                        namespace Test{{i}}
                                        {
@@ -554,6 +562,7 @@ public class PerformanceAndComplianceTests
                                            }
                                        }
                                        """;
+        }
 
         var provider = new InMemoryCodeProvider(sources);
         var manager = new AnalyzerManager();

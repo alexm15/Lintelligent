@@ -15,7 +15,7 @@ public class InMemoryCodeProviderTests
     public void Constructor_NullSources_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => new InMemoryCodeProvider(null!));
+        ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() => new InMemoryCodeProvider(null!));
         exception.ParamName.Should().Be("sources");
     }
 
@@ -120,7 +120,7 @@ public class InMemoryCodeProviderTests
 
         // Assert
         trees.Should().ContainSingle();
-        var tree = trees[0];
+        SyntaxTree tree = trees[0];
         tree.GetRoot().Should().NotBeNull();
         tree.ToString().Should().Contain("ComplexClass");
         tree.ToString().Should().Contain("Method");
@@ -204,7 +204,7 @@ public class InMemoryCodeProviderTests
         var provider = new InMemoryCodeProvider(sources);
 
         // Act - Call GetSyntaxTrees but don't enumerate
-        var enumerable = provider.GetSyntaxTrees();
+        IEnumerable<SyntaxTree> enumerable = provider.GetSyntaxTrees();
 
         // Assert - Should not throw even if not yet materialized
         enumerable.Should().NotBeNull();

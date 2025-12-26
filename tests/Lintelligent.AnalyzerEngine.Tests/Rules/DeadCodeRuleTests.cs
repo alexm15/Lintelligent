@@ -22,20 +22,20 @@ public class DeadCodeRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                private void UnusedMethod()
-                {
-                    // Never called
-                }
-                
-                public void PublicMethod()
-                {
-                    // Does not call UnusedMethod
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       private void UnusedMethod()
+                       {
+                           // Never called
+                       }
+                       
+                       public void PublicMethod()
+                       {
+                           // Does not call UnusedMethod
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -57,20 +57,20 @@ public class DeadCodeRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                private void HelperMethod()
-                {
-                    // Implementation
-                }
-                
-                public void PublicMethod()
-                {
-                    HelperMethod(); // Called here
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       private void HelperMethod()
+                       {
+                           // Implementation
+                       }
+                       
+                       public void PublicMethod()
+                       {
+                           HelperMethod(); // Called here
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -84,17 +84,17 @@ public class DeadCodeRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                private int _unusedField;
-                
-                public void Method()
-                {
-                    // Field is never referenced
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       private int _unusedField;
+                       
+                       public void Method()
+                       {
+                           // Field is never referenced
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -116,17 +116,17 @@ public class DeadCodeRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                private int _count;
-                
-                public int GetCount()
-                {
-                    return _count; // Field is referenced
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       private int _count;
+                       
+                       public int GetCount()
+                       {
+                           return _count; // Field is referenced
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -140,17 +140,17 @@ public class DeadCodeRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                private int _count = 0;
-                
-                public void Method()
-                {
-                    // _count is never read, only initialized
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       private int _count = 0;
+                       
+                       public void Method()
+                       {
+                           // _count is never read, only initialized
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -164,15 +164,15 @@ public class DeadCodeRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void PublicMethod() { }
-                public int PublicField;
-                
-                // Neither are called/used within this class, but that's OK for public members
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void PublicMethod() { }
+                       public int PublicField;
+                       
+                       // Neither are called/used within this class, but that's OK for public members
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -186,20 +186,20 @@ public class DeadCodeRuleTests
     {
         // Arrange
         var code = """
-            public interface IService
-            {
-                void DoWork();
-            }
-            
-            public class TestClass : IService
-            {
-                private void DoWork()
-                {
-                    // Explicit interface implementation (heuristic: has base list)
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public interface IService
+                   {
+                       void DoWork();
+                   }
+
+                   public class TestClass : IService
+                   {
+                       private void DoWork()
+                       {
+                           // Explicit interface implementation (heuristic: has base list)
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -213,12 +213,12 @@ public class DeadCodeRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                private void UnusedMethod() { }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       private void UnusedMethod() { }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -238,16 +238,16 @@ public class DeadCodeRuleTests
     {
         // Arrange
         var code = """
-            // <auto-generated>
-            //     This code was generated by a tool.
-            // </auto-generated>
-            
-            public class TestClass
-            {
-                private void UnusedMethod() { }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   // <auto-generated>
+                   //     This code was generated by a tool.
+                   // </auto-generated>
+
+                   public class TestClass
+                   {
+                       private void UnusedMethod() { }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();

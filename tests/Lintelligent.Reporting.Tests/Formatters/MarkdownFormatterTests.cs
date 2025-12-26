@@ -1,9 +1,9 @@
-namespace Lintelligent.Reporting.Tests.Formatters;
-
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.Abstractions;
 using Lintelligent.AnalyzerEngine.Results;
 using Xunit;
+
+namespace Lintelligent.Reporting.Tests.Formatters;
 
 public class MarkdownFormatterTests
 {
@@ -11,7 +11,7 @@ public class MarkdownFormatterTests
     public void MarkdownFormatter_DuplicationResults_IncludesCodeSnippets()
     {
         // Arrange
-        var results = new[]
+        DiagnosticResult[] results = new[]
         {
             CreateDuplicationResult(
                 "src/ProjectA/Calculator.cs",
@@ -24,7 +24,7 @@ public class MarkdownFormatterTests
         };
 
         // Act
-        var markdown = Reporting.ReportGenerator.GenerateMarkdown(results);
+        var markdown = ReportGenerator.GenerateMarkdown(results);
 
         // Assert
         markdown.Should().NotBeNullOrEmpty();
@@ -42,7 +42,7 @@ public class MarkdownFormatterTests
     public void MarkdownFormatter_GroupedByCategory_ShowsDuplicationCategory()
     {
         // Arrange
-        var results = new[]
+        DiagnosticResult[] results = new[]
         {
             CreateDuplicationResult("File1.cs", 1, "Duplication 1"),
             CreateDuplicationResult("File2.cs", 1, "Duplication 2"),
@@ -50,7 +50,7 @@ public class MarkdownFormatterTests
         };
 
         // Act
-        var markdown = Reporting.ReportGenerator.GenerateMarkdownGroupedByCategory(results);
+        var markdown = ReportGenerator.GenerateMarkdownGroupedByCategory(results);
 
         // Assert
         markdown.Should().Contain("## Code Quality", "because duplications are in Code Quality category");
@@ -61,10 +61,10 @@ public class MarkdownFormatterTests
     public void MarkdownFormatter_EmptyResults_ShowsHeader()
     {
         // Arrange
-        var results = Array.Empty<DiagnosticResult>();
+        DiagnosticResult[] results = Array.Empty<DiagnosticResult>();
 
         // Act
-        var markdown = Reporting.ReportGenerator.GenerateMarkdown(results);
+        var markdown = ReportGenerator.GenerateMarkdown(results);
 
         // Assert
         markdown.Should().Contain("# Lintelligent Report");

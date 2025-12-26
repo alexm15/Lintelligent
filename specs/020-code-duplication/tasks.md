@@ -161,20 +161,20 @@
 
 ### Tests for User Story 4
 
-- [ ] T052 [P] [US4] Test: `ASTNormalizer_IdenticalControlFlow_DifferentVariables_95PercentSimilar` in SimilarityDetectorTests.cs
-- [ ] T053 [P] [US4] Test: `ASTNormalizer_ReorderedStatements_IdentifiedAsSimilar` in SimilarityDetectorTests.cs
-- [ ] T054 [P] [US4] Test: `SimilarityDetector_85PercentThreshold_OnlyMeetingBlocksReported` in SimilarityDetectorTests.cs
+- [X] T052 [P] [US4] Test: `ASTNormalizer_IdenticalControlFlow_DifferentVariables_95PercentSimilar` in SimilarityDetectorTests.cs
+- [X] T053 [P] [US4] Test: `ASTNormalizer_ReorderedStatements_IdentifiedAsSimilar` in SimilarityDetectorTests.cs
+- [X] T054 [P] [US4] Test: `SimilarityDetector_85PercentThreshold_OnlyMeetingBlocksReported` in SimilarityDetectorTests.cs
 
 ### Implementation for User Story 4
 
-- [ ] T055 [P] [US4] Create `ASTNormalizer` class in src/Lintelligent.AnalyzerEngine/WorkspaceAnalyzers/CodeDuplication/ASTNormalizer.cs
-- [ ] T056 [US4] Implement `ASTNormalizer.NormalizeIdentifiers()` method (rename all identifiers to canonical names)
-- [ ] T057 [US4] Implement `ASTNormalizer.NormalizeLiterals()` method (replace literals with type placeholders)
-- [ ] T058 [US4] Create `SimilarityDetector` class in src/Lintelligent.AnalyzerEngine/WorkspaceAnalyzers/CodeDuplication/SimilarityDetector.cs
-- [ ] T059 [US4] Implement `SimilarityDetector.CalculateSimilarity()` method (normalized AST comparison)
-- [ ] T060 [US4] Integrate `SimilarityDetector` into `DuplicationDetector.Analyze()` workflow
-- [ ] T061 [US4] Add `--enable-structural-similarity` and `--min-similarity <percent>` CLI flags to ScanCommand
-- [ ] T062 [US4] Extend `DuplicationOptions` with structural similarity settings
+- [X] T055 [P] [US4] Create `ASTNormalizer` class in src/Lintelligent.AnalyzerEngine/WorkspaceAnalyzers/CodeDuplication/ASTNormalizer.cs
+- [X] T056 [US4] Implement `ASTNormalizer.NormalizeIdentifiers()` method (rename all identifiers to canonical names)
+- [X] T057 [US4] Implement `ASTNormalizer.NormalizeLiterals()` method (replace literals with type placeholders)
+- [X] T058 [US4] Create `SimilarityDetector` class in src/Lintelligent.AnalyzerEngine/WorkspaceAnalyzers/CodeDuplication/SimilarityDetector.cs
+- [X] T059 [US4] Implement `SimilarityDetector.CalculateSimilarity()` method (normalized AST comparison)
+- [X] T060 [US4] Integrate `SimilarityDetector` into `DuplicationDetector.Analyze()` workflow
+- [X] T061 [US4] Add `--enable-structural-similarity` and `--min-similarity <percent>` CLI flags to ScanCommand
+- [X] T062 [US4] Extend `DuplicationOptions` with structural similarity settings
 
 **Checkpoint**: Structural similarity working - near-duplicates with different identifiers detected and reported
 

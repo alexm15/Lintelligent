@@ -1,30 +1,10 @@
 namespace Lintelligent.AnalyzerEngine.ProjectModel;
 
 /// <summary>
-/// Represents a Visual Studio solution with projects and configurations.
+///     Represents a Visual Studio solution with projects and configurations.
 /// </summary>
 public sealed class Solution
 {
-    /// <summary>
-    /// Absolute path to the .sln file.
-    /// </summary>
-    public string FilePath { get; }
-
-    /// <summary>
-    /// Solution display name (file name without extension).
-    /// </summary>
-    public string Name { get; }
-
-    /// <summary>
-    /// All projects contained in the solution.
-    /// </summary>
-    public IReadOnlyList<Project> Projects { get; }
-
-    /// <summary>
-    /// Solution-level configurations (e.g., Debug, Release).
-    /// </summary>
-    public IReadOnlyList<string> Configurations { get; }
-
     public Solution(
         string filePath,
         string name,
@@ -55,14 +35,34 @@ public sealed class Solution
     }
 
     /// <summary>
-    /// Get dependency graph for all projects.
-    /// Returns dictionary mapping project path to list of referenced project paths.
+    ///     Absolute path to the .sln file.
+    /// </summary>
+    public string FilePath { get; }
+
+    /// <summary>
+    ///     Solution display name (file name without extension).
+    /// </summary>
+    public string Name { get; }
+
+    /// <summary>
+    ///     All projects contained in the solution.
+    /// </summary>
+    public IReadOnlyList<Project> Projects { get; }
+
+    /// <summary>
+    ///     Solution-level configurations (e.g., Debug, Release).
+    /// </summary>
+    public IReadOnlyList<string> Configurations { get; }
+
+    /// <summary>
+    ///     Get dependency graph for all projects.
+    ///     Returns dictionary mapping project path to list of referenced project paths.
     /// </summary>
     public IReadOnlyDictionary<string, IReadOnlyList<string>> GetDependencyGraph()
     {
         var graph = new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var project in Projects)
+        foreach (Project project in Projects)
         {
             var dependencies = project.ProjectReferences
                 .Select(r => r.ReferencedProjectPath)
@@ -93,12 +93,13 @@ public sealed class Solution
             // Windows
             return root.Length > 1 || root.Equals("\\\\\\\\", StringComparison.Ordinal);
         }
-        else
-        {
-            // Unix
-            return root.Equals("/", StringComparison.Ordinal);
-        }
+
+        // Unix
+        return root.Equals("/", StringComparison.Ordinal);
     }
 
-    public override string ToString() => $"{Name} ({Projects.Count} projects)";
+    public override string ToString()
+    {
+        return $"{Name} ({Projects.Count} projects)";
+    }
 }

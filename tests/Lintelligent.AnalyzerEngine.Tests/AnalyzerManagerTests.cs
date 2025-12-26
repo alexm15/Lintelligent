@@ -21,7 +21,7 @@ public class AnalyzerManagerTests
         var rule = new InvalidRuleEmptyId();
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => manager.RegisterRule(rule));
+        ArgumentException exception = Assert.Throws<ArgumentException>(() => manager.RegisterRule(rule));
         exception.Message.Should().Contain("Id");
     }
 
@@ -33,7 +33,7 @@ public class AnalyzerManagerTests
         var rule = new InvalidRuleNullId();
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => manager.RegisterRule(rule));
+        ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() => manager.RegisterRule(rule));
         exception.ParamName.Should().Be("Id");
     }
 
@@ -45,7 +45,7 @@ public class AnalyzerManagerTests
         var rule = new InvalidRuleUndefinedSeverity();
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => manager.RegisterRule(rule));
+        ArgumentException exception = Assert.Throws<ArgumentException>(() => manager.RegisterRule(rule));
         exception.Message.Should().Contain("severity");
         exception.Message.Should().Contain("undefined");
     }
@@ -58,7 +58,7 @@ public class AnalyzerManagerTests
         var rule = new InvalidRuleEmptyCategory();
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => manager.RegisterRule(rule));
+        ArgumentException exception = Assert.Throws<ArgumentException>(() => manager.RegisterRule(rule));
         exception.Message.Should().Contain("Category");
     }
 
@@ -70,7 +70,7 @@ public class AnalyzerManagerTests
         var rule = new InvalidRuleNullCategory();
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => manager.RegisterRule(rule));
+        ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() => manager.RegisterRule(rule));
         exception.ParamName.Should().Be("Category");
     }
 

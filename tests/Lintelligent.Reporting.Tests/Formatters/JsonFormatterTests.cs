@@ -1,11 +1,11 @@
-namespace Lintelligent.Reporting.Tests.Formatters;
-
 using System.Text.Json;
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.Abstractions;
 using Lintelligent.AnalyzerEngine.Results;
 using Lintelligent.Reporting.Formatters;
 using Xunit;
+
+namespace Lintelligent.Reporting.Tests.Formatters;
 
 public class JsonFormatterTests
 {
@@ -15,7 +15,7 @@ public class JsonFormatterTests
     public void Format_WithValidResults_ProducesValidJson()
     {
         // Arrange
-        var results = new[]
+        DiagnosticResult[] results = new[]
         {
             CreateDiagnosticResult("File1.cs", Severity.Error, "Complexity"),
             CreateDiagnosticResult("File2.cs", Severity.Warning, "Naming")
@@ -33,14 +33,14 @@ public class JsonFormatterTests
     public void Format_WithEmptyResults_ReturnsSuccessWithZeroViolations()
     {
         // Arrange
-        var results = Array.Empty<DiagnosticResult>();
+        DiagnosticResult[] results = Array.Empty<DiagnosticResult>();
 
         // Act
         var json = _formatter.Format(results);
 
         // Assert
         using var doc = JsonDocument.Parse(json);
-        var root = doc.RootElement;
+        JsonElement root = doc.RootElement;
 
         root.GetProperty("status").GetString().Should().Be("success");
         root.GetProperty("summary").GetProperty("total").GetInt32().Should().Be(0);
@@ -51,14 +51,15 @@ public class JsonFormatterTests
     public void Format_WithSingleViolation_ContainsAllFields()
     {
         // Arrange
-        var result = CreateDiagnosticResult("Test.cs", Severity.Warning, "Maintainability", 42, "LINT001", "Method too long");
+        DiagnosticResult result = CreateDiagnosticResult("Test.cs", Severity.Warning, "Maintainability", 42, "LINT001",
+            "Method too long");
 
         // Act
-        var json = _formatter.Format(new[] { result });
+        var json = _formatter.Format(new[] {result});
 
         // Assert
         using var doc = JsonDocument.Parse(json);
-        var violation = doc.RootElement.GetProperty("violations")[0];
+        JsonElement violation = doc.RootElement.GetProperty("violations")[0];
 
         violation.GetProperty("filePath").GetString().Should().Be("Test.cs");
         violation.GetProperty("lineNumber").GetInt32().Should().Be(42);
@@ -72,7 +73,7 @@ public class JsonFormatterTests
     public void Format_WithMultipleSeverities_GroupsBySeverity()
     {
         // Arrange
-        var results = new[]
+        DiagnosticResult[] results = new[]
         {
             CreateDiagnosticResult("File1.cs", Severity.Error, "Complexity"),
             CreateDiagnosticResult("File2.cs", Severity.Error, "Complexity"),
@@ -86,8 +87,8 @@ public class JsonFormatterTests
 
         // Assert
         using var doc = JsonDocument.Parse(json);
-        var summary = doc.RootElement.GetProperty("summary");
-        var bySeverity = summary.GetProperty("bySeverity");
+        JsonElement summary = doc.RootElement.GetProperty("summary");
+        JsonElement bySeverity = summary.GetProperty("bySeverity");
 
         summary.GetProperty("total").GetInt32().Should().Be(5);
         bySeverity.GetProperty("error").GetInt32().Should().Be(2);
@@ -99,7 +100,7 @@ public class JsonFormatterTests
     public void Format_WithSpecialCharacters_EscapesCorrectly()
     {
         // Arrange
-        var result = CreateDiagnosticResult(
+        DiagnosticResult result = CreateDiagnosticResult(
             "File.cs",
             Severity.Error,
             "Test",
@@ -109,7 +110,7 @@ public class JsonFormatterTests
         );
 
         // Act
-        var json = _formatter.Format(new[] { result });
+        var json = _formatter.Format(new[] {result});
 
         // Assert
         using var doc = JsonDocument.Parse(json);
@@ -124,10 +125,10 @@ public class JsonFormatterTests
     public void Format_WithCamelCaseConvention_UsesCorrectPropertyNames()
     {
         // Arrange
-        var result = CreateDiagnosticResult("File.cs", Severity.Error, "Test");
+        DiagnosticResult result = CreateDiagnosticResult("File.cs", Severity.Error, "Test");
 
         // Act
-        var json = _formatter.Format(new[] { result });
+        var json = _formatter.Format(new[] {result});
 
         // Assert
         json.Should().Contain("\"status\"");
@@ -147,7 +148,7 @@ public class JsonFormatterTests
     public void Format_WithSameInput_ProducesDeterministicOutput()
     {
         // Arrange
-        var results = new[]
+        DiagnosticResult[] results = new[]
         {
             CreateDiagnosticResult("File1.cs", Severity.Error, "Complexity"),
             CreateDiagnosticResult("File2.cs", Severity.Warning, "Naming")
@@ -165,7 +166,7 @@ public class JsonFormatterTests
     public void Format_WithAllCategories_HandlesEightDistinctCategories()
     {
         // Arrange (8 categories from Feature 019 as mentioned in spec)
-        var results = new[]
+        DiagnosticResult[] results = new[]
         {
             CreateDiagnosticResult("File1.cs", Severity.Error, "Complexity"),
             CreateDiagnosticResult("File2.cs", Severity.Warning, "Naming"),
@@ -182,7 +183,7 @@ public class JsonFormatterTests
 
         // Assert
         using var doc = JsonDocument.Parse(json);
-        var violations = doc.RootElement.GetProperty("violations");
+        JsonElement violations = doc.RootElement.GetProperty("violations");
 
         violations.GetArrayLength().Should().Be(8);
         doc.RootElement.GetProperty("summary").GetProperty("total").GetInt32().Should().Be(8);
@@ -192,7 +193,7 @@ public class JsonFormatterTests
     public void Format_WithStatusField_ReturnsSuccess()
     {
         // Arrange
-        var results = new[] { CreateDiagnosticResult("File.cs", Severity.Error, "Test") };
+        DiagnosticResult[] results = new[] {CreateDiagnosticResult("File.cs", Severity.Error, "Test")};
 
         // Act
         var json = _formatter.Format(results);
@@ -206,7 +207,7 @@ public class JsonFormatterTests
     public void Format_WithSummaryTotals_MatchesViolationCount()
     {
         // Arrange
-        var results = new[]
+        DiagnosticResult[] results = new[]
         {
             CreateDiagnosticResult("File1.cs", Severity.Error, "Complexity"),
             CreateDiagnosticResult("File2.cs", Severity.Warning, "Naming"),
@@ -218,8 +219,8 @@ public class JsonFormatterTests
 
         // Assert
         using var doc = JsonDocument.Parse(json);
-        var summary = doc.RootElement.GetProperty("summary");
-        var violations = doc.RootElement.GetProperty("violations");
+        JsonElement summary = doc.RootElement.GetProperty("summary");
+        JsonElement violations = doc.RootElement.GetProperty("violations");
 
         summary.GetProperty("total").GetInt32().Should().Be(violations.GetArrayLength());
         summary.GetProperty("total").GetInt32().Should().Be(3);
@@ -236,7 +237,7 @@ public class JsonFormatterTests
     public void JsonFormatter_DuplicationResults_IncludesLocationsAndTokenCounts()
     {
         // Arrange - Create duplication results with detailed information
-        var results = new[]
+        DiagnosticResult[] results = new[]
         {
             CreateDiagnosticResult(
                 "src/ProjectA/Calculator.cs",
@@ -259,20 +260,20 @@ public class JsonFormatterTests
 
         // Assert
         using var doc = JsonDocument.Parse(json);
-        var violations = doc.RootElement.GetProperty("violations");
-        
+        JsonElement violations = doc.RootElement.GetProperty("violations");
+
         violations.GetArrayLength().Should().Be(2);
-        
+
         // First duplication
-        var dup1 = violations[0];
+        JsonElement dup1 = violations[0];
         dup1.GetProperty("ruleId").GetString().Should().Be("DUP001");
         dup1.GetProperty("message").GetString().Should().Contain("3 files");
         dup1.GetProperty("message").GetString().Should().Contain("15 lines");
         dup1.GetProperty("message").GetString().Should().Contain("200 tokens");
         dup1.GetProperty("lineNumber").GetInt32().Should().Be(25);
-        
+
         // Second duplication
-        var dup2 = violations[1];
+        JsonElement dup2 = violations[1];
         dup2.GetProperty("message").GetString().Should().Contain("2 files");
         dup2.GetProperty("message").GetString().Should().Contain("8 lines");
         dup2.GetProperty("message").GetString().Should().Contain("95 tokens");

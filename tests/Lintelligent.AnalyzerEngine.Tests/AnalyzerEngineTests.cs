@@ -25,8 +25,8 @@ public class AnalyzerEngineTests
         manager.RegisterRule(new ThirdRule());
 
         var engine = new EngineClass(manager);
-        var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
-        var trees = new[] {tree};
+        SyntaxTree tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
+        SyntaxTree[] trees = new[] {tree};
 
         // Act
         var results = engine.Analyze(trees).ToList();
@@ -46,9 +46,9 @@ public class AnalyzerEngineTests
         manager.RegisterRule(new FirstRule());
 
         var engine = new EngineClass(manager);
-        var tree1 = CSharpSyntaxTree.ParseText("class A { }", path: "A.cs");
-        var tree2 = CSharpSyntaxTree.ParseText("class B { }", path: "B.cs");
-        var trees = new[] {tree1, tree2};
+        SyntaxTree tree1 = CSharpSyntaxTree.ParseText("class A { }", path: "A.cs");
+        SyntaxTree tree2 = CSharpSyntaxTree.ParseText("class B { }", path: "B.cs");
+        SyntaxTree[] trees = new[] {tree1, tree2};
 
         // Act
         var results = engine.Analyze(trees).ToList();
@@ -64,7 +64,7 @@ public class AnalyzerEngineTests
         // Arrange
         var manager = new EngineManager();
         var engine = new EngineClass(manager);
-        var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
+        SyntaxTree tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
 
         // Act
         var results = engine.Analyze([tree]).ToList();
@@ -81,10 +81,10 @@ public class AnalyzerEngineTests
         manager.RegisterRule(new SecondRule());
 
         var engine = new EngineClass(manager);
-        var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
+        SyntaxTree tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
 
         // Act - Get enumerable but don't materialize
-        var results = engine.Analyze([tree]);
+        IEnumerable<DiagnosticResult> results = engine.Analyze([tree]);
 
         // Assert - Should return IEnumerable (lazy)
         results.Should().BeAssignableTo<IEnumerable<DiagnosticResult>>();
@@ -105,7 +105,7 @@ public class AnalyzerEngineTests
         manager.RegisterRule(new FirstRule()); // Emits 1 finding
 
         var engine = new EngineClass(manager);
-        var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
+        SyntaxTree tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
 
         // Act
         var results = engine.Analyze([tree]).ToList();
@@ -125,7 +125,7 @@ public class AnalyzerEngineTests
         manager.RegisterRule(new SecondRule()); // Works correctly
 
         var engine = new EngineClass(manager);
-        var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
+        SyntaxTree tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
 
         // Act
         var results = engine.Analyze([tree]).ToList();
@@ -151,7 +151,7 @@ public class AnalyzerEngineTests
         manager.RegisterRule(new ThrowingRule());
 
         var engine = new EngineClass(manager);
-        var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
+        SyntaxTree tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
 
         // Act - First analysis
         _ = engine.Analyze([tree]).ToList();

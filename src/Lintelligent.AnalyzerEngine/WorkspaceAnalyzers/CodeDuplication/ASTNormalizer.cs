@@ -1,21 +1,17 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 namespace Lintelligent.AnalyzerEngine.WorkspaceAnalyzers.CodeDuplication;
 
 /// <summary>
-/// Normalizes AST nodes to enable structural similarity detection.
-/// Transforms code with different identifiers and literals into a canonical form
-/// for comparing code structure independently of naming choices.
+///     Normalizes AST nodes to enable structural similarity detection.
+///     Transforms code with different identifiers and literals into a canonical form
+///     for comparing code structure independently of naming choices.
 /// </summary>
 public class AstNormalizer
 {
     private int _identifierCounter;
 
     /// <summary>
-    /// Normalizes all identifiers in a syntax tree to canonical names.
-    /// This allows comparison of code structure regardless of variable/method naming.
+    ///     Normalizes all identifiers in a syntax tree to canonical names.
+    ///     This allows comparison of code structure regardless of variable/method naming.
     /// </summary>
     /// <param name="root">The root syntax node to normalize.</param>
     /// <returns>A new syntax node with all identifiers renamed to canonical forms (id_0, id_1, etc.).</returns>
@@ -30,8 +26,8 @@ public class AstNormalizer
     }
 
     /// <summary>
-    /// Normalizes all literals in a syntax tree to type placeholders.
-    /// This allows comparison of code structure regardless of literal values.
+    ///     Normalizes all literals in a syntax tree to type placeholders.
+    ///     This allows comparison of code structure regardless of literal values.
     /// </summary>
     /// <param name="root">The root syntax node to normalize.</param>
     /// <returns>A new syntax node with all literals replaced with type placeholders.</returns>
@@ -43,8 +39,8 @@ public class AstNormalizer
 
     private sealed class IdentifierNormalizingRewriter : CSharpSyntaxRewriter
     {
-        private readonly Dictionary<string, string> _identifierMapping;
         private readonly Func<int> _getNextId;
+        private readonly Dictionary<string, string> _identifierMapping;
 
         public IdentifierNormalizingRewriter(Dictionary<string, string> identifierMapping, Func<int> getNextId)
         {
@@ -55,7 +51,7 @@ public class AstNormalizer
         public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
         {
             var originalName = node.Identifier.Text;
-            
+
             // Don't normalize built-in types or keywords
             if (SyntaxFacts.GetKeywordKind(originalName) != SyntaxKind.None)
                 return base.VisitIdentifierName(node);
@@ -72,7 +68,7 @@ public class AstNormalizer
         public override SyntaxNode? VisitParameter(ParameterSyntax node)
         {
             var originalName = node.Identifier.Text;
-            
+
             if (!_identifierMapping.TryGetValue(originalName, out var normalizedName))
             {
                 normalizedName = $"id_{_getNextId()}";
@@ -85,7 +81,7 @@ public class AstNormalizer
         public override SyntaxNode? VisitVariableDeclarator(VariableDeclaratorSyntax node)
         {
             var originalName = node.Identifier.Text;
-            
+
             if (!_identifierMapping.TryGetValue(originalName, out var normalizedName))
             {
                 normalizedName = $"id_{_getNextId()}";
@@ -98,7 +94,7 @@ public class AstNormalizer
         public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
             var originalName = node.Identifier.Text;
-            
+
             if (!_identifierMapping.TryGetValue(originalName, out var normalizedName))
             {
                 normalizedName = $"id_{_getNextId()}";
@@ -121,8 +117,9 @@ public class AstNormalizer
                 SyntaxKind.StringLiteralExpression => SyntaxFactory.LiteralExpression(
                     SyntaxKind.StringLiteralExpression,
                     SyntaxFactory.Literal(string.Empty)),
-                SyntaxKind.TrueLiteralExpression or SyntaxKind.FalseLiteralExpression => SyntaxFactory.LiteralExpression(
-                    SyntaxKind.TrueLiteralExpression),
+                SyntaxKind.TrueLiteralExpression or SyntaxKind.FalseLiteralExpression =>
+                    SyntaxFactory.LiteralExpression(
+                        SyntaxKind.TrueLiteralExpression),
                 _ => base.VisitLiteralExpression(node)
             };
         }

@@ -1,7 +1,7 @@
 namespace CompileDirectivesProject.Generated;
 
 /// <summary>
-/// This file should be EXCLUDED from compilation due to <Compile Remove="Generated/**/*.cs" />
+///     This file should be EXCLUDED from compilation due to <Compile Remove="Generated/**/*.cs" />
 /// </summary>
 public class GeneratedFile
 {

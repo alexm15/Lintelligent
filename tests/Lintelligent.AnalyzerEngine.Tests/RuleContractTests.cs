@@ -14,17 +14,18 @@ namespace Lintelligent.AnalyzerEngine.Tests;
 /// </summary>
 public class RuleContractTests
 {
-    private static readonly string[] ExpectedFindings = ["Finding 1", "Finding 2", "Finding 3", "Finding 4", "Finding 5"];
+    private static readonly string[] ExpectedFindings =
+        ["Finding 1", "Finding 2", "Finding 3", "Finding 4", "Finding 5"];
 
     [Fact]
     public void Rule_EmittingZeroFindings_ReturnsEmptyEnumerable()
     {
         // Arrange
         var rule = new ZeroFindingsRule();
-        var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
+        SyntaxTree tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
 
         // Act
-        var results = rule.Analyze(tree);
+        IEnumerable<DiagnosticResult> results = rule.Analyze(tree);
 
         // Assert
         results.Should().NotBeNull("rules must never return null");
@@ -36,7 +37,7 @@ public class RuleContractTests
     {
         // Arrange
         var rule = new MultipleFindingsRule(5);
-        var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
+        SyntaxTree tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
 
         // Act
         var results = rule.Analyze(tree).ToList();
@@ -53,7 +54,7 @@ public class RuleContractTests
     {
         // Arrange - Test with 100+ findings to verify memory efficiency
         var rule = new MultipleFindingsRule(100);
-        var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
+        SyntaxTree tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
 
         // Act
         var results = rule.Analyze(tree).ToList();
@@ -69,16 +70,16 @@ public class RuleContractTests
     {
         // Arrange
         var rule = new LazyEvaluationRule();
-        var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
+        SyntaxTree tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
 
         // Act - Get enumerable but don't enumerate yet
-        var results = rule.Analyze(tree);
+        IEnumerable<DiagnosticResult> results = rule.Analyze(tree);
 
         // Assert - Should not have evaluated any items yet
         rule.EvaluationCount.Should().Be(0, "yield return should use lazy evaluation");
 
         // Act - Enumerate first item only
-        var firstItem = results.First();
+        DiagnosticResult firstItem = results.First();
 
         // Assert - Should only have evaluated first item
         rule.EvaluationCount.Should().Be(1, "should only evaluate items as they're consumed");
@@ -95,10 +96,10 @@ public class RuleContractTests
     {
         // Arrange
         var rule = new MultipleFindingsRule(3);
-        var tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
+        SyntaxTree tree = CSharpSyntaxTree.ParseText("class C { }", path: "Test.cs");
 
         // Act - Enumerate twice
-        var results = rule.Analyze(tree);
+        IEnumerable<DiagnosticResult> results = rule.Analyze(tree);
         var firstPass = results.ToList();
         var secondPass = results.ToList();
 
@@ -113,10 +114,10 @@ public class RuleContractTests
     {
         // Arrange
         var rule = new ZeroFindingsRule();
-        var tree = CSharpSyntaxTree.ParseText("class Perfect { }", path: "Test.cs");
+        SyntaxTree tree = CSharpSyntaxTree.ParseText("class Perfect { }", path: "Test.cs");
 
         // Act
-        var results = rule.Analyze(tree);
+        IEnumerable<DiagnosticResult> results = rule.Analyze(tree);
 
         // Assert
         results.Should().NotBeNull("null is not a valid return value");
@@ -148,6 +149,7 @@ public class RuleContractTests
         public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
         {
             for (var i = 1; i <= findingCount; i++)
+            {
                 yield return new DiagnosticResult(
                     tree.FilePath,
                     Id,
@@ -156,6 +158,7 @@ public class RuleContractTests
                     Severity,
                     Category
                 );
+            }
         }
     }
 

@@ -1,15 +1,15 @@
-using Microsoft.CodeAnalysis;
 using Lintelligent.AnalyzerEngine.Abstractions;
+using Microsoft.CodeAnalysis;
 
 namespace Lintelligent.Analyzers.Metadata;
 
 /// <summary>
-/// Converts Lintelligent Severity to Roslyn DiagnosticSeverity and handles EditorConfig severity parsing.
+///     Converts Lintelligent Severity to Roslyn DiagnosticSeverity and handles EditorConfig severity parsing.
 /// </summary>
 public static class SeverityMapper
 {
     /// <summary>
-    /// Converts Lintelligent Severity enum to Roslyn DiagnosticSeverity.
+    ///     Converts Lintelligent Severity enum to Roslyn DiagnosticSeverity.
     /// </summary>
     public static DiagnosticSeverity ToRoslynSeverity(Severity severity)
     {
@@ -23,11 +23,11 @@ public static class SeverityMapper
     }
 
     /// <summary>
-    /// Converts EditorConfig severity string to Roslyn DiagnosticSeverity.
+    ///     Converts EditorConfig severity string to Roslyn DiagnosticSeverity.
     /// </summary>
     /// <remarks>
-    /// EditorConfig severity values: none, suggestion, warning, error
-    /// Roslyn DiagnosticSeverity: Hidden, Info, Warning, Error
+    ///     EditorConfig severity values: none, suggestion, warning, error
+    ///     Roslyn DiagnosticSeverity: Hidden, Info, Warning, Error
     /// </remarks>
     public static DiagnosticSeverity FromEditorConfigSeverity(string editorConfigSeverity)
     {
@@ -36,13 +36,15 @@ public static class SeverityMapper
             "suggestion" => DiagnosticSeverity.Info,
             "warning" => DiagnosticSeverity.Warning,
             "error" => DiagnosticSeverity.Error,
-            "none" => throw new InvalidOperationException("Severity 'none' should be handled by caller via IsSuppressed()"),
-            _ => throw new ArgumentException($"Invalid EditorConfig severity: {editorConfigSeverity}", nameof(editorConfigSeverity))
+            "none" => throw new InvalidOperationException(
+                "Severity 'none' should be handled by caller via IsSuppressed()"),
+            _ => throw new ArgumentException($"Invalid EditorConfig severity: {editorConfigSeverity}",
+                nameof(editorConfigSeverity))
         };
     }
 
     /// <summary>
-    /// Checks if EditorConfig severity is 'none' (suppressed).
+    ///     Checks if EditorConfig severity is 'none' (suppressed).
     /// </summary>
     public static bool IsSuppressed(string? editorConfigSeverity)
     {

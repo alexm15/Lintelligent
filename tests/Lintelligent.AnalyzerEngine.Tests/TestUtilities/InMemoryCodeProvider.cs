@@ -58,18 +58,18 @@ public class InMemoryCodeProvider : ICodeProvider
     /// </returns>
     public IEnumerable<SyntaxTree> GetSyntaxTrees(IReadOnlyList<string>? conditionalSymbols = null)
     {
-        foreach (var kvp in _sources)
+        foreach (KeyValuePair<string, string> kvp in _sources)
         {
             var filePath = kvp.Key;
             var sourceCode = kvp.Value;
 
             // Create parse options with conditional symbols if provided
-            var parseOptions = conditionalSymbols is { Count: > 0 }
+            CSharpParseOptions parseOptions = conditionalSymbols is {Count: > 0}
                 ? new CSharpParseOptions(LanguageVersion.Latest)
                     .WithPreprocessorSymbols(conditionalSymbols)
                 : new CSharpParseOptions(LanguageVersion.Latest);
-            
-            var tree = CSharpSyntaxTree.ParseText(sourceCode, parseOptions, path: filePath);
+
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(sourceCode, parseOptions, filePath);
             yield return tree;
         }
     }

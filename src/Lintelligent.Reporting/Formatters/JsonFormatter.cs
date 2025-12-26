@@ -6,11 +6,11 @@ using Lintelligent.Reporting.Formatters.Models;
 namespace Lintelligent.Reporting.Formatters;
 
 /// <summary>
-/// Formats diagnostic results as JSON for CI/CD pipeline integration.
-/// Constitutional Compliance: Principle I (Layered Architecture), Principle VII (Testability).
-/// FR-001: JSON format support for machine-readable output.
-/// FR-012: Proper escaping of special characters (quotes, newlines, Unicode).
-/// FR-014: Graceful handling of empty result sets.
+///     Formats diagnostic results as JSON for CI/CD pipeline integration.
+///     Constitutional Compliance: Principle I (Layered Architecture), Principle VII (Testability).
+///     FR-001: JSON format support for machine-readable output.
+///     FR-012: Proper escaping of special characters (quotes, newlines, Unicode).
+///     FR-014: Graceful handling of empty result sets.
 /// </summary>
 public class JsonFormatter : IReportFormatter
 {
@@ -41,12 +41,7 @@ public class JsonFormatter : IReportFormatter
                 .ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal)
         };
 
-        var output = new JsonOutputModel
-        {
-            Status = "success",
-            Summary = summary,
-            Violations = violations
-        };
+        var output = new JsonOutputModel {Status = "success", Summary = summary, Violations = violations};
 
         // FR-012: Special character escaping via JavaScriptEncoder
         // SC-003: camelCase naming convention via JsonPropertyName attributes

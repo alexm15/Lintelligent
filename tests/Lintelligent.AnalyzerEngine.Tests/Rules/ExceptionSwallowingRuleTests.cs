@@ -22,22 +22,22 @@ public class ExceptionSwallowingRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    try
-                    {
-                        DoSomething();
-                    }
-                    catch
-                    {
-                        throw;
-                    }
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           try
+                           {
+                               DoSomething();
+                           }
+                           catch
+                           {
+                               throw;
+                           }
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -51,21 +51,21 @@ public class ExceptionSwallowingRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    try
-                    {
-                        DoSomething();
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           try
+                           {
+                               DoSomething();
+                           }
+                           catch
+                           {
+                           }
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -87,22 +87,22 @@ public class ExceptionSwallowingRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    try
-                    {
-                        DoSomething();
-                    }
-                    catch
-                    {
-                        // This is a comment, not executable code
-                    }
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           try
+                           {
+                               DoSomething();
+                           }
+                           catch
+                           {
+                               // This is a comment, not executable code
+                           }
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -116,22 +116,22 @@ public class ExceptionSwallowingRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    try
-                    {
-                        DoSomething();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error(ex);
-                    }
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           try
+                           {
+                               DoSomething();
+                           }
+                           catch (Exception ex)
+                           {
+                               Logger.Error(ex);
+                           }
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -145,28 +145,28 @@ public class ExceptionSwallowingRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    try
-                    {
-                        try
-                        {
-                            DoSomething();
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Error(ex);
-                        }
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           try
+                           {
+                               try
+                               {
+                                   DoSomething();
+                               }
+                               catch (Exception ex)
+                               {
+                                   Logger.Error(ex);
+                               }
+                           }
+                           catch
+                           {
+                           }
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -190,16 +190,16 @@ public class ExceptionSwallowingRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    try { }
-                    catch { }
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code, "Form1.Designer.cs");
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           try { }
+                           catch { }
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code, "Form1.Designer.cs");
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -213,20 +213,20 @@ public class ExceptionSwallowingRuleTests
     {
         // Arrange
         var code = """
-            // <auto-generated>
-            //     This code was generated by a tool.
-            // </auto-generated>
-            
-            public class TestClass
-            {
-                public void Method()
-                {
-                    try { }
-                    catch { }
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   // <auto-generated>
+                   //     This code was generated by a tool.
+                   // </auto-generated>
+
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           try { }
+                           catch { }
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();

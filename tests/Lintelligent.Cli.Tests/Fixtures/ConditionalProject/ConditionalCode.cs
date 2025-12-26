@@ -8,7 +8,7 @@ public class ConditionalCode
     {
         var debugMessage = "This is debug code";
         Console.WriteLine(debugMessage);
-        
+
         // Intentionally long method for testing (21+ statements)
         var a = 1;
         var b = 2;

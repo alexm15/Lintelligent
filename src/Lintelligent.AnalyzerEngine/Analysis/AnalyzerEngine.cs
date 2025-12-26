@@ -1,4 +1,5 @@
 ﻿using Lintelligent.AnalyzerEngine.Results;
+using Lintelligent.AnalyzerEngine.Rules;
 
 namespace Lintelligent.AnalyzerEngine.Analysis;
 
@@ -48,18 +49,15 @@ public class AnalyzerEngine(AnalyzerManager manager)
     {
         _exceptions.Clear();
 
-        foreach (var tree in syntaxTrees)
+        foreach (SyntaxTree tree in syntaxTrees)
         {
-            foreach (var result in AnalyzeTree(tree))
-            {
-                yield return result;
-            }
+            foreach (DiagnosticResult result in AnalyzeTree(tree)) yield return result;
         }
     }
 
     private IEnumerable<DiagnosticResult> AnalyzeTree(SyntaxTree tree)
     {
-        foreach (var rule in manager.Rules)
+        foreach (IAnalyzerRule rule in manager.Rules)
         {
             IEnumerable<DiagnosticResult> results;
             try
@@ -72,10 +70,7 @@ public class AnalyzerEngine(AnalyzerManager manager)
                 continue;
             }
 
-            foreach (var result in results)
-            {
-                yield return result;
-            }
+            foreach (DiagnosticResult result in results) yield return result;
         }
     }
 }

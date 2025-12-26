@@ -1,7 +1,10 @@
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.Abstractions;
-using Lintelligent.AnalyzerEngine.Analysis;using Lintelligent.AnalyzerEngine.Configuration;using Lintelligent.AnalyzerEngine.Results;
+using Lintelligent.AnalyzerEngine.Analysis;
+using Lintelligent.AnalyzerEngine.Configuration;
+using Lintelligent.AnalyzerEngine.Results;
 using Lintelligent.AnalyzerEngine.WorkspaceAnalyzers.CodeDuplication;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
 using CompileItem = Lintelligent.AnalyzerEngine.ProjectModel.CompileItem;
@@ -14,7 +17,7 @@ using WorkspaceContext = Lintelligent.AnalyzerEngine.Abstractions.WorkspaceConte
 namespace Lintelligent.AnalyzerEngine.Tests.Analysis;
 
 /// <summary>
-/// Tests for WorkspaceAnalyzerEngine - validates workspace-level analysis orchestration.
+///     Tests for WorkspaceAnalyzerEngine - validates workspace-level analysis orchestration.
 /// </summary>
 public sealed class WorkspaceAnalyzerEngineTests
 {
@@ -22,7 +25,7 @@ public sealed class WorkspaceAnalyzerEngineTests
     public void Analyze_FiveProjects_AllProjectsIncluded()
     {
         // Arrange - Create workspace context with 5 projects
-        var projects = new[]
+        Project[] projects = new[]
         {
             CreateProject("Project1", Path.GetFullPath(Path.Combine("Solution", "Project1", "Project1.csproj"))),
             CreateProject("Project2", Path.GetFullPath(Path.Combine("Solution", "Project2", "Project2.csproj"))),
@@ -32,10 +35,10 @@ public sealed class WorkspaceAnalyzerEngineTests
         };
 
         var solution = new Solution(
-            filePath: Path.GetFullPath(Path.Combine("Solution", "TestSolution.sln")),
-            name: "TestSolution",
-            projects: projects,
-            configurations: new[] { "Debug", "Release" });
+            Path.GetFullPath(Path.Combine("Solution", "TestSolution.sln")),
+            "TestSolution",
+            projects,
+            new[] {"Debug", "Release"});
 
         var context = new WorkspaceContext(
             solution,
@@ -46,15 +49,15 @@ public sealed class WorkspaceAnalyzerEngineTests
 
         // Create 5 syntax trees (one per project) with identical code (multi-line to ensure detection)
         var code = """
-            public class TestClass
-            {
-                void Method()
-                {
-                    int x = 42;
-                }
-            }
-            """;
-        var trees = new[]
+                   public class TestClass
+                   {
+                       void Method()
+                       {
+                           int x = 42;
+                       }
+                   }
+                   """;
+        SyntaxTree[] trees = new[]
         {
             CSharpSyntaxTree.ParseText(code, path: @"C:\Solution\Project1\Test.cs"),
             CSharpSyntaxTree.ParseText(code, path: @"C:\Solution\Project2\Test.cs"),
@@ -64,7 +67,7 @@ public sealed class WorkspaceAnalyzerEngineTests
         };
 
         var engine = new WorkspaceAnalyzerEngine();
-        var options = new DuplicationOptions { MinLines = 1, MinTokens = 1 }; // Low thresholds to detect this small code
+        var options = new DuplicationOptions {MinLines = 1, MinTokens = 1}; // Low thresholds to detect this small code
         engine.RegisterAnalyzer(new DuplicationDetector(options));
 
         // Act
@@ -73,9 +76,9 @@ public sealed class WorkspaceAnalyzerEngineTests
         // Assert - Should detect 1 duplication group spanning all 5 projects
         diagnostics.Should().HaveCount(1, "because there is one duplication across all projects");
 
-        var diagnostic = diagnostics[0];
+        DiagnosticResult diagnostic = diagnostics[0];
         diagnostic.Message.Should().Contain("5 files", "because duplication spans 5 projects");
-        
+
         // Verify all project names appear in message
         diagnostic.Message.Should().Contain("Project1")
             .And.Contain("Project2")
@@ -106,7 +109,7 @@ public sealed class WorkspaceAnalyzerEngineTests
         var engine = new WorkspaceAnalyzerEngine();
 
         // Act
-        var act = () => engine.RegisterAnalyzer(null!);
+        Action act = () => engine.RegisterAnalyzer(null!);
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
@@ -137,10 +140,10 @@ public sealed class WorkspaceAnalyzerEngineTests
         // Arrange
         var engine = new WorkspaceAnalyzerEngine();
         engine.RegisterAnalyzer(new DuplicationDetector());
-        var context = CreateMinimalContext();
+        WorkspaceContext context = CreateMinimalContext();
 
         // Act
-        var act = () => engine.Analyze(null!, context).ToList();
+        Func<List<DiagnosticResult>> act = () => engine.Analyze(null!, context).ToList();
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
@@ -153,10 +156,10 @@ public sealed class WorkspaceAnalyzerEngineTests
         // Arrange
         var engine = new WorkspaceAnalyzerEngine();
         engine.RegisterAnalyzer(new DuplicationDetector());
-        var trees = new[] { CSharpSyntaxTree.ParseText("class A { }", path: "A.cs") };
+        SyntaxTree[] trees = new[] {CSharpSyntaxTree.ParseText("class A { }", path: "A.cs")};
 
         // Act
-        var act = () => engine.Analyze(trees, null!).ToList();
+        Func<List<DiagnosticResult>> act = () => engine.Analyze(trees, null!).ToList();
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
@@ -168,8 +171,8 @@ public sealed class WorkspaceAnalyzerEngineTests
     {
         // Arrange
         var engine = new WorkspaceAnalyzerEngine();
-        var context = CreateMinimalContext();
-        var trees = new[] { CSharpSyntaxTree.ParseText("class A { }", path: "A.cs") };
+        WorkspaceContext context = CreateMinimalContext();
+        SyntaxTree[] trees = new[] {CSharpSyntaxTree.ParseText("class A { }", path: "A.cs")};
 
         // Act
         var diagnostics = engine.Analyze(trees, context).ToList();
@@ -183,13 +186,13 @@ public sealed class WorkspaceAnalyzerEngineTests
     {
         // Arrange
         var code = "public class Duplicate { void Method() { Console.WriteLine(\"test\"); } }";
-        var trees = new[]
+        SyntaxTree[] trees = new[]
         {
             CSharpSyntaxTree.ParseText(code, path: "File1.cs"),
             CSharpSyntaxTree.ParseText(code, path: "File2.cs")
         };
 
-        var context = CreateMinimalContext();
+        WorkspaceContext context = CreateMinimalContext();
         var engine = new WorkspaceAnalyzerEngine();
         engine.RegisterAnalyzer(new DuplicationDetector());
 
@@ -199,7 +202,7 @@ public sealed class WorkspaceAnalyzerEngineTests
 
         // Assert - Results should be identical (deterministic)
         results1.Should().HaveCount(results2.Count);
-        for (int i = 0; i < results1.Count; i++)
+        for (var i = 0; i < results1.Count; i++)
         {
             results1[i].RuleId.Should().Be(results2[i].RuleId);
             results1[i].FilePath.Should().Be(results2[i].FilePath);
@@ -212,34 +215,35 @@ public sealed class WorkspaceAnalyzerEngineTests
     {
         // Ensure path is absolute and cross-platform
         var absolutePath = Path.IsPathRooted(path) ? path : Path.GetFullPath(path);
-        
+
         return new Project(
-            filePath: absolutePath,
-            name: name,
-            targetFramework: new TargetFramework("net10.0"),
-            allTargetFrameworks: new[] { new TargetFramework("net10.0") },
-            conditionalSymbols: Array.Empty<string>(),
-            configuration: "Debug",
-            platform: "AnyCPU",
-            outputType: "Library",
-            compileItems: Array.Empty<CompileItem>(),
-            projectReferences: Array.Empty<ProjectReference>());
+            absolutePath,
+            name,
+            new TargetFramework("net10.0"),
+            new[] {new TargetFramework("net10.0")},
+            Array.Empty<string>(),
+            "Debug",
+            "AnyCPU",
+            "Library",
+            Array.Empty<CompileItem>(),
+            Array.Empty<ProjectReference>());
     }
 
     private static WorkspaceContext CreateMinimalContext()
     {
-        var project = CreateProject("TestProject", Path.GetFullPath(Path.Combine("TestProject", "TestProject.csproj")));
+        Project project = CreateProject("TestProject",
+            Path.GetFullPath(Path.Combine("TestProject", "TestProject.csproj")));
         var solution = new Solution(
-            filePath: Path.GetFullPath("TestSolution.sln"),
-            name: "TestSolution",
-            projects: new[] { project },
-            configurations: new[] { "Debug" });
+            Path.GetFullPath("TestSolution.sln"),
+            "TestSolution",
+            new[] {project},
+            new[] {"Debug"});
 
         return new WorkspaceContext(
             solution,
             new Dictionary<string, Project>(StringComparer.OrdinalIgnoreCase)
             {
-                { project.FilePath, project }
+                {project.FilePath, project}
             });
     }
 }

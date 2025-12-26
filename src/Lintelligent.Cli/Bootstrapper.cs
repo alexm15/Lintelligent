@@ -5,7 +5,6 @@ using Lintelligent.AnalyzerEngine.Rules;
 using Lintelligent.AnalyzerEngine.WorkspaceAnalyzers.CodeDuplication;
 using Lintelligent.Cli.Commands;
 using Lintelligent.Cli.Providers;
-using Lintelligent.Reporting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Lintelligent.Cli;
@@ -32,7 +31,7 @@ public static class Bootstrapper
 
         // Duplication detection configuration and analyzers
         services.AddSingleton(new DuplicationOptions()); // Default options, will be overridden by CLI flags
-        services.AddSingleton<IWorkspaceAnalyzer>(sp => 
+        services.AddSingleton<IWorkspaceAnalyzer>(sp =>
             new DuplicationDetector(sp.GetRequiredService<DuplicationOptions>()));
     }
 }

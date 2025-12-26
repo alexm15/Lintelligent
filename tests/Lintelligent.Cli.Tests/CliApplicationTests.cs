@@ -16,7 +16,7 @@ public class CliApplicationTests
         builder.AddCommand<TestCommand>();
 
         // Act
-        using var app = builder.Build();
+        using CliApplication app = builder.Build();
 
         // Assert
         Assert.NotNull(app);
@@ -29,10 +29,10 @@ public class CliApplicationTests
         var builder = new CliApplicationBuilder();
         builder.ConfigureServices(services => { services.AddTransient<TestCommand>(); });
         builder.AddCommand<TestCommand>();
-        using var app = builder.Build();
+        using CliApplication app = builder.Build();
 
         // Act
-        var result = app.Execute(["test", "arg1"]);
+        CommandResult result = app.Execute(["test", "arg1"]);
 
         // Assert
         Assert.Equal(0, result.ExitCode);
@@ -47,10 +47,10 @@ public class CliApplicationTests
         var builder = new CliApplicationBuilder();
         builder.ConfigureServices(services => { services.AddTransient<ThrowingCommand>(); });
         builder.AddCommand<ThrowingCommand>();
-        using var app = builder.Build();
+        using CliApplication app = builder.Build();
 
         // Act
-        var result = app.Execute(["throwing", "invalid"]);
+        CommandResult result = app.Execute(["throwing", "invalid"]);
 
         // Assert
         Assert.Equal(2, result.ExitCode);
@@ -65,10 +65,10 @@ public class CliApplicationTests
         var builder = new CliApplicationBuilder();
         builder.ConfigureServices(services => { services.AddTransient<GeneralErrorCommand>(); });
         builder.AddCommand<GeneralErrorCommand>();
-        using var app = builder.Build();
+        using CliApplication app = builder.Build();
 
         // Act
-        var result = app.Execute(["generalerror"]);
+        CommandResult result = app.Execute(["generalerror"]);
 
         // Assert
         Assert.Equal(1, result.ExitCode);
@@ -82,10 +82,10 @@ public class CliApplicationTests
         // Arrange
         var builder = new CliApplicationBuilder();
         builder.ConfigureServices(services => { });
-        using var app = builder.Build();
+        using CliApplication app = builder.Build();
 
         // Act
-        var result = app.Execute(["nonexistent"]);
+        CommandResult result = app.Execute(["nonexistent"]);
 
         // Assert
         Assert.Equal(2, result.ExitCode);
@@ -97,10 +97,10 @@ public class CliApplicationTests
     {
         // Arrange
         var builder = new CliApplicationBuilder();
-        using var app = builder.Build();
+        using CliApplication app = builder.Build();
 
         // Act
-        var result = app.Execute([]);
+        CommandResult result = app.Execute([]);
 
         // Assert
         Assert.Equal(2, result.ExitCode);

@@ -1,14 +1,16 @@
-using Microsoft.CodeAnalysis;
 using Lintelligent.AnalyzerEngine.Rules;
+using Lintelligent.Analyzers.Metadata;
+using Microsoft.CodeAnalysis;
 
 namespace Lintelligent.Analyzers.Adapters;
 
 /// <summary>
-/// Factory for creating Roslyn DiagnosticDescriptor from IAnalyzerRule.
+///     Factory for creating Roslyn DiagnosticDescriptor from IAnalyzerRule.
 /// </summary>
 public static class RuleDescriptorFactory
 {
-    private const string BaseHelpUrl = "https://github.com/YourOrg/Lintelligent/blob/main/specs/005-core-rule-library/rules-documentation.md";
+    private const string BaseHelpUrl =
+        "https://github.com/YourOrg/Lintelligent/blob/main/specs/005-core-rule-library/rules-documentation.md";
 
     private static readonly Dictionary<string, string> RuleAnchors = new(StringComparer.Ordinal)
     {
@@ -23,7 +25,7 @@ public static class RuleDescriptorFactory
     };
 
     /// <summary>
-    /// Creates a DiagnosticDescriptor from an IAnalyzerRule.
+    ///     Creates a DiagnosticDescriptor from an IAnalyzerRule.
     /// </summary>
     public static DiagnosticDescriptor Create(IAnalyzerRule rule)
     {
@@ -34,19 +36,19 @@ public static class RuleDescriptorFactory
 #endif
 
         return new DiagnosticDescriptor(
-            id: rule.Id,
-            title: rule.Description,
-            messageFormat: "{0}",  // Filled with DiagnosticResult.Message
-            category: rule.Category,
-            defaultSeverity: Metadata.SeverityMapper.ToRoslynSeverity(rule.Severity),
-            isEnabledByDefault: true,
-            description: rule.Description,
-            helpLinkUri: GetHelpLinkUri(rule.Id),
-            customTags: GetCustomTags(rule.Category));
+            rule.Id,
+            rule.Description,
+            "{0}", // Filled with DiagnosticResult.Message
+            rule.Category,
+            SeverityMapper.ToRoslynSeverity(rule.Severity),
+            true,
+            rule.Description,
+            GetHelpLinkUri(rule.Id),
+            GetCustomTags(rule.Category));
     }
 
     /// <summary>
-    /// Gets the help link URI for a rule ID.
+    ///     Gets the help link URI for a rule ID.
     /// </summary>
     public static string GetHelpLinkUri(string ruleId)
     {
@@ -56,11 +58,11 @@ public static class RuleDescriptorFactory
     }
 
     /// <summary>
-    /// Gets custom tags based on rule category.
+    ///     Gets custom tags based on rule category.
     /// </summary>
     public static string[] GetCustomTags(string category)
     {
-        var tags = new List<string> { "CodeQuality" };
+        var tags = new List<string> {"CodeQuality"};
 
         if (string.Equals(category, "Maintainability", StringComparison.Ordinal)) tags.Add("Maintainability");
         else if (string.Equals(category, "CodeSmell", StringComparison.Ordinal)) tags.Add("CodeSmell");

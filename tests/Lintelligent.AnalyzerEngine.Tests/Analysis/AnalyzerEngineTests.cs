@@ -46,8 +46,8 @@ public class AnalyzerEngineTests
                                       }
                                   }
                                   """;
-        var tree = CSharpSyntaxTree.ParseText(sourceCode, path: "InMemoryTest.cs");
-        var trees = new[] {tree};
+        SyntaxTree tree = CSharpSyntaxTree.ParseText(sourceCode, path: "InMemoryTest.cs");
+        SyntaxTree[] trees = new[] {tree};
 
         var rule = new LongMethodRule();
         var manager = new AnalyzerManager();
@@ -66,7 +66,7 @@ public class AnalyzerEngineTests
     public void Analyze_WithEmptyCollection_ReturnsEmptyResults()
     {
         // Arrange: Empty syntax tree collection
-        var trees = Array.Empty<SyntaxTree>();
+        SyntaxTree[] trees = Array.Empty<SyntaxTree>();
         var manager = new AnalyzerManager();
         var engine = new AnalyzerEngine.Analysis.AnalyzerEngine(manager);
 
@@ -82,8 +82,8 @@ public class AnalyzerEngineTests
     {
         // Arrange: Create identical in-memory trees
         const string sourceCode = "class Test { void Method() { } }";
-        var tree1 = CSharpSyntaxTree.ParseText(sourceCode, path: "Test1.cs");
-        var tree2 = CSharpSyntaxTree.ParseText(sourceCode, path: "Test2.cs");
+        SyntaxTree tree1 = CSharpSyntaxTree.ParseText(sourceCode, path: "Test1.cs");
+        SyntaxTree tree2 = CSharpSyntaxTree.ParseText(sourceCode, path: "Test2.cs");
 
         var rule = new LongMethodRule();
         var manager = new AnalyzerManager();
@@ -105,8 +105,8 @@ public class AnalyzerEngineTests
         var source1 = GenerateLongMethodSource("Class1", "Method1");
         var source2 = GenerateLongMethodSource("Class2", "Method2");
 
-        var tree1 = CSharpSyntaxTree.ParseText(source1, path: "File1.cs");
-        var tree2 = CSharpSyntaxTree.ParseText(source2, path: "File2.cs");
+        SyntaxTree tree1 = CSharpSyntaxTree.ParseText(source1, path: "File1.cs");
+        SyntaxTree tree2 = CSharpSyntaxTree.ParseText(source2, path: "File2.cs");
 
         var rule = new LongMethodRule();
         var manager = new AnalyzerManager();

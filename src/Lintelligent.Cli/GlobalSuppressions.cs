@@ -13,4 +13,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1822:Mark members as static",
     Justification = "ParseFile may need instance state for configuration or caching",
     Scope = "member",
-    Target = "~M:Lintelligent.Cli.Providers.FileSystemCodeProvider.ParseFile(System.String)~Microsoft.CodeAnalysis.SyntaxTree")]
+    Target =
+        "~M:Lintelligent.Cli.Providers.FileSystemCodeProvider.ParseFile(System.String)~Microsoft.CodeAnalysis.SyntaxTree")]

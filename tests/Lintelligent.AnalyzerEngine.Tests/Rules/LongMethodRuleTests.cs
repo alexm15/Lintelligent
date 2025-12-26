@@ -17,35 +17,35 @@ public class LongMethodRuleTests
     {
         // Arrange - Create method with 21 statements (exceeds threshold)
         var sourceCode = """
-            class TestClass
-            {
-                void LongMethod()
-                {
-                    var line1 = 1;
-                    var line2 = 2;
-                    var line3 = 3;
-                    var line4 = 4;
-                    var line5 = 5;
-                    var line6 = 6;
-                    var line7 = 7;
-                    var line8 = 8;
-                    var line9 = 9;
-                    var line10 = 10;
-                    var line11 = 11;
-                    var line12 = 12;
-                    var line13 = 13;
-                    var line14 = 14;
-                    var line15 = 15;
-                    var line16 = 16;
-                    var line17 = 17;
-                    var line18 = 18;
-                    var line19 = 19;
-                    var line20 = 20;
-                    var line21 = 21;
-                }
-            }
-            """;
-        var syntaxTree = CSharpSyntaxTree.ParseText(sourceCode, path: "Test.cs");
+                         class TestClass
+                         {
+                             void LongMethod()
+                             {
+                                 var line1 = 1;
+                                 var line2 = 2;
+                                 var line3 = 3;
+                                 var line4 = 4;
+                                 var line5 = 5;
+                                 var line6 = 6;
+                                 var line7 = 7;
+                                 var line8 = 8;
+                                 var line9 = 9;
+                                 var line10 = 10;
+                                 var line11 = 11;
+                                 var line12 = 12;
+                                 var line13 = 13;
+                                 var line14 = 14;
+                                 var line15 = 15;
+                                 var line16 = 16;
+                                 var line17 = 17;
+                                 var line18 = 18;
+                                 var line19 = 19;
+                                 var line20 = 20;
+                                 var line21 = 21;
+                             }
+                         }
+                         """;
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode, path: "Test.cs");
 
         // Act
         var diagnostics = _rule.Analyze(syntaxTree).ToList();
@@ -58,7 +58,7 @@ public class LongMethodRuleTests
                 Severity = Severity.Warning,
                 Category = DiagnosticCategories.CodeSmell
             }, options => options.ExcludingMissingMembers());
-        
+
         // Verify enhanced message format includes method name and statement count
         diagnostics.First().Message.Should().Contain("LongMethod");
         diagnostics.First().Message.Should().Contain("21 statements");
@@ -70,33 +70,33 @@ public class LongMethodRuleTests
     {
         // Arrange - Create method with 19 statements (under threshold)
         var sourceCode = """
-            class TestClass
-            {
-                void ShortMethod()
-                {
-                    var line1 = 1;
-                    var line2 = 2;
-                    var line3 = 3;
-                    var line4 = 4;
-                    var line5 = 5;
-                    var line6 = 6;
-                    var line7 = 7;
-                    var line8 = 8;
-                    var line9 = 9;
-                    var line10 = 10;
-                    var line11 = 11;
-                    var line12 = 12;
-                    var line13 = 13;
-                    var line14 = 14;
-                    var line15 = 15;
-                    var line16 = 16;
-                    var line17 = 17;
-                    var line18 = 18;
-                    var line19 = 19;
-                }
-            }
-            """;
-        var syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
+                         class TestClass
+                         {
+                             void ShortMethod()
+                             {
+                                 var line1 = 1;
+                                 var line2 = 2;
+                                 var line3 = 3;
+                                 var line4 = 4;
+                                 var line5 = 5;
+                                 var line6 = 6;
+                                 var line7 = 7;
+                                 var line8 = 8;
+                                 var line9 = 9;
+                                 var line10 = 10;
+                                 var line11 = 11;
+                                 var line12 = 12;
+                                 var line13 = 13;
+                                 var line14 = 14;
+                                 var line15 = 15;
+                                 var line16 = 16;
+                                 var line17 = 17;
+                                 var line18 = 18;
+                                 var line19 = 19;
+                             }
+                         }
+                         """;
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
 
         // Act
         var diagnostics = _rule.Analyze(syntaxTree).ToList();
@@ -110,14 +110,14 @@ public class LongMethodRuleTests
     {
         // Arrange - Method with no statements
         var sourceCode = """
-            class TestClass
-            {
-                void EmptyMethod()
-                {
-                }
-            }
-            """;
-        var syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
+                         class TestClass
+                         {
+                             void EmptyMethod()
+                             {
+                             }
+                         }
+                         """;
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
 
         // Act
         var diagnostics = _rule.Analyze(syntaxTree).ToList();
@@ -131,12 +131,12 @@ public class LongMethodRuleTests
     {
         // Arrange - Abstract method with no body
         var sourceCode = """
-            abstract class TestClass
-            {
-                public abstract void AbstractMethod();
-            }
-            """;
-        var syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
+                         abstract class TestClass
+                         {
+                             public abstract void AbstractMethod();
+                         }
+                         """;
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
 
         // Act
         var diagnostics = _rule.Analyze(syntaxTree).ToList();
@@ -150,34 +150,34 @@ public class LongMethodRuleTests
     {
         // Arrange - Create method with exactly 20 statements (at threshold)
         var sourceCode = """
-            class TestClass
-            {
-                void BoundaryMethod()
-                {
-                    var line1 = 1;
-                    var line2 = 2;
-                    var line3 = 3;
-                    var line4 = 4;
-                    var line5 = 5;
-                    var line6 = 6;
-                    var line7 = 7;
-                    var line8 = 8;
-                    var line9 = 9;
-                    var line10 = 10;
-                    var line11 = 11;
-                    var line12 = 12;
-                    var line13 = 13;
-                    var line14 = 14;
-                    var line15 = 15;
-                    var line16 = 16;
-                    var line17 = 17;
-                    var line18 = 18;
-                    var line19 = 19;
-                    var line20 = 20;
-                }
-            }
-            """;
-        var syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
+                         class TestClass
+                         {
+                             void BoundaryMethod()
+                             {
+                                 var line1 = 1;
+                                 var line2 = 2;
+                                 var line3 = 3;
+                                 var line4 = 4;
+                                 var line5 = 5;
+                                 var line6 = 6;
+                                 var line7 = 7;
+                                 var line8 = 8;
+                                 var line9 = 9;
+                                 var line10 = 10;
+                                 var line11 = 11;
+                                 var line12 = 12;
+                                 var line13 = 13;
+                                 var line14 = 14;
+                                 var line15 = 15;
+                                 var line16 = 16;
+                                 var line17 = 17;
+                                 var line18 = 18;
+                                 var line19 = 19;
+                                 var line20 = 20;
+                             }
+                         }
+                         """;
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
 
         // Act
         var diagnostics = _rule.Analyze(syntaxTree).ToList();
@@ -191,35 +191,35 @@ public class LongMethodRuleTests
     {
         // Arrange - Create method with exactly 21 statements (just over threshold)
         var sourceCode = """
-            class TestClass
-            {
-                void JustOverBoundaryMethod()
-                {
-                    var line1 = 1;
-                    var line2 = 2;
-                    var line3 = 3;
-                    var line4 = 4;
-                    var line5 = 5;
-                    var line6 = 6;
-                    var line7 = 7;
-                    var line8 = 8;
-                    var line9 = 9;
-                    var line10 = 10;
-                    var line11 = 11;
-                    var line12 = 12;
-                    var line13 = 13;
-                    var line14 = 14;
-                    var line15 = 15;
-                    var line16 = 16;
-                    var line17 = 17;
-                    var line18 = 18;
-                    var line19 = 19;
-                    var line20 = 20;
-                    var line21 = 21;
-                }
-            }
-            """;
-        var syntaxTree = CSharpSyntaxTree.ParseText(sourceCode, path: "Test.cs");
+                         class TestClass
+                         {
+                             void JustOverBoundaryMethod()
+                             {
+                                 var line1 = 1;
+                                 var line2 = 2;
+                                 var line3 = 3;
+                                 var line4 = 4;
+                                 var line5 = 5;
+                                 var line6 = 6;
+                                 var line7 = 7;
+                                 var line8 = 8;
+                                 var line9 = 9;
+                                 var line10 = 10;
+                                 var line11 = 11;
+                                 var line12 = 12;
+                                 var line13 = 13;
+                                 var line14 = 14;
+                                 var line15 = 15;
+                                 var line16 = 16;
+                                 var line17 = 17;
+                                 var line18 = 18;
+                                 var line19 = 19;
+                                 var line20 = 20;
+                                 var line21 = 21;
+                             }
+                         }
+                         """;
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode, path: "Test.cs");
 
         // Act
         var diagnostics = _rule.Analyze(syntaxTree).ToList();
@@ -244,60 +244,60 @@ public class LongMethodRuleTests
     {
         // Arrange - Create class with 2 long methods
         var sourceCode = """
-            class TestClass
-            {
-                void LongMethod1()
-                {
-                    var line1 = 1;
-                    var line2 = 2;
-                    var line3 = 3;
-                    var line4 = 4;
-                    var line5 = 5;
-                    var line6 = 6;
-                    var line7 = 7;
-                    var line8 = 8;
-                    var line9 = 9;
-                    var line10 = 10;
-                    var line11 = 11;
-                    var line12 = 12;
-                    var line13 = 13;
-                    var line14 = 14;
-                    var line15 = 15;
-                    var line16 = 16;
-                    var line17 = 17;
-                    var line18 = 18;
-                    var line19 = 19;
-                    var line20 = 20;
-                    var line21 = 21;
-                }
+                         class TestClass
+                         {
+                             void LongMethod1()
+                             {
+                                 var line1 = 1;
+                                 var line2 = 2;
+                                 var line3 = 3;
+                                 var line4 = 4;
+                                 var line5 = 5;
+                                 var line6 = 6;
+                                 var line7 = 7;
+                                 var line8 = 8;
+                                 var line9 = 9;
+                                 var line10 = 10;
+                                 var line11 = 11;
+                                 var line12 = 12;
+                                 var line13 = 13;
+                                 var line14 = 14;
+                                 var line15 = 15;
+                                 var line16 = 16;
+                                 var line17 = 17;
+                                 var line18 = 18;
+                                 var line19 = 19;
+                                 var line20 = 20;
+                                 var line21 = 21;
+                             }
 
-                void LongMethod2()
-                {
-                    var line1 = 1;
-                    var line2 = 2;
-                    var line3 = 3;
-                    var line4 = 4;
-                    var line5 = 5;
-                    var line6 = 6;
-                    var line7 = 7;
-                    var line8 = 8;
-                    var line9 = 9;
-                    var line10 = 10;
-                    var line11 = 11;
-                    var line12 = 12;
-                    var line13 = 13;
-                    var line14 = 14;
-                    var line15 = 15;
-                    var line16 = 16;
-                    var line17 = 17;
-                    var line18 = 18;
-                    var line19 = 19;
-                    var line20 = 20;
-                    var line21 = 21;
-                }
-            }
-            """;
-        var syntaxTree = CSharpSyntaxTree.ParseText(sourceCode, path: "Test.cs");
+                             void LongMethod2()
+                             {
+                                 var line1 = 1;
+                                 var line2 = 2;
+                                 var line3 = 3;
+                                 var line4 = 4;
+                                 var line5 = 5;
+                                 var line6 = 6;
+                                 var line7 = 7;
+                                 var line8 = 8;
+                                 var line9 = 9;
+                                 var line10 = 10;
+                                 var line11 = 11;
+                                 var line12 = 12;
+                                 var line13 = 13;
+                                 var line14 = 14;
+                                 var line15 = 15;
+                                 var line16 = 16;
+                                 var line17 = 17;
+                                 var line18 = 18;
+                                 var line19 = 19;
+                                 var line20 = 20;
+                                 var line21 = 21;
+                             }
+                         }
+                         """;
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode, path: "Test.cs");
 
         // Act
         var diagnostics = _rule.Analyze(syntaxTree).ToList();

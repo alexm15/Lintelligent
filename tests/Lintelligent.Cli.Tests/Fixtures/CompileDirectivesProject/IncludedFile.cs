@@ -1,8 +1,8 @@
 namespace CompileDirectivesProject;
 
 /// <summary>
-/// This is a normal file in the project directory.
-/// Should be included by SDK-style default glob pattern (**/*.cs).
+///     This is a normal file in the project directory.
+///     Should be included by SDK-style default glob pattern (**/*.cs).
 /// </summary>
 public class IncludedFile
 {

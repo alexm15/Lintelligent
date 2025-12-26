@@ -22,17 +22,17 @@ public class MagicNumberRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    int x = 0;
-                    int y = 1;
-                    int z = -1;
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           int x = 0;
+                           int y = 1;
+                           int z = -1;
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -46,17 +46,17 @@ public class MagicNumberRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                private const int MaxRetries = 3;
-                
-                public void Method()
-                {
-                    const int LocalConst = 100;
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       private const int MaxRetries = 3;
+                       
+                       public void Method()
+                       {
+                           const int LocalConst = 100;
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -70,15 +70,15 @@ public class MagicNumberRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    Thread.Sleep(5000);
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           Thread.Sleep(5000);
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -100,16 +100,16 @@ public class MagicNumberRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    double pi = 3.14159;
-                    float value = 2.5f;
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           double pi = 3.14159;
+                           float value = 2.5f;
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -125,15 +125,15 @@ public class MagicNumberRuleTests
     {
         // Arrange
         var code = """
-            using System;
-            
-            public class TestClass
-            {
-                [StringLength(50)]
-                public string Name { get; set; }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   using System;
+
+                   public class TestClass
+                   {
+                       [StringLength(50)]
+                       public string Name { get; set; }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -148,15 +148,15 @@ public class MagicNumberRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    int timeout = 5000;
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           int timeout = 5000;
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -172,15 +172,15 @@ public class MagicNumberRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                    int value = 42;
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           int value = 42;
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -200,19 +200,19 @@ public class MagicNumberRuleTests
     {
         // Arrange
         var code = """
-            // <auto-generated>
-            //     This code was generated by a tool.
-            // </auto-generated>
-            
-            public class TestClass
-            {
-                public void Method()
-                {
-                    int value = 42;
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   // <auto-generated>
+                   //     This code was generated by a tool.
+                   // </auto-generated>
+
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                           int value = 42;
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();

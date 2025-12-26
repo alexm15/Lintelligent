@@ -15,15 +15,15 @@ public class DeadCodeRule : IAnalyzerRule
         if (IsGeneratedCode(tree))
             yield break;
 
-        var root = tree.GetRoot();
-        var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
+        SyntaxNode root = tree.GetRoot();
+        IEnumerable<ClassDeclarationSyntax> classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
 
-        foreach (var classDecl in classes)
+        foreach (ClassDeclarationSyntax classDecl in classes)
         {
-            foreach (var result in CheckPrivateMethods(tree, classDecl))
+            foreach (DiagnosticResult result in CheckPrivateMethods(tree, classDecl))
                 yield return result;
 
-            foreach (var result in CheckPrivateFields(tree, classDecl))
+            foreach (DiagnosticResult result in CheckPrivateFields(tree, classDecl))
                 yield return result;
         }
     }
@@ -31,14 +31,14 @@ public class DeadCodeRule : IAnalyzerRule
     private IEnumerable<DiagnosticResult> CheckPrivateMethods(SyntaxTree tree, ClassDeclarationSyntax classDecl)
     {
         // Find all private methods
-        var privateMethods = classDecl.DescendantNodes()
+        IEnumerable<MethodDeclarationSyntax> privateMethods = classDecl.DescendantNodes()
             .OfType<MethodDeclarationSyntax>()
             .Where(m => m.Modifiers.Any(SyntaxKind.PrivateKeyword));
 
-        foreach (var method in privateMethods)
+        foreach (MethodDeclarationSyntax method in privateMethods)
         {
             var methodName = method.Identifier.ValueText;
-            
+
             // Heuristic: exclude methods that might implement interface members
             if (MightImplementInterface(classDecl))
                 continue;
@@ -62,13 +62,13 @@ public class DeadCodeRule : IAnalyzerRule
     private IEnumerable<DiagnosticResult> CheckPrivateFields(SyntaxTree tree, ClassDeclarationSyntax classDecl)
     {
         // Find all private fields
-        var privateFields = classDecl.DescendantNodes()
+        IEnumerable<FieldDeclarationSyntax> privateFields = classDecl.DescendantNodes()
             .OfType<FieldDeclarationSyntax>()
             .Where(f => f.Modifiers.Any(SyntaxKind.PrivateKeyword));
 
-        foreach (var fieldDecl in privateFields)
+        foreach (FieldDeclarationSyntax fieldDecl in privateFields)
         {
-            foreach (var variable in fieldDecl.Declaration.Variables)
+            foreach (VariableDeclaratorSyntax variable in fieldDecl.Declaration.Variables)
             {
                 var fieldName = variable.Identifier.ValueText;
 
@@ -91,14 +91,15 @@ public class DeadCodeRule : IAnalyzerRule
         }
     }
 
-    private static bool IsMethodReferenced(string methodName, ClassDeclarationSyntax classDecl, MethodDeclarationSyntax excludeMethod)
+    private static bool IsMethodReferenced(string methodName, ClassDeclarationSyntax classDecl,
+        MethodDeclarationSyntax excludeMethod)
     {
         // Search for any identifier tokens matching the method name (excluding the declaration itself)
-        var identifiers = classDecl.DescendantNodes()
+        IEnumerable<IdentifierNameSyntax> identifiers = classDecl.DescendantNodes()
             .OfType<IdentifierNameSyntax>()
             .Where(id => string.Equals(id.Identifier.ValueText, methodName, StringComparison.Ordinal));
 
-        foreach (var identifier in identifiers)
+        foreach (IdentifierNameSyntax identifier in identifiers)
         {
             // Skip if this is the method declaration itself
             if (identifier.Ancestors().Any(a => a == excludeMethod))
@@ -111,14 +112,15 @@ public class DeadCodeRule : IAnalyzerRule
         return false;
     }
 
-    private static bool IsFieldReferenced(string fieldName, ClassDeclarationSyntax classDecl, FieldDeclarationSyntax excludeField)
+    private static bool IsFieldReferenced(string fieldName, ClassDeclarationSyntax classDecl,
+        FieldDeclarationSyntax excludeField)
     {
         // Search for any identifier tokens matching the field name (excluding the declaration itself)
-        var identifiers = classDecl.DescendantNodes()
+        IEnumerable<IdentifierNameSyntax> identifiers = classDecl.DescendantNodes()
             .OfType<IdentifierNameSyntax>()
             .Where(id => string.Equals(id.Identifier.ValueText, fieldName, StringComparison.Ordinal));
 
-        foreach (var identifier in identifiers)
+        foreach (IdentifierNameSyntax identifier in identifiers)
         {
             // Skip if this is the field declaration itself (in initializer)
             if (identifier.Ancestors().Any(a => a == excludeField))
@@ -149,9 +151,9 @@ public class DeadCodeRule : IAnalyzerRule
             fileName.Contains(".Generated."))
             return true;
 
-        var root = tree.GetRoot();
-        var leadingTrivia = root.GetLeadingTrivia().Take(10);
-        return leadingTrivia.Any(t => 
+        SyntaxNode root = tree.GetRoot();
+        IEnumerable<SyntaxTrivia> leadingTrivia = root.GetLeadingTrivia().Take(10);
+        return leadingTrivia.Any(t =>
             t.ToString().Contains("<auto-generated>") ||
             t.ToString().Contains("<auto-generated />"));
     }

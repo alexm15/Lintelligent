@@ -22,14 +22,14 @@ public class LongParameterListRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method(int a, int b, int c, int d, int e)
-                {
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method(int a, int b, int c, int d, int e)
+                       {
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -43,14 +43,14 @@ public class LongParameterListRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method(int a, int b, int c, int d, int e, int f)
-                {
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method(int a, int b, int c, int d, int e, int f)
+                       {
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -74,14 +74,14 @@ public class LongParameterListRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public TestClass(int a, int b, int c, int d, int e, int f, int g, int h)
-                {
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public TestClass(int a, int b, int c, int d, int e, int f, int g, int h)
+                       {
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -97,14 +97,14 @@ public class LongParameterListRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method()
-                {
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       public void Method()
+                       {
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -118,14 +118,14 @@ public class LongParameterListRuleTests
     {
         // Arrange - Extension method with 'this' parameter + 5 others = 6 total, but should count as 5
         var code = """
-            public static class Extensions
-            {
-                public static void ExtMethod(this string str, int a, int b, int c, int d, int e)
-                {
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public static class Extensions
+                   {
+                       public static void ExtMethod(this string str, int a, int b, int c, int d, int e)
+                       {
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -139,14 +139,14 @@ public class LongParameterListRuleTests
     {
         // Arrange - Extension method with 'this' parameter + 6 others = 7 total, should count as 6
         var code = """
-            public static class Extensions
-            {
-                public static void ExtMethod(this string str, int a, int b, int c, int d, int e, int f)
-                {
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public static class Extensions
+                   {
+                       public static void ExtMethod(this string str, int a, int b, int c, int d, int e, int f)
+                       {
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -171,14 +171,14 @@ public class LongParameterListRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                public void Method(int a, int b, int c, int d, int e, int f, int g, int h)
-                {
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code, "Form1.Designer.cs");
+                   public class TestClass
+                   {
+                       public void Method(int a, int b, int c, int d, int e, int f, int g, int h)
+                       {
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code, "Form1.Designer.cs");
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();

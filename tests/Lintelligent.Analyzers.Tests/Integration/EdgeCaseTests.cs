@@ -2,12 +2,11 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Xunit;
 
 namespace Lintelligent.Analyzers.Tests.Integration;
 
 /// <summary>
-/// Integration tests for edge cases like generated code, partial classes, and error handling.
+///     Integration tests for edge cases like generated code, partial classes, and error handling.
 /// </summary>
 public class EdgeCaseTests
 {
@@ -30,15 +29,15 @@ public class GeneratedClass
 }";
 
         // Act: Parse with .g.cs file extension
-        var syntaxTree = CSharpSyntaxTree.ParseText(source, path: "Generated.g.cs");
-        var compilation = CSharpCompilation.Create("TestAssembly")
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source, path: "Generated.g.cs");
+        CSharpCompilation compilation = CSharpCompilation.Create("TestAssembly")
             .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
             .AddSyntaxTrees(syntaxTree);
 
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
+        CompilationWithAnalyzers compilationWithAnalyzers = compilation.WithAnalyzers(
             ImmutableArray.Create<DiagnosticAnalyzer>(new LintelligentDiagnosticAnalyzer()));
 
-        var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        ImmutableArray<Diagnostic> diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
 
         // Assert: No diagnostics should be reported for generated code
         Assert.Empty(diagnostics);
@@ -77,22 +76,22 @@ public partial class MyClass
 }";
 
         // Act: Parse both files
-        var tree1 = CSharpSyntaxTree.ParseText(file1, path: "MyClass.Part1.cs");
-        var tree2 = CSharpSyntaxTree.ParseText(file2, path: "MyClass.Part2.cs");
-        
-        var compilation = CSharpCompilation.Create("TestAssembly")
+        SyntaxTree tree1 = CSharpSyntaxTree.ParseText(file1, path: "MyClass.Part1.cs");
+        SyntaxTree tree2 = CSharpSyntaxTree.ParseText(file2, path: "MyClass.Part2.cs");
+
+        CSharpCompilation compilation = CSharpCompilation.Create("TestAssembly")
             .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
             .AddSyntaxTrees(tree1, tree2);
 
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
+        CompilationWithAnalyzers compilationWithAnalyzers = compilation.WithAnalyzers(
             ImmutableArray.Create<DiagnosticAnalyzer>(new LintelligentDiagnosticAnalyzer()));
 
-        var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        ImmutableArray<Diagnostic> diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
 
         // Assert: Should have 2 LNT001 diagnostics (one per file)
-        var lnt001Diagnostics = diagnostics.Where(d => d.Id == "LNT001").ToArray();
+        Diagnostic[] lnt001Diagnostics = diagnostics.Where(d => d.Id == "LNT001").ToArray();
         Assert.Equal(2, lnt001Diagnostics.Length);
-        
+
         // Verify each diagnostic is in the correct file
         Assert.Contains(lnt001Diagnostics, d => d.Location.SourceTree == tree1);
         Assert.Contains(lnt001Diagnostics, d => d.Location.SourceTree == tree2);
@@ -105,15 +104,15 @@ public partial class MyClass
         const string source = "";
 
         // Act
-        var syntaxTree = CSharpSyntaxTree.ParseText(source, path: "Empty.cs");
-        var compilation = CSharpCompilation.Create("TestAssembly")
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source, path: "Empty.cs");
+        CSharpCompilation compilation = CSharpCompilation.Create("TestAssembly")
             .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
             .AddSyntaxTrees(syntaxTree);
 
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
+        CompilationWithAnalyzers compilationWithAnalyzers = compilation.WithAnalyzers(
             ImmutableArray.Create<DiagnosticAnalyzer>(new LintelligentDiagnosticAnalyzer()));
 
-        var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        ImmutableArray<Diagnostic> diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
 
         // Assert: Should not crash, no diagnostics expected
         Assert.Empty(diagnostics);
@@ -131,30 +130,30 @@ public class Broken
 }";
 
         // Act
-        var syntaxTree = CSharpSyntaxTree.ParseText(source, path: "Broken.cs");
-        var compilation = CSharpCompilation.Create("TestAssembly")
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source, path: "Broken.cs");
+        CSharpCompilation compilation = CSharpCompilation.Create("TestAssembly")
             .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
             .AddSyntaxTrees(syntaxTree);
 
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
+        CompilationWithAnalyzers compilationWithAnalyzers = compilation.WithAnalyzers(
             ImmutableArray.Create<DiagnosticAnalyzer>(new LintelligentDiagnosticAnalyzer()));
 
-        var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        ImmutableArray<Diagnostic> diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
 
         // Assert: Should not crash, may or may not have analyzer diagnostics
         // (syntax errors are handled by compiler, not analyzer)
-        var lnt999 = diagnostics.Where(d => d.Id == "LNT999").ToArray();
-        Assert.Empty(lnt999);  // No internal errors
+        Diagnostic[] lnt999 = diagnostics.Where(d => d.Id == "LNT999").ToArray();
+        Assert.Empty(lnt999); // No internal errors
     }
 
     private static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(string source, string path = "Test.cs")
     {
-        var syntaxTree = CSharpSyntaxTree.ParseText(source, path: path);
-        var compilation = CSharpCompilation.Create("TestAssembly")
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source, path: path);
+        CSharpCompilation compilation = CSharpCompilation.Create("TestAssembly")
             .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
             .AddSyntaxTrees(syntaxTree);
 
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
+        CompilationWithAnalyzers compilationWithAnalyzers = compilation.WithAnalyzers(
             ImmutableArray.Create<DiagnosticAnalyzer>(new LintelligentDiagnosticAnalyzer()));
 
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();

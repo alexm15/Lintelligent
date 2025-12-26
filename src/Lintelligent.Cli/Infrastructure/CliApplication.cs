@@ -60,7 +60,7 @@ public sealed class CliApplication : IDisposable
             var commandName = args[0].ToLowerInvariant();
 
             // Find command type by name (simple name matching)
-            var commandType = _commandTypes.FirstOrDefault(t =>
+            Type? commandType = _commandTypes.FirstOrDefault(t =>
                 t.Name.Equals($"{commandName}Command", StringComparison.OrdinalIgnoreCase) ||
                 t.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
 

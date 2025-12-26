@@ -14,10 +14,10 @@ builder.ConfigureServices(Bootstrapper.Configure);
 builder.AddCommand<ScanCommand>();
 
 // Build and execute
-using var app = builder.Build();
+using CliApplication app = builder.Build();
 
 Console.WriteLine("Lintelligent CLI (NET 10)");
-var result = app.Execute(args);
+CommandResult result = app.Execute(args);
 
 // Output results to console
 if (!string.IsNullOrEmpty(result.Output))

@@ -6,11 +6,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Markdig" Version="0.34.0" />
+        <PackageReference Include="Markdig" Version="0.34.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Lintelligent.AnalyzerEngine\Lintelligent.AnalyzerEngine.csproj" />
+        <ProjectReference Include="..\Lintelligent.AnalyzerEngine\Lintelligent.AnalyzerEngine.csproj"/>
     </ItemGroup>
 
 

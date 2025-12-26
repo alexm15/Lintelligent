@@ -22,11 +22,11 @@ public class MissingXmlDocumentationRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -48,14 +48,14 @@ public class MissingXmlDocumentationRuleTests
     {
         // Arrange
         var code = """
-            /// <summary>
-            /// Test class description
-            /// </summary>
-            public class TestClass
-            {
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   /// <summary>
+                   /// Test class description
+                   /// </summary>
+                   public class TestClass
+                   {
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -69,16 +69,16 @@ public class MissingXmlDocumentationRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                /// <inheritdoc />
-                public override string ToString()
-                {
-                    return "test";
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       /// <inheritdoc />
+                       public override string ToString()
+                       {
+                           return "test";
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -94,15 +94,15 @@ public class MissingXmlDocumentationRuleTests
     {
         // Arrange
         var code = """
-            /// <summary>Test class</summary>
-            public class TestClass
-            {
-                public void PublicMethod()
-                {
-                }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   /// <summary>Test class</summary>
+                   public class TestClass
+                   {
+                       public void PublicMethod()
+                       {
+                       }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -117,13 +117,13 @@ public class MissingXmlDocumentationRuleTests
     {
         // Arrange
         var code = """
-            /// <summary>Test class</summary>
-            public class TestClass
-            {
-                public string Name { get; set; }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   /// <summary>Test class</summary>
+                   public class TestClass
+                   {
+                       public string Name { get; set; }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -138,13 +138,13 @@ public class MissingXmlDocumentationRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-                private void PrivateMethod() { }
-                private string _field;
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                       private void PrivateMethod() { }
+                       private string _field;
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -159,12 +159,12 @@ public class MissingXmlDocumentationRuleTests
     {
         // Arrange
         var code = """
-            internal class TestClass
-            {
-                internal void Method() { }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   internal class TestClass
+                   {
+                       internal void Method() { }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -178,13 +178,13 @@ public class MissingXmlDocumentationRuleTests
     {
         // Arrange
         var code = """
-            /// <summary>Test class</summary>
-            public class TestClass
-            {
-                protected void ProtectedMethod() { }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   /// <summary>Test class</summary>
+                   public class TestClass
+                   {
+                       protected void ProtectedMethod() { }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -199,12 +199,12 @@ public class MissingXmlDocumentationRuleTests
     {
         // Arrange
         var code = """
-            // Regular comment (not XML doc)
-            public class TestClass
-            {
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   // Regular comment (not XML doc)
+                   public class TestClass
+                   {
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -218,11 +218,11 @@ public class MissingXmlDocumentationRuleTests
     {
         // Arrange
         var code = """
-            public class TestClass
-            {
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   public class TestClass
+                   {
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();
@@ -242,16 +242,16 @@ public class MissingXmlDocumentationRuleTests
     {
         // Arrange
         var code = """
-            // <auto-generated>
-            //     This code was generated by a tool.
-            // </auto-generated>
-            
-            public class TestClass
-            {
-                public void Method() { }
-            }
-            """;
-        var tree = CreateSyntaxTree(code);
+                   // <auto-generated>
+                   //     This code was generated by a tool.
+                   // </auto-generated>
+
+                   public class TestClass
+                   {
+                       public void Method() { }
+                   }
+                   """;
+        SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
         var diagnostics = _rule.Analyze(tree).ToList();

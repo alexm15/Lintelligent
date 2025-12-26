@@ -6,18 +6,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Lintelligent.Analyzers" />
-        <InternalsVisibleTo Include="Lintelligent.AnalyzerEngine.Tests" />
+        <InternalsVisibleTo Include="Lintelligent.Analyzers"/>
+        <InternalsVisibleTo Include="Lintelligent.AnalyzerEngine.Tests"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Configuration\" />
-        <Folder Include="Utilities\" />
+        <Folder Include="Configuration\"/>
+        <Folder Include="Utilities\"/>
     </ItemGroup>
 
 </Project>

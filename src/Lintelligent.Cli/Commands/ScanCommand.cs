@@ -1,4 +1,6 @@
-﻿using Lintelligent.AnalyzerEngine.Abstractions;
+﻿using System.Globalization;
+using Lintelligent.AnalyzerEngine.Abstractions;
+using Lintelligent.AnalyzerEngine.Analysis;
 using Lintelligent.AnalyzerEngine.Configuration;
 using Lintelligent.AnalyzerEngine.ProjectModel;
 using Lintelligent.AnalyzerEngine.Results;
@@ -31,13 +33,13 @@ namespace Lintelligent.Cli.Commands;
 /// </remarks>
 public sealed class ScanCommand(
     AnalyzerEngine.Analysis.AnalyzerEngine engine,
-    AnalyzerEngine.Analysis.WorkspaceAnalyzerEngine workspaceEngine,
+    WorkspaceAnalyzerEngine workspaceEngine,
     DuplicationOptions duplicationOptions,
     ISolutionProvider? solutionProvider = null,
     IProjectProvider? projectProvider = null,
     ILogger<ScanCommand>? logger = null) : IAsyncCommand
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
 #pragma warning disable MA0051 // Method is too long - CLI argument parsing requires multiple options
     public async Task<CommandResult> ExecuteAsync(string[] args)
 #pragma warning restore MA0051
@@ -70,7 +72,8 @@ public sealed class ScanCommand(
             if (path.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
             {
                 if (solutionProvider == null)
-                    throw new InvalidOperationException("Solution support requires ISolutionProvider to be registered.");
+                    throw new InvalidOperationException(
+                        "Solution support requires ISolutionProvider to be registered.");
 
                 return await AnalyzeSolutionAsync(path, severityFilter, groupBy, configuration, targetFramework);
             }
@@ -92,7 +95,7 @@ public sealed class ScanCommand(
             var report = groupBy switch
             {
                 "category" => ReportGenerator.GenerateMarkdownGroupedByCategory(materializedResults),
-                _ => ReportGenerator.GenerateMarkdown(materializedResults),
+                _ => ReportGenerator.GenerateMarkdown(materializedResults)
             };
 
             // Return success with report in Output
@@ -117,7 +120,8 @@ public sealed class ScanCommand(
         string configuration,
         string? targetFramework)
     {
-        logger?.LogInformation("Analyzing solution: {SolutionPath} with configuration: {Configuration}", solutionPath, configuration);
+        logger?.LogInformation("Analyzing solution: {SolutionPath} with configuration: {Configuration}", solutionPath,
+            configuration);
 
         // Parse solution to get project list
         Solution solution = await solutionProvider!.ParseSolutionAsync(solutionPath);
@@ -125,9 +129,8 @@ public sealed class ScanCommand(
 
         // Check if we have project provider for metadata extraction
         if (projectProvider != null)
-        {
-            return await AnalyzeSolutionWithProviderAsync(solution, configuration, targetFramework, severityFilter, groupBy);
-        }
+            return await AnalyzeSolutionWithProviderAsync(solution, configuration, targetFramework, severityFilter,
+                groupBy);
 
         // Fallback to directory-based analysis if IProjectProvider not available
         return AnalyzeSolutionDirectories(solution, severityFilter, groupBy);
@@ -192,7 +195,7 @@ public sealed class ScanCommand(
         var reportFallback = groupBy switch
         {
             "category" => ReportGenerator.GenerateMarkdownGroupedByCategory(filteredResultsFallback),
-            _ => ReportGenerator.GenerateMarkdown(filteredResultsFallback),
+            _ => ReportGenerator.GenerateMarkdown(filteredResultsFallback)
         };
 
         return CommandResult.Success(reportFallback);
@@ -315,7 +318,7 @@ public sealed class ScanCommand(
                     "error" => Severity.Error,
                     "warning" => Severity.Warning,
                     "info" => Severity.Info,
-                    _ => null,
+                    _ => null
                 };
             }
         }
@@ -341,12 +344,13 @@ public sealed class ScanCommand(
         {
             if (args[i] != "--format") continue;
             var value = args[i + 1].ToLowerInvariant();
-            var validFormats = new[] { "json", "sarif", "markdown" };
+            var validFormats = new[] {"json", "sarif", "markdown"};
             if (!validFormats.Contains(value))
             {
                 throw new ArgumentException(
                     $"Invalid format '{value}'. Valid formats: {string.Join(", ", validFormats)}");
             }
+
             return value;
         }
 
@@ -377,7 +381,6 @@ public sealed class ScanCommand(
     ///     - Debug: typically defines DEBUG and TRACE symbols
     ///     - Release: typically defines RELEASE symbol
     ///     Custom configurations may define different symbols based on project settings.
-    ///
     ///     Example usage:
     ///     - lintelligent scan MySolution.sln --configuration Debug
     ///     - lintelligent scan MyProject.csproj --configuration Release
@@ -437,7 +440,7 @@ public sealed class ScanCommand(
         for (var i = 0; i < args.Length - 1; i++)
         {
             if (args[i] == "--min-duplication-lines")
-                return int.TryParse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : null;
+                return int.TryParse(args[i + 1], CultureInfo.InvariantCulture, out var value) ? value : null;
         }
 
         return null; // Default: use DuplicationOptions default (10)
@@ -462,7 +465,7 @@ public sealed class ScanCommand(
         for (var i = 0; i < args.Length - 1; i++)
         {
             if (args[i] == "--min-duplication-tokens")
-                return int.TryParse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : null;
+                return int.TryParse(args[i + 1], CultureInfo.InvariantCulture, out var value) ? value : null;
         }
 
         return null; // Default: use DuplicationOptions default (50)
@@ -505,10 +508,9 @@ public sealed class ScanCommand(
         for (var i = 0; i < args.Length - 1; i++)
         {
             if (args[i] == "--min-similarity")
-                return double.TryParse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : null;
+                return double.TryParse(args[i + 1], CultureInfo.InvariantCulture, out var value) ? value : null;
         }
 
         return null; // Default: use DuplicationOptions default (85.0)
     }
 }
-

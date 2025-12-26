@@ -61,8 +61,10 @@ public class FilteringCodeProvider : ICodeProvider
     /// </returns>
     public IEnumerable<SyntaxTree> GetSyntaxTrees(IReadOnlyList<string>? conditionalSymbols = null)
     {
-        foreach (var tree in _innerProvider.GetSyntaxTrees(conditionalSymbols))
+        foreach (SyntaxTree tree in _innerProvider.GetSyntaxTrees(conditionalSymbols))
+        {
             if (_predicate(tree))
                 yield return tree;
+        }
     }
 }

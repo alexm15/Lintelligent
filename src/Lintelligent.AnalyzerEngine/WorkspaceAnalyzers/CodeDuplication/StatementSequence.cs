@@ -28,7 +28,7 @@ public sealed class StatementSequence
         
         // Calculate location from first to last statement
         var firstLocation = statements[0].GetLocation().GetLineSpan();
-        var lastLocation = statements[^1].GetLocation().GetLineSpan();
+        var lastLocation = statements[statements.Count - 1].GetLocation().GetLineSpan();
         
         Location = new LinePositionSpan(
             firstLocation.StartLinePosition,

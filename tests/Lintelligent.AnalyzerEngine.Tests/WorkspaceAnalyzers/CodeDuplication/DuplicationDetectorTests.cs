@@ -297,11 +297,7 @@ public sealed class DuplicationDetectorTests
             p => p,
             StringComparer.OrdinalIgnoreCase);
 
-        return new WorkspaceContext
-        {
-            Solution = solution,
-            ProjectsByPath = projectsByPath
-        };
+        return new WorkspaceContext(solution, projectsByPath);
     }
 
     private static WorkspaceContext CreateWorkspaceContext(string projectName)

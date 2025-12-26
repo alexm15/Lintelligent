@@ -21,7 +21,7 @@ public class WorkspaceContext
     /// <remarks>
     /// From Feature 009: Solution provides GetDependencyGraph() for project relationships
     /// </remarks>
-    public required Solution Solution { get; init; }
+    public Solution Solution { get; }
     
     /// <summary>
     /// Dictionary mapping absolute file paths to their containing projects.
@@ -32,5 +32,14 @@ public class WorkspaceContext
     /// Value: Project containing that file
     /// Usage: Identify cross-project duplications, respect project boundaries
     /// </remarks>
-    public required IReadOnlyDictionary<string, Project> ProjectsByPath { get; init; }
+    public IReadOnlyDictionary<string, Project> ProjectsByPath { get; }
+
+    /// <summary>
+    /// Constructs a workspace context with solution and project mapping.
+    /// </summary>
+    public WorkspaceContext(Solution solution, IReadOnlyDictionary<string, Project> projectsByPath)
+    {
+        Solution = solution ?? throw new ArgumentNullException(nameof(solution));
+        ProjectsByPath = projectsByPath ?? throw new ArgumentNullException(nameof(projectsByPath));
+    }
 }

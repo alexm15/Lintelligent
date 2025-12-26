@@ -59,7 +59,7 @@ public sealed class WorkspaceAnalyzerEngine
     /// <param name="analyzers">Analyzers to register</param>
     public void RegisterAnalyzers(IEnumerable<IWorkspaceAnalyzer> analyzers)
     {
-        ArgumentNullException.ThrowIfNull(analyzers);
+        ArgumentNullExceptionPolyfills.ThrowIfNull(analyzers, nameof(analyzers));
         
         foreach (var analyzer in analyzers)
         {
@@ -91,8 +91,8 @@ public sealed class WorkspaceAnalyzerEngine
         IReadOnlyList<SyntaxTree> trees,
         WorkspaceContext context)
     {
-        ArgumentNullException.ThrowIfNull(trees);
-        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullExceptionPolyfills.ThrowIfNull(trees, nameof(trees));
+        ArgumentNullExceptionPolyfills.ThrowIfNull(context, nameof(context));
         
         // Sequential execution: run each analyzer against all trees
         // Lazy evaluation: results streamed as they are produced

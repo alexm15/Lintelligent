@@ -51,8 +51,8 @@ public sealed class DuplicationDetector : IWorkspaceAnalyzer
         IReadOnlyList<SyntaxTree> trees,
         WorkspaceContext context)
     {
-        ArgumentNullException.ThrowIfNull(trees);
-        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullExceptionPolyfills.ThrowIfNull(trees, nameof(trees));
+        ArgumentNullExceptionPolyfills.ThrowIfNull(context, nameof(context));
 
         return AnalyzeCore(trees, context);
     }

@@ -37,14 +37,12 @@ public sealed class WorkspaceAnalyzerEngineTests
             projects: projects,
             configurations: new[] { "Debug", "Release" });
 
-        var context = new WorkspaceContext
-        {
-            Solution = solution,
-            ProjectsByPath = solution.Projects.ToDictionary(
+        var context = new WorkspaceContext(
+            solution,
+            solution.Projects.ToDictionary(
                 p => p.FilePath,
                 p => p,
-                StringComparer.OrdinalIgnoreCase)
-        };
+                StringComparer.OrdinalIgnoreCase));
 
         // Create 5 syntax trees (one per project) with identical code (multi-line to ensure detection)
         var code = """
@@ -234,13 +232,11 @@ public sealed class WorkspaceAnalyzerEngineTests
             projects: new[] { project },
             configurations: new[] { "Debug" });
 
-        return new WorkspaceContext
-        {
-            Solution = solution,
-            ProjectsByPath = new Dictionary<string, Project>(StringComparer.OrdinalIgnoreCase)
+        return new WorkspaceContext(
+            solution,
+            new Dictionary<string, Project>(StringComparer.OrdinalIgnoreCase)
             {
                 { project.FilePath, project }
-            }
-        };
+            });
     }
 }

@@ -134,18 +134,18 @@
 
 ### Tests for User Story 5
 
-- [ ] T043 [P] [US5] Test: `ConsoleFormatter_TenDuplications_GroupedByHash` in tests/Lintelligent.Reporting.Tests/ConsoleFormatterTests.cs
-- [ ] T044 [P] [US5] Test: `JsonFormatter_DuplicationResults_IncludesLocationsAndTokenCounts` in JsonFormatterTests.cs
-- [ ] T045 [P] [US5] Test: `MarkdownFormatter_DuplicationResults_IncludesCodeSnippets` in MarkdownFormatterTests.cs
-- [ ] T046 [P] [US5] Test: `ReportGenerator_50DuplicationGroups_SortedBySeverity` in ReportGeneratorTests.cs
+- [X] T043 [P] [US5] Test: `ConsoleFormatter_TenDuplications_GroupedByHash` in tests/Lintelligent.Reporting.Tests/ConsoleFormatterTests.cs
+- [X] T044 [P] [US5] Test: `JsonFormatter_DuplicationResults_IncludesLocationsAndTokenCounts` in JsonFormatterTests.cs
+- [X] T045 [P] [US5] Test: `MarkdownFormatter_DuplicationResults_IncludesCodeSnippets` in MarkdownFormatterTests.cs
+- [X] T046 [P] [US5] Test: `ReportGenerator_50DuplicationGroups_SortedBySeverity` in ReportGeneratorTests.cs
 
 ### Implementation for User Story 5
 
-- [ ] T047 [P] [US5] Update `ConsoleFormatter` in src/Lintelligent.Reporting/Formatters/ConsoleFormatter.cs to handle duplication diagnostics with grouping
-- [ ] T048 [P] [US5] Update `JsonFormatter` in src/Lintelligent.Reporting/Formatters/JsonFormatter.cs to serialize duplication metadata (token counts, line ranges)
-- [ ] T049 [P] [US5] Update `MarkdownFormatter` in src/Lintelligent.Reporting/Formatters/MarkdownFormatter.cs to include collapsible sections with code snippets
-- [ ] T050 [US5] Implement severity-based sorting in `ReportGenerator.GenerateReport()` in src/Lintelligent.Reporting/ReportGenerator.cs
-- [ ] T051 [US5] Add duplication-specific message formatting helpers (e.g., "3 instances across 2 projects")
+- [X] T047 [P] [US5] Update `ConsoleFormatter` in src/Lintelligent.Reporting/Formatters/ConsoleFormatter.cs to handle duplication diagnostics with grouping
+- [X] T048 [P] [US5] Update `JsonFormatter` in src/Lintelligent.Reporting/Formatters/JsonFormatter.cs to serialize duplication metadata (token counts, line ranges)
+- [X] T049 [P] [US5] Update `MarkdownFormatter` in src/Lintelligent.Reporting/Formatters/MarkdownFormatter.cs to include collapsible sections with code snippets
+- [X] T050 [US5] Implement severity-based sorting in `ReportGenerator.GenerateReport()` in src/Lintelligent.Reporting/ReportGenerator.cs
+- [X] T051 [US5] Add duplication-specific message formatting helpers (e.g., "3 instances across 2 projects")
 
 **Checkpoint**: Reporting complete - all formats display comprehensive duplication information with proper grouping and sorting
 

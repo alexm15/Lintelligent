@@ -70,7 +70,7 @@ public class GodClassRule : IAnalyzerRule
 
     private static bool IsGeneratedCode(SyntaxTree tree)
     {
-        string fileName = Path.GetFileName(tree.FilePath);
+        var fileName = Path.GetFileName(tree.FilePath);
         if (fileName.EndsWith(".Designer.cs", StringComparison.OrdinalIgnoreCase) ||
             fileName.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) ||
             fileName.Contains(".Generated."))

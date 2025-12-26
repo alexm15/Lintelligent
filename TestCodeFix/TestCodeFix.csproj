@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Install both analyzer and code fix packages -->
+    <ProjectReference Include="..\src\Lintelligent.Analyzers\Lintelligent.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\src\Lintelligent.CodeFixes\Lintelligent.CodeFixes.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <!-- Need LanguageExt for Option<T> -->
+    <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-38" />
+  </ItemGroup>
+
+</Project>

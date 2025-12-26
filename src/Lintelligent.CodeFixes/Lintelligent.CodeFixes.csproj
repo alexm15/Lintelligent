@@ -4,15 +4,42 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+
+    <!-- NuGet Packaging -->
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackCodeFix</TargetsForTfmSpecificContentInPackage>
+
+    <!-- Package Metadata -->
+    <PackageId>Lintelligent.CodeFixes</PackageId>
+    <Version>1.0.0-preview</Version>
+    <Authors>Lintelligent Team</Authors>
+    <Description>Code fix providers for Lintelligent analyzers - enables one-click refactorings (nullable → Option&lt;T&gt;, try/catch → Either&lt;L,R&gt;, etc.)</Description>
+    <PackageTags>roslyn code-fix refactoring functional-programming monad language-ext</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.12.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.12.0" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Lintelligent.AnalyzerEngine\Lintelligent.AnalyzerEngine.csproj" />
+    <ProjectReference Include="..\Lintelligent.AnalyzerEngine\Lintelligent.AnalyzerEngine.csproj" PrivateAssets="all" />
+    <!-- Must also reference Analyzers package to get diagnostics -->
+    <ProjectReference Include="..\Lintelligent.Analyzers\Lintelligent.Analyzers.csproj" PrivateAssets="all" />
   </ItemGroup>
+
+  <!-- Package code fix DLLs -->
+  <Target Name="PackCodeFix">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).dll" PackagePath="analyzers/dotnet/cs"/>
+      <!-- Include dependencies -->
+      <TfmSpecificPackageFile Include="$(OutputPath)\Lintelligent.AnalyzerEngine.dll" PackagePath="analyzers/dotnet/cs"/>
+      <TfmSpecificPackageFile Include="$(OutputPath)\Lintelligent.Analyzers.dll" PackagePath="analyzers/dotnet/cs"/>
+    </ItemGroup>
+  </Target>
 
 </Project>

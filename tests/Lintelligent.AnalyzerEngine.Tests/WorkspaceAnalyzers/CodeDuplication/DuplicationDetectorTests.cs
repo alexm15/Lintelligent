@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Lintelligent.AnalyzerEngine.Abstractions;
+using Lintelligent.AnalyzerEngine.Configuration;
 using Lintelligent.AnalyzerEngine.Results;
 using Lintelligent.AnalyzerEngine.WorkspaceAnalyzers.CodeDuplication;
 using Microsoft.CodeAnalysis.CSharp;
@@ -121,7 +122,9 @@ public sealed class DuplicationDetectorTests
             ("Project1", @"C:\Project1\Project1.csproj"),
             ("Project2", @"C:\Project2\Project2.csproj"));
 
-        var detector = new DuplicationDetector();
+        // Use low thresholds to ensure this 8-line code is detected
+        var options = new DuplicationOptions { MinLines = 5, MinTokens = 10 };
+        var detector = new DuplicationDetector(options);
 
         // Act
         var diagnostics = detector.Analyze(new[] { tree1, tree2 }, context).ToList();
@@ -304,5 +307,76 @@ public sealed class DuplicationDetectorTests
     private static WorkspaceContext CreateWorkspaceContext(string projectName)
     {
         return CreateWorkspaceContext("TestSolution", (projectName, $"C:\\{projectName}\\{projectName}.csproj"));
+    }
+
+    [Fact]
+    public void DuplicationDetector_8LineDuplication_MinThreshold10_NoReport()
+    {
+        // Arrange - Create short duplication (7 lines) with MinLines = 10
+        var code1 = """
+            public class Class1 {
+                public void Method1() {
+                    var x = 1;
+                    var y = 2;
+                    var z = x + y;
+                    Console.WriteLine(z);
+                }
+            """;
+
+        var code2 = """
+            public class Class2 {
+                public void Method2() {
+                    var x = 1;
+                    var y = 2;
+                    var z = x + y;
+                    Console.WriteLine(z);
+                }
+            """;
+
+        var tree1 = CSharpSyntaxTree.ParseText(code1, path: "C:\\File1.cs");
+        var tree2 = CSharpSyntaxTree.ParseText(code2, path: "C:\\File2.cs");
+        var context = CreateWorkspaceContext("Project1");
+
+        var options = new DuplicationOptions { MinLines = 10, MinTokens = 50 };
+        var detector = new DuplicationDetector(options);
+
+        // Act
+        var results = detector.Analyze(new[] { tree1, tree2 }, context).ToList();
+
+        // Assert - 7 lines is below 10-line threshold AND 37 tokens is below 50-token threshold, should not report
+        results.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void DuplicationDetector_ShortTokenDense_MinTokenThreshold_Reported()
+    {
+        // Arrange - Short code (3 lines) but many tokens (>50)
+        var code1 = """
+            public class Class1
+            {
+                public int Calculate() => ((a + b) * (c - d)) / ((e + f) * (g - h)) + ((i + j) * (k - l)) / ((m + n) * (o - p));
+            }
+            """;
+
+        var code2 = """
+            public class Class2
+            {
+                public int Process() => ((a + b) * (c - d)) / ((e + f) * (g - h)) + ((i + j) * (k - l)) / ((m + n) * (o - p));
+            }
+            """;
+
+        var tree1 = CSharpSyntaxTree.ParseText(code1, path: "C:\\File1.cs");
+        var tree2 = CSharpSyntaxTree.ParseText(code2, path: "C:\\File2.cs");
+        var context = CreateWorkspaceContext("Project1");
+
+        var options = new DuplicationOptions { MinLines = 100, MinTokens = 50 }; // High line threshold, low token threshold
+        var detector = new DuplicationDetector(options);
+
+        // Act
+        var results = detector.Analyze(new[] { tree1, tree2 }, context).ToList();
+
+        // Assert - Should report because token count exceeds MinTokens (even though lines < MinLines)
+        results.Should().NotBeEmpty();
+        results.Should().ContainSingle(r => r.RuleId == "DUP001");
     }
 }

@@ -107,22 +107,22 @@
 
 ### Tests for User Story 2
 
-- [ ] T032 [P] [US2] Test: `DuplicationDetector_8LineDuplication_MinThreshold10_NoReport` in DuplicationDetectorTests.cs
-- [ ] T033 [P] [US2] Test: `DuplicationDetector_ShortTokenDense_MinTokenThreshold_Reported` in DuplicationDetectorTests.cs
-- [ ] T034 [P] [US2] Test: `ScanCommand_MinDuplicationLinesFlag_FiltersByLineCount` in tests/Lintelligent.Cli.Tests/ScanCommandTests.cs
-- [ ] T035 [P] [US2] Test: `ScanCommand_CLIFlagOverridesConfig_CLITakesPrecedence` in ScanCommandTests.cs
+- [X] T032 [P] [US2] Test: `DuplicationDetector_8LineDuplication_MinThreshold10_NoReport` in DuplicationDetectorTests.cs
+- [X] T033 [P] [US2] Test: `DuplicationDetector_ShortTokenDense_MinTokenThreshold_Reported` in DuplicationDetectorTests.cs
+- [X] T034 [P] [US2] Test: `ScanCommand_MinDuplicationLinesFlag_FiltersByLineCount` in tests/Lintelligent.Cli.Tests/ScanCommandTests.cs
+- [X] T035 [P] [US2] Test: `ScanCommand_CLIFlagOverridesConfig_CLITakesPrecedence` in ScanCommandTests.cs
 
 ### Implementation for User Story 2
 
-- [ ] T036 [P] [US2] Create `DuplicationOptions` class in src/Lintelligent.AnalyzerEngine/Configuration/DuplicationOptions.cs with MinLines and MinTokens properties
-- [ ] T037 [US2] Update `DuplicationDetector` constructor to accept `DuplicationOptions` parameter
-- [ ] T038 [US2] Implement threshold filtering in `ExactDuplicationFinder.FindDuplicates()` method
-- [ ] T039 [US2] Add `--min-duplication-lines <n>` option to ScanCommand in src/Lintelligent.Cli/Commands/ScanCommand.cs
-- [ ] T040 [US2] Add `--min-duplication-tokens <n>` option to ScanCommand
-- [ ] T041 [US2] Extend configuration file schema in src/Lintelligent.Cli/Configuration/ to support duplicationDetection section
-- [ ] T042 [US2] Implement CLI flag precedence over config file in ScanCommand option binding
+- [X] T036 [P] [US2] Create `DuplicationOptions` class in src/Lintelligent.AnalyzerEngine/Configuration/DuplicationOptions.cs with MinLines and MinTokens properties
+- [X] T037 [US2] Update `DuplicationDetector` constructor to accept `DuplicationOptions` parameter
+- [X] T038 [US2] Implement threshold filtering in `ExactDuplicationFinder.FindDuplicates()` method
+- [X] T039 [US2] Add `--min-duplication-lines <n>` option to ScanCommand in src/Lintelligent.Cli/Commands/ScanCommand.cs
+- [X] T040 [US2] Add `--min-duplication-tokens <n>` option to ScanCommand
+- [X] T041 [US2] Implement CLI flag parsing and DuplicationOptions update in ScanCommand.ExecuteAsync
+- [X] T042 [US2] Update ScanCommand to inject and configure DuplicationOptions via dependency injection
 
-**Checkpoint**: Threshold configuration working - developers can filter duplications by size via CLI or config file
+**Checkpoint**: Threshold configuration working - developers can filter duplications by size via CLI flags
 
 ---
 

@@ -27,7 +27,6 @@ A static code analysis CLI tool for C# projects that detects code quality issues
 
 ## Licensing
 - Free features: MIT License (see LICENSE)
-- Pro features: Source-available, commercial use requires license (see LICENSE-PRO.md)
 
 ## Repository Structure
 
@@ -38,20 +37,15 @@ src/
     Lintelligent.Cli/            # Free, MIT
     Lintelligent.Reporting/      # Free, MIT
 docs/
-    MONETIZATION.md
-    POC-CODE-FIXES.md
 LICENSE
 LICENSE-PRO.md
 README.md
 .github/
-    ISSUE_TEMPLATE/
     workflows/
-    FUNDING.yml
 ```
 
 ## Support
 - Community: GitHub Discussions
-- Pro: Priority support via email/Discord (see pricing page)
 
 ## Installation
 
@@ -313,275 +307,6 @@ Lintelligent uses the **Strategy Pattern** to decouple code analysis from code s
 - **FilteringCodeProvider**: Decorator for selective analysis (predicate-based filtering)
 - **AnalyzerManager**: Manages registered analyzer rules
 - **IAnalyzerRule**: Interface for implementing custom analysis rules
-
-## Migration Guide
-
-### From v1.x to v2.0 (Enhanced Rule Contract)
-
-**Version 2.0 introduces breaking changes to the IAnalyzerRule interface.** This migration guide helps you update your custom rules and usage code.
-
-#### Breaking Change 1: Analyze() Return Type
-
-**Before (v1.x)**:
-```csharp
-public DiagnosticResult? Analyze(SyntaxTree tree)
-{
-    var violation = FindFirstViolation(tree);
-    return violation != null ? CreateResult(violation) : null;
-}
-```
-
-**After (v2.0)**:
-```csharp
-public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
-{
-    var violations = FindAllViolations(tree); // Find ALL, not just first
-    
-    foreach (var violation in violations)
-    {
-        yield return CreateResult(violation);
-    }
-    
-    // Return empty collection instead of null
-    // No explicit return needed - method naturally returns empty if no violations
-}
-```
-
-**Migration Steps**:
-1. Change return type from `DiagnosticResult?` to `IEnumerable<DiagnosticResult>`
-2. Use `yield return` for each finding (enables lazy evaluation)
-3. Find **all** violations, not just the first one
-4. Remove null returns - empty collection is implicit
-
-#### Breaking Change 2: New Required Properties
-
-**Before (v1.x)**:
-```csharp
-public class MyRule : IAnalyzerRule
-{
-    public string Id => "MY001";
-    public string Description => "My custom rule";
-    
-    public DiagnosticResult? Analyze(SyntaxTree tree) { /* ... */ }
-}
-```
-
-**After (v2.0)**:
-```csharp
-using Lintelligent.AnalyzerEngine.Abstractions;
-using Lintelligent.AnalyzerEngine.Results;
-
-public class MyRule : IAnalyzerRule
-{
-    public string Id => "MY001";
-    public string Description => "My custom rule";
-    public Severity Severity => Severity.Warning;  // NEW - Required
-    public string Category => DiagnosticCategories.Maintainability;  // NEW - Required
-    
-    public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree) { /* ... */ }
-}
-```
-
-**Migration Steps**:
-1. Add `Severity` property - choose from `Error`, `Warning`, or `Info`
-2. Add `Category` property - use `DiagnosticCategories` constants or custom string
-3. Update `Analyze()` signature per Breaking Change 1
-
-**Severity Guidelines**:
-- `Severity.Error`: Critical bugs, security vulnerabilities, correctness issues that **must** be fixed
-- `Severity.Warning`: Code smells, maintainability problems, **should** be fixed but non-blocking
-- `Severity.Info`: Style suggestions, optional improvements, informational only
-
-**Category Options**:
-- `DiagnosticCategories.Maintainability` - Code structure, readability, complexity
-- `DiagnosticCategories.Performance` - Performance issues, inefficiencies
-- `DiagnosticCategories.Security` - Security vulnerabilities, risks
-- `DiagnosticCategories.Style` - Formatting, naming conventions
-- `DiagnosticCategories.Design` - Architecture, design patterns
-- `DiagnosticCategories.General` - General code quality
-- Custom string: `"MyCustomCategory"` for domain-specific categorization
-
-#### Breaking Change 3: DiagnosticResult Constructor
-
-**Before (v1.x)**:
-```csharp
-yield return new DiagnosticResult(
-    tree.FilePath,
-    Id,
-    "Method is too long",
-    lineNumber
-);
-```
-
-**After (v2.0)**:
-```csharp
-yield return new DiagnosticResult(
-    tree.FilePath,
-    Id,
-    "Method is too long",
-    lineNumber,
-    Severity,      // NEW - Pass rule's severity
-    Category       // NEW - Pass rule's category
-);
-```
-
-**Migration Steps**:
-1. Add `Severity` parameter (pass `this.Severity`)
-2. Add `Category` parameter (pass `this.Category`)
-
-#### Complete Migration Example
-
-**Before (v1.x)**:
-```csharp
-public class LongMethodRule : IAnalyzerRule
-{
-    public string Id => "LNT001";
-    public string Description => "Method exceeds recommended length";
-
-    public DiagnosticResult? Analyze(SyntaxTree tree)
-    {
-        var root = tree.GetRoot();
-        var longMethod = root.DescendantNodes()
-            .OfType<MethodDeclarationSyntax>()
-            .FirstOrDefault(m => m.Body?.Statements.Count > 20);
-
-        if (longMethod != null)
-        {
-            var line = longMethod.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-            return new DiagnosticResult(tree.FilePath, Id, "Method is too long", line);
-        }
-
-        return null;
-    }
-}
-```
-
-**After (v2.0)**:
-```csharp
-using Lintelligent.AnalyzerEngine.Abstractions;
-using Lintelligent.AnalyzerEngine.Results;
-
-public class LongMethodRule : IAnalyzerRule
-{
-    public string Id => "LNT001";
-    public string Description => "Method exceeds recommended length";
-    public Severity Severity => Severity.Warning;                    // ADDED
-    public string Category => DiagnosticCategories.Maintainability;  // ADDED
-
-    public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)    // CHANGED return type
-    {
-        var root = tree.GetRoot();
-        var longMethods = root.DescendantNodes()                     // CHANGED to find ALL
-            .OfType<MethodDeclarationSyntax>()
-            .Where(m => m.Body?.Statements.Count > 20);              // CHANGED to Where()
-
-        foreach (var method in longMethods)                          // ADDED loop
-        {
-            var line = method.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-            yield return new DiagnosticResult(                       // CHANGED to yield return
-                tree.FilePath,
-                Id,
-                "Method is too long",
-                line,
-                Severity,                                            // ADDED
-                Category                                             // ADDED
-            );
-        }
-        // No explicit return - empty collection is implicit
-    }
-}
-```
-
-#### New CLI Features
-
-**Severity Filtering**:
-```bash
-# Show only errors
-dotnet run -- scan /path/to/project --severity Error
-
-# Show errors and warnings
-dotnet run -- scan /path/to/project --severity Error,Warning
-
-# Show all (default behavior)
-dotnet run -- scan /path/to/project --severity Error,Warning,Info
-```
-
-**Category Grouping**:
-```bash
-# Group findings by category in reports
-dotnet run -- scan /path/to/project --group-by category
-
-# Output organized with headers like:
-# ## Maintainability
-# LNT001: Method is too long (Controller.cs:45)
-# 
-# ## Performance
-# PERF001: Inefficient LINQ usage (Service.cs:102)
-```
-
-**Combined**:
-```bash
-# Show only errors, grouped by category
-dotnet run -- scan /path/to/project --severity Error --group-by category
-```
-
-#### Why This Change?
-
-1. **Multiple Findings**: Old API (`DiagnosticResult?`) could only return one finding or null, missing subsequent violations in the same file
-2. **Severity Filtering**: Users needed a way to focus on critical issues (errors) vs informational messages
-3. **Better Reporting**: Categories enable organized reports, metrics by type, team-specific workflows
-4. **Constitutional Alignment**: Principle III requires comprehensive findings and metadata
-
-#### Migration Checklist
-
-- [ ] Update all custom IAnalyzerRule implementations:
-  - [ ] Change `Analyze()` return type to `IEnumerable<DiagnosticResult>`
-  - [ ] Add `Severity` property
-  - [ ] Add `Category` property
-  - [ ] Use `yield return` for findings
-  - [ ] Find ALL violations, not just first
-  - [ ] Pass severity and category to DiagnosticResult constructor
-- [ ] Update tests that expect single results to handle collections
-- [ ] Update code that calls `Analyze()` to enumerate results
-- [ ] Test with `--severity` and `--group-by` CLI options
-- [ ] Review [CHANGELOG.md](CHANGELOG.md) for full list of changes
-
-### From v1.x (Direct File System Access)
-
-**Old API** (before IO boundary refactor):
-```csharp
-var engine = new AnalyzerEngine(manager);
-var results = engine.Analyze("/path/to/project"); // REMOVED
-```
-
-**New API** (after IO boundary refactor):
-```csharp
-var provider = new FileSystemCodeProvider("/path/to/project");
-var engine = new AnalyzerEngine(manager);
-var results = engine.Analyze(provider.GetSyntaxTrees()); // NEW
-```
-
-### Key Changes
-
-1. **AnalyzerEngine.Analyze() signature changed**:
-   - **Before**: `Analyze(string path)` - accepted file path
-   - **After**: `Analyze(IEnumerable<SyntaxTree> syntaxTrees)` - accepts parsed trees
-
-2. **File system access moved to CLI layer**:
-   - **Before**: AnalyzerEngine directly read files
-   - **After**: FileSystemCodeProvider handles IO, AnalyzerEngine processes trees
-
-3. **Testing is now in-memory**:
-   - **Before**: Tests created temporary files on disk
-   - **After**: Tests use `CSharpSyntaxTree.ParseText()` directly
-
-### Benefits of Migration
-
-✅ **50x faster tests** - no disk IO overhead  
-✅ **Isolated tests** - no file cleanup, no race conditions  
-✅ **IDE integration ready** - analyze unsaved buffers  
-✅ **Constitutional compliance** - layered architecture enforced  
-✅ **Same performance** - CLI usage has ±5% execution time  
 
 ## Creating Custom Code Providers
 
@@ -876,13 +601,6 @@ dotnet test tests/Lintelligent.AnalyzerEngine.Tests
 dotnet test tests/Lintelligent.Cli.Tests
 ```
 
-### Current Test Coverage
-
-- **Total Tests**: 84 (100% passing)
-- **AnalyzerEngine.Tests**: 62 tests (core engine, providers, integration, performance, validation)
-- **Cli.Tests**: 22 tests (CLI commands, file system integration, filtering, grouping)
-- **Code Coverage**: ≥95% for rule contract, ≥90% for AnalyzerEngine core
-
 ## Performance
 
 Designed for large codebases:
@@ -891,32 +609,6 @@ Designed for large codebases:
 - ✅ **Lazy evaluation**: Syntax trees parsed on-demand during enumeration
 - ✅ **Memory efficient**: Tested with 10,000+ file projects, no memory exhaustion
 - ✅ **Fast execution**: ±5% performance vs pre-refactor implementation
-
-## Project Structure
-
-```
-Lintelligent/
-├── src/
-│   ├── Lintelligent.AnalyzerEngine/    # Core analysis engine (no IO dependencies)
-│   │   ├── Abstractions/               # ICodeProvider interface
-│   │   ├── Analysis/                   # AnalyzerEngine, AnalyzerManager
-│   │   ├── Rules/                      # IAnalyzerRule, LongMethodRule
-│   │   └── Results/                    # DiagnosticResult
-│   ├── Lintelligent.Cli/               # CLI application (handles IO)
-│   │   ├── Commands/                   # ScanCommand
-│   │   └── Providers/                  # FileSystemCodeProvider
-│   └── Lintelligent.Reporting/         # Report generation
-└── tests/
-    ├── Lintelligent.AnalyzerEngine.Tests/
-    │   ├── TestUtilities/              # InMemoryCodeProvider, FilteringCodeProvider
-    │   ├── AnalyzerEngineTests.cs
-    │   ├── InMemoryCodeProviderTests.cs
-    │   ├── FilteringCodeProviderTests.cs
-    │   └── CodeProviderIntegrationTests.cs
-    └── Lintelligent.Cli.Tests/
-        ├── Providers/                  # FileSystemCodeProviderTests
-        └── ScanCommandTests.cs
-```
 
 ## Contributing
 
@@ -934,5 +626,4 @@ Lintelligent/
 [Add license information]
 
 ## Support
-
 For issues, questions, or contributions, please [open an issue](https://github.com/yourorg/lintelligent/issues).

@@ -61,8 +61,9 @@ public class FileSystemCodeProvider : ICodeProvider
         // Check if root path is a single file
         if (File.Exists(_rootPath))
         {
-            SyntaxTree? tree = ParseFile(_rootPath, conditionalSymbols);
-            if (tree != null) yield return tree;
+            Option<SyntaxTree> treeOption = ParseFile(_rootPath, conditionalSymbols);
+            if (treeOption.IsSome)
+                yield return treeOption.IfNone(() => throw new InvalidOperationException("Unexpected None after IsSome check"));
             yield break;
         }
 
@@ -88,8 +89,9 @@ public class FileSystemCodeProvider : ICodeProvider
         // Parse each file and yield syntax tree
         foreach (var file in files)
         {
-            SyntaxTree? tree = ParseFile(file, conditionalSymbols);
-            if (tree != null) yield return tree;
+            Option<SyntaxTree> treeOption = ParseFile(file, conditionalSymbols);
+            if (treeOption.IsSome)
+                yield return treeOption.IfNone(() => throw new InvalidOperationException("Unexpected None after IsSome check"));
         }
     }
 

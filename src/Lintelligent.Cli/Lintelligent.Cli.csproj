@@ -29,9 +29,9 @@
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1"/>
         <PackageReference Include="Buildalyzer" Version="8.0.0"/>
         
-        <!-- DOGFOODING: Using local packages from packages-local folder -->
-        <PackageReference Include="Lintelligent.Analyzers" Version="1.2.0" />
-        <PackageReference Include="Lintelligent.CodeFixes" Version="1.0.0-preview" />
+        <!-- Use local project references for analyzer and codefix during development -->
+        <ProjectReference Include="..\Lintelligent.Analyzers\Lintelligent.Analyzers.csproj" />
+        <ProjectReference Include="..\Lintelligent.CodeFixes\Lintelligent.CodeFixes.csproj" />
     </ItemGroup>
 
 

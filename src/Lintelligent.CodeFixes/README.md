@@ -73,4 +73,9 @@ Future code fix providers:
 
 ## License
 
-See main Lintelligent repository for licensing information.
+This package is source-available but not open source. Commercial or production use requires a valid Lintelligent Pro license key.
+
+- Permitted: View, study, and modify for evaluation or contribution
+- Prohibited: Commercial use without a license, redistribution, or license circumvention
+
+See [LICENSE-PRO.md](../../LICENSE-PRO.md) for full terms.

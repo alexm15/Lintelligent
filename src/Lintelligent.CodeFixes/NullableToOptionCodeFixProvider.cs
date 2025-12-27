@@ -115,12 +115,9 @@ public class NullableToOptionCodeFixProvider : CodeFixProvider
             return returnStatement.WithExpression(noneExpression);
         }
 
-        var expressionText = expression.ToString().Trim();
-        var someExpression = SyntaxFactory.ParseExpression($"Option<{typeName}>.Some({expressionText})")
-            .WithLeadingTrivia(expression.GetLeadingTrivia())
-            .WithTrailingTrivia(expression.GetTrailingTrivia());
-
-        return returnStatement.WithExpression(someExpression);
+        // Keep non-null returns as-is - LanguageExt has implicit conversion from T to Option<T>
+        // This avoids the Option<T>.Some(value) pattern which uses lazy evaluation
+        return returnStatement;
     }
 
     private static string GetNonNullableTypeName(TypeSyntax type)

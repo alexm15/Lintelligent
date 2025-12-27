@@ -8,6 +8,8 @@
         <!-- Suppress NuGet security warnings from Buildalyzer transitive dependencies -->
         <!-- These are runtime-only dependencies not exposed in our API surface -->
         <NoWarn>$(NoWarn);NU1608;NU1902;NU1903;NU1904</NoWarn>
+        <!-- DOGFOODING: Don't treat LNT warnings as errors so we can see code fixes -->
+        <WarningsNotAsErrors>LNT200;LNT201;LNT202</WarningsNotAsErrors>
     </PropertyGroup>
 
 
@@ -16,11 +18,9 @@
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1"/>
         <PackageReference Include="Buildalyzer" Version="8.0.0"/>
         
-        <!-- DOGFOODING: Uncomment to enable Lintelligent analyzer on this project -->
-        <!-- IMPORTANT: Requires the analyzer NuGet package to be published or in local cache -->
-        <!-- To use: 1) Uncomment the line below, 2) Update version to match published package, 3) Run: dotnet restore -->
-        <!-- Note: Does NOT work in CI without publishing package to a feed -->
-        <!--<PackageReference Include="Lintelligent.Analyzers" Version="1.2.0" />-->
+        <!-- DOGFOODING: Using local packages from packages-local folder -->
+        <PackageReference Include="Lintelligent.Analyzers" Version="1.2.0" />
+        <PackageReference Include="Lintelligent.CodeFixes" Version="1.0.0-preview" />
     </ItemGroup>
 
 

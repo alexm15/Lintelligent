@@ -1,6 +1,7 @@
 using Lintelligent.AnalyzerEngine.Abstractions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using LanguageExt;
 
 namespace Lintelligent.Cli.Providers;
 
@@ -92,7 +93,7 @@ public class FileSystemCodeProvider : ICodeProvider
         }
     }
 
-    private static SyntaxTree? ParseFile(string filePath, IReadOnlyList<string>? conditionalSymbols)
+    private static Option<SyntaxTree> ParseFile(string filePath, IReadOnlyList<string>? conditionalSymbols)
     {
         try
         {
@@ -109,27 +110,27 @@ public class FileSystemCodeProvider : ICodeProvider
         catch (FileNotFoundException)
         {
             Console.WriteLine($"Warning: File not found (may have been deleted): {filePath}");
-            return null;
+            return Option<SyntaxTree>.None;
         }
         catch (UnauthorizedAccessException)
         {
             Console.WriteLine($"Warning: Access denied: {filePath}");
-            return null;
+            return Option<SyntaxTree>.None;
         }
         catch (PathTooLongException)
         {
             Console.WriteLine($"Warning: Path too long: {filePath}");
-            return null;
+            return Option<SyntaxTree>.None;
         }
         catch (IOException ex)
         {
             Console.WriteLine($"Warning: IO error reading {filePath}: {ex.Message}");
-            return null;
+            return Option<SyntaxTree>.None;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Warning: Unexpected error parsing {filePath}: {ex.Message}");
-            return null;
+            return Option<SyntaxTree>.None;
         }
     }
 }

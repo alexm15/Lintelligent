@@ -12,7 +12,8 @@ Lintelligent is a modular static analysis toolkit for C#/.NET projects, featurin
 
 ## Major Components
 
-### 1. Lintelligent.Analyzers
+
+### 1. Lintelligent.Analyzers ([see README](src/Lintelligent.Analyzers/README.md))
 
 Roslyn-based analyzers for code quality, maintainability, and duplication. Rules are grouped by category:
 
@@ -40,7 +41,8 @@ Rules are extensible—implement `IAnalyzerRule` to add your own.
 
 ---
 
-### 2. Lintelligent.Cli
+
+### 2. Lintelligent.Cli ([see README](src/Lintelligent.Cli/README.md))
 
 Cross-platform CLI for scanning projects, solutions, or files. Key features:
 
@@ -58,7 +60,8 @@ dotnet run -- scan /path/to/project --severity Error,Warning --group-by category
 
 ---
 
-### 3. Lintelligent.CodeFixes
+
+### 3. Lintelligent.CodeFixes ([see README](src/Lintelligent.CodeFixes/README.md))
 
 Roslyn CodeFixProviders for automated code fixes. Features:
 
@@ -72,7 +75,8 @@ Roslyn CodeFixProviders for automated code fixes. Features:
 
 ---
 
-### 4. Lintelligent.Reporting
+
+### 4. Lintelligent.Reporting ([see README](src/Lintelligent.Reporting/README.md))
 
 Flexible reporting for CLI and integrations. Features:
 
@@ -88,10 +92,11 @@ Flexible reporting for CLI and integrations. Features:
 
 ```
 src/
-    Lintelligent.Analyzers/      # Roslyn analyzers
-    Lintelligent.Cli/            # CLI application
-    Lintelligent.CodeFixes/      # Code-fix providers
-    Lintelligent.Reporting/      # Reporting/formatters
+    Lintelligent.Analyzers/      # Roslyn analyzers ([README](src/Lintelligent.Analyzers/README.md))
+    Lintelligent.Cli/            # CLI application ([README](src/Lintelligent.Cli/README.md))
+    Lintelligent.CodeFixes/      # Code-fix providers ([README](src/Lintelligent.CodeFixes/README.md))
+    Lintelligent.Reporting/      # Reporting/formatters ([README](src/Lintelligent.Reporting/README.md))
+    Lintelligent.AnalyzerEngine/ # Core analysis engine ([README](src/Lintelligent.AnalyzerEngine/README.md))
 tests/
     Lintelligent.AnalyzerEngine.Tests/
     Lintelligent.Cli.Tests/

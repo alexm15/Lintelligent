@@ -1,0 +1,102 @@
+name: Version Bump PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'New version (e.g., 1.3.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Prerelease suffix (optional, e.g., beta, rc.1)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Configure Git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+    
+    - name: Bump version
+      id: bump
+      run: |
+        VERSION="${{ inputs.version }}"
+        PRERELEASE="${{ inputs.prerelease }}"
+        FULL_VERSION="$VERSION"
+        if [ -n "$PRERELEASE" ]; then
+          FULL_VERSION="$VERSION-$PRERELEASE"
+        fi
+        
+        echo "full_version=$FULL_VERSION" >> "$GITHUB_OUTPUT"
+        
+        # Update only Lintelligent.Analyzers
+        sed -i "s|<Version>.*</Version>|<Version>$FULL_VERSION</Version>|g" src/Lintelligent.Analyzers/Lintelligent.Analyzers.csproj
+        echo "Updated src/Lintelligent.Analyzers/Lintelligent.Analyzers.csproj"
+        
+        # Update CHANGELOG.md
+        DATE=$(date +%Y-%m-%d)
+        
+        # Create new version section in CHANGELOG
+        cat > /tmp/changelog_entry.txt << 'EOL'
+        
+        ## [$FULL_VERSION] - $DATE
+        
+        ### Added
+        - 
+        
+        ### Changed
+        - 
+        
+        ### Fixed
+        - 
+        
+        EOL
+        
+        # Replace placeholders
+        sed -i "s/\$FULL_VERSION/$FULL_VERSION/g" /tmp/changelog_entry.txt
+        sed -i "s/\$DATE/$DATE/g" /tmp/changelog_entry.txt
+        
+        # Insert after [Unreleased] section in package CHANGELOG
+        CHANGELOG_PATH="src/Lintelligent.Analyzers/CHANGELOG.md"
+        awk '/^## \[Unreleased\]/{print; system("cat /tmp/changelog_entry.txt"); next}1' "$CHANGELOG_PATH" > /tmp/changelog_new.md
+        mv /tmp/changelog_new.md "$CHANGELOG_PATH"
+    
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "chore(analyzers): bump version to ${{ steps.bump.outputs.full_version }}"
+        branch: release/analyzers-v${{ steps.bump.outputs.full_version }}
+        title: "chore(analyzers): Release v${{ steps.bump.outputs.full_version }}"
+        body: |
+          ## Lintelligent.Analyzers Version Bump to ${{ steps.bump.outputs.full_version }}
+          
+          This PR bumps the Analyzers package version and updates the CHANGELOG.
+          
+          **Before merging:**
+          1. ✏️ Edit `CHANGELOG.md` to add detailed release notes
+          2. ✅ Review version changes in `Lintelligent.Analyzers.csproj`
+          3. 🧪 Ensure all tests pass
+          
+          **After merging:**
+          1. Push tag: `git tag analyzers/v${{ steps.bump.outputs.full_version }} && git push origin analyzers/v${{ steps.bump.outputs.full_version }}`
+          2. Publishing workflow will automatically push to NuGet
+          
+          ---
+          *This PR was automatically created by the Version Bump workflow*
+        labels: |
+          release
+          automated
+        draft: false

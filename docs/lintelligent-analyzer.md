@@ -1,56 +1,39 @@
-
 # Lintelligent.Analyzers
 
-Roslyn analyzer integration for Lintelligent code quality rules, duplication detection, and functional/monad diagnostics. Provides instant feedback in your IDE and during builds—no extra tools required.
+## Overview
 
+The Lintelligent Roslyn Analyzer provides build-time code quality analysis by integrating all 8 Lintelligent rules (LNT001-LNT008) directly into the C# compiler pipeline. Diagnostics appear instantly in your IDE and during builds, with zero additional tools required.
 
 ## Installation
 
-Install from NuGet:
+### NuGet Package
 
 ```bash
 dotnet add package Lintelligent.Analyzers
 ```
 
-- **Package ID:** Lintelligent.Analyzers
-- **Targets:** .NET Standard 2.0+ (works with .NET Framework 4.6.1+, .NET Core 2.0+, .NET 6/7/8/9/10+)
-- **Type:** DevelopmentDependency (analyzers only, no runtime impact)
-- **Depends on:** Lintelligent.AnalyzerEngine (bundled in package)
+The analyzer is automatically enabled once installed. No additional configuration required.
 
+### Package Details
 
-## Supported Rules & Diagnostics
+- **Package ID**: `Lintelligent.Analyzers`
+- **Type**: Development Dependency (does not affect runtime)
+- **Targets**: .NET Standard 2.0+ (compatible with all .NET projects)
 
-### Core Rule Library
+## Supported Rules
 
-| Rule ID  | Name/Description                | Category         | Default Severity |
-|----------|---------------------------------|------------------|------------------|
-| LNT001   | Long Method (>20 statements)    | Maintainability  | Warning          |
-| LNT002   | Too Many Parameters (>5)        | Maintainability  | Warning          |
-| LNT003   | Deeply Nested Code (depth >3)   | Complexity       | Warning          |
-| LNT004   | Magic Number                    | CodeSmell        | Info             |
-| LNT005   | God Class (>10 members)         | Maintainability  | Warning          |
-| LNT006   | Unused Private Member           | DeadCode         | Info             |
-| LNT007   | Empty Catch Block               | ErrorHandling    | Warning          |
-| LNT008   | Missing XML Documentation       | Documentation    | Info             |
+| Rule ID | Description | Category | Default Severity |
+|---------|-------------|----------|------------------|
+| LNT001 | Long Method (>20 statements) | Maintainability | Warning |
+| LNT002 | Too Many Parameters (>5) | Maintainability | Warning |
+| LNT003 | Deeply Nested Code (depth >3) | Complexity | Warning |
+| LNT004 | Magic Number | CodeSmell | Info |
+| LNT005 | God Class (>10 members) | Maintainability | Warning |
+| LNT006 | Unused Private Member | DeadCode | Info |
+| LNT007 | Empty Catch Block | ErrorHandling | Warning |
+| LNT008 | Missing XML Documentation | Documentation | Info |
 
-### Duplication Detection
-
-| Rule ID  | Description                                 | Category      | Default Severity |
-|----------|---------------------------------------------|---------------|------------------|
-| LNT100   | Code Duplication (whole-file, sub-block)    | Duplication   | Warning          |
-
-### Functional/Monad Detection (language-ext)
-
-| Rule ID  | Description                                 | Category      | Default Severity |
-|----------|---------------------------------------------|---------------|------------------|
-| LNT200   | Nullable → Option<T> suggestion             | Functional    | Info             |
-| LNT201   | Try/Catch → Either<L,R> suggestion          | Functional    | Info             |
-| LNT202   | Sequential Validation → Validation<T>       | Functional    | Info             |
-
-All rules are implemented in the AnalyzerEngine and surfaced via Roslyn diagnostics.
-
-
-## Configuration (.editorconfig)
+## Configuration with EditorConfig
 
 The analyzer respects `.editorconfig` files for per-project or per-file rule configuration.
 
@@ -107,7 +90,6 @@ dotnet_diagnostic.LNT002.severity = none  # Many parameters OK in test cases
 dotnet_diagnostic.LNT005.severity = none  # Large test fixtures OK
 ```
 
-
 ## Severity Levels
 
 | Severity | Meaning | Build Impact |
@@ -117,7 +99,6 @@ dotnet_diagnostic.LNT005.severity = none  # Large test fixtures OK
 | `suggestion` (or `info`) | Informational hint | ℹ️ IDE hint only |
 | `silent` | Hidden from output | (Not visible) |
 | `none` | Rule disabled | (Suppressed) |
-
 
 ## IDE Integration
 
@@ -135,7 +116,6 @@ dotnet_diagnostic.LNT005.severity = none  # Large test fixtures OK
 - Diagnostics appear in Problems panel
 - Same hover/navigation experience as Visual Studio
 
-
 ## Generated Code Exclusion
 
 The analyzer automatically skips files matching these patterns:
@@ -147,13 +127,11 @@ The analyzer automatically skips files matching these patterns:
 
 **No configuration required** - these are excluded by default.
 
-
 ## Performance
 
 - **Build Overhead**: <2s for typical 100-file solution (<10% overhead)
 - **Concurrent Execution**: Enabled for parallel analysis across files
 - **Incremental Builds**: Only changed files are re-analyzed
-
 
 ## Troubleshooting
 
@@ -187,7 +165,6 @@ If you see `LNT999: Internal Analyzer Error`, this indicates a bug in the analyz
 2. Capture the code that triggered the error
 3. Report to: [GitHub Issues](https://github.com/alexm15/Lintelligent/issues)
 
-
 ## FAQ
 
 **Q: Can I use this analyzer in CI/CD pipelines?**  
@@ -211,25 +188,14 @@ A: Yes! The analyzer targets .NET Standard 2.0 and works with:
 - .NET Framework 4.6.1+
 - .NET Core 2.0+
 
-
 ## Additional Resources
 
-- [Rule Documentation](../../specs/005-core-rule-library/rules-documentation.md) - Detailed rule descriptions
-- [Feature Specification](../../specs/019-roslyn-analyzer-bridge/spec.md) 
-- [Technical implementation details](../../specs/019-roslyn-analyzer-bridge/plan.md)
-- [Lintelligent CLI](../Lintelligent.Cli/README.md)
-
+- [Rule Documentation](../../005-core-rule-library/rules-documentation.md) - Detailed rule descriptions
+- [Feature Specification](./FEATURE_SPEC.md) - Technical implementation details
+- [Lintelligent CLI](../../../README.md) - Full analysis suite
 
 ## Support
 
 For issues or questions:
 - GitHub: [Lintelligent Issues](https://github.com/alexm15/Lintelligent/issues)
-- Documentation: [specs/019-roslyn-analyzer-bridge/](../../specs/019-roslyn-analyzer-bridge/)
-
-
-
-## License
-
-MIT License. Free and open source—no restrictions on commercial or personal use.
-
-See [LICENSE](../../LICENSE) for details.
+- Documentation: [specs/019-roslyn-analyzer-bridge/](.)

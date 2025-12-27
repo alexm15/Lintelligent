@@ -6,48 +6,15 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Build Status](https://github.com/alexm15/Lintelligent/actions/workflows/ci.yml/badge.svg)](https://github.com/alexm15/Lintelligent/actions)
 
-A static code analysis CLI tool for C# projects that detects code quality issues and provides actionable insights.
+Lintelligent is a modular static analysis toolkit for C#/.NET projects, featuring analyzers, code-fixes, a powerful CLI, and flexible reporting. All major components are open-source under MIT, with optional commercial licensing for advanced code-fix features.
 
-## Features
+---
 
+## Major Components
 
-## Licensing
-- Free features: MIT License (see LICENSE)
+### 1. Lintelligent.Analyzers
 
-## Repository Structure
-
-```
-src/
-    Lintelligent.Analyzers/      # Free, MIT
-    Lintelligent.CodeFixes/      # Pro, license required
-    Lintelligent.Cli/            # Free, MIT
-    Lintelligent.Reporting/      # Free, MIT
-docs/
-LICENSE
-LICENSE-PRO.md
-README.md
-.github/
-    workflows/
-```
-
-## Support
-- Community: GitHub Discussions
-
-## Installation
-
-### CLI Tool
-
-```bash
-dotnet build
-```
-
-### Roslyn Analyzer (NuGet Package)
-
-For instant IDE feedback and build-time analysis:
-
-```bash
-dotnet add package Lintelligent.Analyzers
-```
+Roslyn-based analyzers for code quality, maintainability, and duplication. Rules are grouped by category:
 
 The Roslyn analyzer automatically integrates with your IDE (Visual Studio, Rider, VS Code) and provides:
 - Real-time diagnostics as you type
@@ -58,52 +25,146 @@ The Roslyn analyzer automatically integrates with your IDE (Visual Studio, Rider
 
 See the [Analyzer Guide](./specs/019-roslyn-analyzer-bridge/ANALYZER_GUIDE.md) for configuration options.
 
+**Rule Categories & Examples:**
+
+| Category           | Rule Name                | ID      | Description                                 |
+|--------------------|-------------------------|---------|---------------------------------------------|
+| Maintainability    | LongMethodRule          | LNT001  | Detects methods exceeding length threshold  |
+| Duplication        | CodeDuplicationRule     | LNT100  | Finds whole-file and sub-block duplications |
+| Design             | NoPublicFieldsRule      | LNT002  | Flags classes with public fields            |
+| Performance        | InefficientLinqRule     | PERF001 | Detects inefficient LINQ usage              |
+| Security           | (Planned)               |         |                                            |
+| Style              | (Planned)               |         |                                            |
+
+Rules are extensible—implement `IAnalyzerRule` to add your own.
+
+---
+
+### 2. Lintelligent.Cli
+
+Cross-platform CLI for scanning projects, solutions, or files. Key features:
+
+- **Scan**: Analyze codebase for diagnostics
+- **Severity Filtering**: `--severity Error,Warning,Info`
+- **Grouping**: `--group-by category` for organized reports
+- **Output Formats**: Console, JSON (via Reporting)
+- **Performance**: Streaming, memory-efficient for large repos
+- **Integration**: Easily embed via `CliApplicationBuilder`
+
+Example usage:
+```bash
+dotnet run -- scan /path/to/project --severity Error,Warning --group-by category
+```
+
+---
+
+### 3. Lintelligent.CodeFixes
+
+Roslyn CodeFixProviders for automated code fixes. Features:
+
+- **Automated Fixes**: Suggest and apply fixes for supported diagnostics
+- **Fix-All Support**: Document/project/solution-wide fixes
+- **Rule Coverage**:
+    - `LongMethodRule`: No code-fix (informational)
+    - `NullableToOptionRule`: Code-fix available (convert nullable to Option<T>)
+    - (Add more as rules evolve)
+- **License**: Commercial license required for advanced code-fix features
+
+---
+
+### 4. Lintelligent.Reporting
+
+Flexible reporting for CLI and integrations. Features:
+
+- **Supported Formats**:
+    - Console (default)
+    - JSON (`--output json`)
+- **Extensible**: Add custom formatters via `IReportFormatter`
+- **Output Configuration**: Control verbosity, grouping, and output destination
+
+---
+
+## Repository Structure
+
+```
+src/
+    Lintelligent.Analyzers/      # Roslyn analyzers
+    Lintelligent.Cli/            # CLI application
+    Lintelligent.CodeFixes/      # Code-fix providers
+    Lintelligent.Reporting/      # Reporting/formatters
+tests/
+    Lintelligent.AnalyzerEngine.Tests/
+    Lintelligent.Cli.Tests/
+LICENSE
+LICENSE-PRO.md
+README.md
+.github/
+    workflows/
+```
+
+---
+
+## Installation
+
+### CLI Tool
+```bash
+dotnet build
+```
+
+### Roslyn Analyzer (NuGet)
+```bash
+dotnet add package Lintelligent.Analyzers
+```
+
+### CodeFixes (Pro)
+```bash
+dotnet add package Lintelligent.CodeFixes
+# Requires license for advanced features
+```
+
+---
+
 ## Quick Start
 
-### Basic Usage
-
-Analyze a C# project or file:
-
+Analyze a project:
 ```bash
 cd src/Lintelligent.Cli
 dotnet run -- scan /path/to/project
 ```
 
-Analyze with severity filtering (show only errors):
-
-```bash
-dotnet run -- scan /path/to/project --severity Error
-```
-
-Analyze with multiple severity levels:
-
+Filter by severity:
 ```bash
 dotnet run -- scan /path/to/project --severity Error,Warning
 ```
 
-Group results by category for organized reports:
-
+Group by category:
 ```bash
 dotnet run -- scan /path/to/project --group-by category
 ```
 
-Combine filtering and grouping:
-
+Output as JSON:
 ```bash
-dotnet run -- scan /path/to/project --severity Error,Warning --group-by category
+dotnet run -- scan /path/to/project --output json
 ```
 
-Analyze a single file:
+---
 
-```bash
-dotnet run -- scan /path/to/file.cs
-```
+## Extending & Contributing
 
-Detect code duplication (whole files and sub-blocks within methods):
+Lintelligent is designed for extensibility. Add new rules, formatters, or CLI commands by following the architecture in each component. See CONTRIBUTING.md for guidelines.
 
-```bash
-dotnet run -- scan /path/to/project  # LNT100 warnings show duplicated code
-```
+---
+
+## License
+
+MIT License for analyzers, CLI, and reporting. Commercial license required for advanced code-fix features (see LICENSE-PRO.md).
+
+---
+
+## Support
+
+- Community: [GitHub Discussions](https://github.com/alexm15/Lintelligent/discussions)
+
 
 ### Code Duplication Detection
 
@@ -612,4 +673,4 @@ Designed for large codebases:
 [Add license information]
 
 ## Support
-For issues, questions, or contributions, please [open an issue](https://github.com/yourorg/lintelligent/issues).
+For issues, questions, or contributions, please [open an issue](https://github.com/alexm15/lintelligent/issues).

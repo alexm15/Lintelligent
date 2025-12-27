@@ -11,7 +11,7 @@ public static class RuleDescriptorFactory
 {
 #pragma warning disable S1075 // URIs should not be hardcoded - These are documentation links
     private const string BaseHelpUrl =
-        "https://github.com/YourOrg/Lintelligent/blob/main/specs/005-core-rule-library/rules-documentation.md";
+        "https://github.com/alexm15/Lintelligent/blob/main/specs/005-core-rule-library/rules-documentation.md";
 
     private static readonly Dictionary<string, string> RuleAnchors = new(StringComparer.Ordinal)
     {

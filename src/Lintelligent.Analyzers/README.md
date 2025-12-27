@@ -1,12 +1,235 @@
-# Lintelligent Analyzers
 
-This package provides Roslyn analyzers for functional programming patterns in C#.
+# Lintelligent.Analyzers
+
+Roslyn analyzer integration for Lintelligent code quality rules, duplication detection, and functional/monad diagnostics. Provides instant feedback in your IDE and during builds—no extra tools required.
+
+
+## Installation
+
+Install from NuGet:
+
+```bash
+dotnet add package Lintelligent.Analyzers
+```
+
+- **Package ID:** Lintelligent.Analyzers
+- **Targets:** .NET Standard 2.0+ (works with .NET Framework 4.6.1+, .NET Core 2.0+, .NET 6/7/8/9/10+)
+- **Type:** DevelopmentDependency (analyzers only, no runtime impact)
+- **Depends on:** Lintelligent.AnalyzerEngine (bundled in package)
+
+
+## Supported Rules & Diagnostics
+
+### Core Rule Library
+
+| Rule ID  | Name/Description                | Category         | Default Severity |
+|----------|---------------------------------|------------------|------------------|
+| LNT001   | Long Method (>20 statements)    | Maintainability  | Warning          |
+| LNT002   | Too Many Parameters (>5)        | Maintainability  | Warning          |
+| LNT003   | Deeply Nested Code (depth >3)   | Complexity       | Warning          |
+| LNT004   | Magic Number                    | CodeSmell        | Info             |
+| LNT005   | God Class (>10 members)         | Maintainability  | Warning          |
+| LNT006   | Unused Private Member           | DeadCode         | Info             |
+| LNT007   | Empty Catch Block               | ErrorHandling    | Warning          |
+| LNT008   | Missing XML Documentation       | Documentation    | Info             |
+
+### Duplication Detection
+
+| Rule ID  | Description                                 | Category      | Default Severity |
+|----------|---------------------------------------------|---------------|------------------|
+| LNT100   | Code Duplication (whole-file, sub-block)    | Duplication   | Warning          |
+
+### Functional/Monad Detection (language-ext)
+
+| Rule ID  | Description                                 | Category      | Default Severity |
+|----------|---------------------------------------------|---------------|------------------|
+| LNT200   | Nullable → Option<T> suggestion             | Functional    | Info             |
+| LNT201   | Try/Catch → Either<L,R> suggestion          | Functional    | Info             |
+| LNT202   | Sequential Validation → Validation<T>       | Functional    | Info             |
+
+All rules are implemented in the AnalyzerEngine and surfaced via Roslyn diagnostics.
+
+
+## Configuration (.editorconfig)
+
+The analyzer respects `.editorconfig` files for per-project or per-file rule configuration.
+
+### Suppress a Rule Entirely
+
+```ini
+# .editorconfig
+root = true
+
+[*.cs]
+# Disable magic number detection
+dotnet_diagnostic.LNT004.severity = none
+```
+
+### Change Severity Levels
+
+```ini
+[*.cs]
+# Make long methods an error (build fails)
+dotnet_diagnostic.LNT001.severity = error
+
+# Downgrade unused members to suggestion
+dotnet_diagnostic.LNT006.severity = suggestion
+
+# Keep missing XML docs as info
+dotnet_diagnostic.LNT008.severity = info
+```
+
+### Suppress for Specific Files
+
+```ini
+# Suppress all rules in generated code
+[**/Generated/*.cs]
+dotnet_diagnostic.LNT001.severity = none
+dotnet_diagnostic.LNT002.severity = none
+dotnet_diagnostic.LNT003.severity = none
+dotnet_diagnostic.LNT004.severity = none
+dotnet_diagnostic.LNT005.severity = none
+dotnet_diagnostic.LNT006.severity = none
+dotnet_diagnostic.LNT007.severity = none
+dotnet_diagnostic.LNT008.severity = none
+```
+
+### Suppress for Test Projects
+
+```ini
+# tests/.editorconfig
+root = true
+
+[*.cs]
+# Relax rules in test code
+dotnet_diagnostic.LNT001.severity = none  # Long methods OK in tests
+dotnet_diagnostic.LNT002.severity = none  # Many parameters OK in test cases
+dotnet_diagnostic.LNT005.severity = none  # Large test fixtures OK
+```
+
+
+## Severity Levels
+
+| Severity | Meaning | Build Impact |
+|----------|---------|--------------|
+| `error` | Violation breaks build | ❌ Build fails |
+| `warning` | Reported but build succeeds | ⚠️ Warning shown |
+| `suggestion` (or `info`) | Informational hint | ℹ️ IDE hint only |
+| `silent` | Hidden from output | (Not visible) |
+| `none` | Rule disabled | (Suppressed) |
+
+
+## IDE Integration
+
+### Visual Studio / Rider
+
+- Diagnostics appear as squiggly underlines in the editor
+- Severity determines underline color (red=error, yellow=warning, blue=info)
+- Hover over diagnostic to see full message and help link
+- Press **F8** to jump to next diagnostic
+- Click help link in tooltip to view rule documentation
+
+### VS Code
+
+- Install **C# Dev Kit** extension for analyzer support
+- Diagnostics appear in Problems panel
+- Same hover/navigation experience as Visual Studio
+
+
+## Generated Code Exclusion
+
+The analyzer automatically skips files matching these patterns:
+
+- `*.g.cs` (generated code)
+- `*.designer.cs` (designer files)
+- `*.Designer.cs` (designer files)
+- Files with `<auto-generated>` comment header
+
+**No configuration required** - these are excluded by default.
+
+
+## Performance
+
+- **Build Overhead**: <2s for typical 100-file solution (<10% overhead)
+- **Concurrent Execution**: Enabled for parallel analysis across files
+- **Incremental Builds**: Only changed files are re-analyzed
+
+
+## Troubleshooting
+
+### Diagnostics Not Appearing
+
+1. **Verify Installation**:
+   ```bash
+   dotnet list package
+   ```
+   Should show `Lintelligent.Analyzers 1.0.0`
+
+2. **Check EditorConfig**:
+   - Ensure rule not suppressed with `severity = none`
+   - Check for `.editorconfig` files in parent directories
+
+3. **Rebuild Solution**:
+   ```bash
+   dotnet clean
+   dotnet build
+   ```
+
+4. **Verify Analyzer Loaded** (Visual Studio):
+   - Project → Properties → Code Analysis → Installed Analyzers
+   - Should list "Lintelligent.Analyzers"
+
+### Internal Errors (LNT999)
+
+If you see `LNT999: Internal Analyzer Error`, this indicates a bug in the analyzer. Please:
+
+1. Note the rule ID mentioned in the error message
+2. Capture the code that triggered the error
+3. Report to: [GitHub Issues](https://github.com/alexm15/Lintelligent/issues)
+
+
+## FAQ
+
+**Q: Can I use this analyzer in CI/CD pipelines?**  
+A: Yes! The analyzer runs during `dotnet build`, so it works in any CI environment. Use `TreatWarningsAsErrors` to fail builds on analyzer warnings.
+
+**Q: Does this replace the Lintelligent CLI?**  
+A: No, they complement each other. The analyzer provides instant IDE feedback, while the CLI offers detailed reports, historical analysis, and batch processing.
+
+**Q: How do I update to a newer version?**  
+A:
+```bash
+dotnet add package Lintelligent.Analyzers --version 1.x.x
+```
+
+**Q: Can I create custom rules?**  
+A: Not yet. Custom rule extensibility is planned for a future release.
+
+**Q: Does this work with .NET Framework projects?**  
+A: Yes! The analyzer targets .NET Standard 2.0 and works with:
+- .NET 6, 7, 8, 9, 10+
+- .NET Framework 4.6.1+
+- .NET Core 2.0+
+
+
+## Additional Resources
+
+- [Rule Documentation](../../specs/005-core-rule-library/rules-documentation.md) - Detailed rule descriptions
+- [Feature Specification](../../specs/019-roslyn-analyzer-bridge/spec.md) 
+- [Technical implementation details](../../specs/019-roslyn-analyzer-bridge/plan.md)
+- [Lintelligent CLI](../Lintelligent.Cli/README.md)
+
+
+## Support
+
+For issues or questions:
+- GitHub: [Lintelligent Issues](https://github.com/alexm15/Lintelligent/issues)
+- Documentation: [specs/019-roslyn-analyzer-bridge/](../../specs/019-roslyn-analyzer-bridge/)
+
+
 
 ## License
 
-This package is licensed under the MIT License. You are free to use, modify, and distribute it in accordance with the terms of the LICENSE file in the root of the repository.
-
-- Free and open source (MIT)
-- No restrictions on commercial or personal use
+MIT License. Free and open source—no restrictions on commercial or personal use.
 
 See [LICENSE](../../LICENSE) for details.

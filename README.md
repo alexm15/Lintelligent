@@ -6,68 +6,16 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Build Status](https://github.com/alexm15/Lintelligent/actions/workflows/ci.yml/badge.svg)](https://github.com/alexm15/Lintelligent/actions)
 
-A static code analysis CLI tool for C# projects that detects code quality issues and provides actionable insights.
+Lintelligent is a modular static analysis toolkit for C#/.NET projects, featuring analyzers, code-fixes, a powerful CLI, and flexible reporting. All major components are open-source under MIT, with optional commercial licensing for advanced code-fix features.
 
-## Features
+---
+
+## Major Components
 
 
-## Free vs Pro
+### 1. Lintelligent.Analyzers ([see README](src/Lintelligent.Analyzers/README.md))
 
-| Feature                | Free (MIT) | Pro (License) |
-|------------------------|:----------:|:-------------:|
-| Diagnostics            |     ✅      |      ✅       |
-| Code Fixes             |     ❌      |      ✅       |
-| CLI                    |     ✅      |      ✅       |
-| Intelligence Dashboard |     ❌      |      ✅       |
-
-## How to Upgrade to Pro
-1. Purchase a license at https://lintelligent.dev/pricing
-2. Enter your license key in your IDE or set the environment variable `LINTELLIGENT_LICENSE_KEY`
-3. Pro features (code fixes, dashboard) will be enabled automatically
-
-## Licensing
-- Free features: MIT License (see LICENSE)
-- Pro features: Source-available, commercial use requires license (see LICENSE-PRO.md)
-
-## Repository Structure
-
-```
-src/
-    Lintelligent.Analyzers/      # Free, MIT
-    Lintelligent.CodeFixes/      # Pro, license required
-    Lintelligent.Cli/            # Free, MIT
-    Lintelligent.Reporting/      # Free, MIT
-docs/
-    MONETIZATION.md
-    POC-CODE-FIXES.md
-LICENSE
-LICENSE-PRO.md
-README.md
-.github/
-    ISSUE_TEMPLATE/
-    workflows/
-    FUNDING.yml
-```
-
-## Support
-- Community: GitHub Discussions
-- Pro: Priority support via email/Discord (see pricing page)
-
-## Installation
-
-### CLI Tool
-
-```bash
-dotnet build
-```
-
-### Roslyn Analyzer (NuGet Package)
-
-For instant IDE feedback and build-time analysis:
-
-```bash
-dotnet add package Lintelligent.Analyzers
-```
+Roslyn-based analyzers for code quality, maintainability, and duplication. Rules are grouped by category:
 
 The Roslyn analyzer automatically integrates with your IDE (Visual Studio, Rider, VS Code) and provides:
 - Real-time diagnostics as you type
@@ -78,52 +26,150 @@ The Roslyn analyzer automatically integrates with your IDE (Visual Studio, Rider
 
 See the [Analyzer Guide](./specs/019-roslyn-analyzer-bridge/ANALYZER_GUIDE.md) for configuration options.
 
+**Rule Categories & Examples:**
+
+| Category           | Rule Name                | ID      | Description                                 |
+|--------------------|-------------------------|---------|---------------------------------------------|
+| Maintainability    | LongMethodRule          | LNT001  | Detects methods exceeding length threshold  |
+| Duplication        | CodeDuplicationRule     | LNT100  | Finds whole-file and sub-block duplications |
+| Design             | NoPublicFieldsRule      | LNT002  | Flags classes with public fields            |
+| Performance        | InefficientLinqRule     | PERF001 | Detects inefficient LINQ usage              |
+| Security           | (Planned)               |         |                                            |
+| Style              | (Planned)               |         |                                            |
+
+Rules are extensible—implement `IAnalyzerRule` to add your own.
+
+---
+
+
+### 2. Lintelligent.Cli ([see README](src/Lintelligent.Cli/README.md))
+
+Cross-platform CLI for scanning projects, solutions, or files. Key features:
+
+- **Scan**: Analyze codebase for diagnostics
+- **Severity Filtering**: `--severity Error,Warning,Info`
+- **Grouping**: `--group-by category` for organized reports
+- **Output Formats**: Console, JSON (via Reporting)
+- **Performance**: Streaming, memory-efficient for large repos
+- **Integration**: Easily embed via `CliApplicationBuilder`
+
+Example usage:
+```bash
+dotnet run -- scan /path/to/project --severity Error,Warning --group-by category
+```
+
+---
+
+
+### 3. Lintelligent.CodeFixes ([see README](src/Lintelligent.CodeFixes/README.md))
+
+Roslyn CodeFixProviders for automated code fixes. Features:
+
+- **Automated Fixes**: Suggest and apply fixes for supported diagnostics
+- **Fix-All Support**: Document/project/solution-wide fixes
+- **Rule Coverage**:
+    - `LongMethodRule`: No code-fix (informational)
+    - `NullableToOptionRule`: Code-fix available (convert nullable to Option<T>)
+    - (Add more as rules evolve)
+- **License**: Commercial license required for advanced code-fix features
+
+---
+
+
+### 4. Lintelligent.Reporting ([see README](src/Lintelligent.Reporting/README.md))
+
+Flexible reporting for CLI and integrations. Features:
+
+- **Supported Formats**:
+    - Console (default)
+    - JSON (`--output json`)
+- **Extensible**: Add custom formatters via `IReportFormatter`
+- **Output Configuration**: Control verbosity, grouping, and output destination
+
+---
+
+## Repository Structure
+
+```
+src/
+    Lintelligent.Analyzers/      # Roslyn analyzers ([README](src/Lintelligent.Analyzers/README.md))
+    Lintelligent.Cli/            # CLI application ([README](src/Lintelligent.Cli/README.md))
+    Lintelligent.CodeFixes/      # Code-fix providers ([README](src/Lintelligent.CodeFixes/README.md))
+    Lintelligent.Reporting/      # Reporting/formatters ([README](src/Lintelligent.Reporting/README.md))
+    Lintelligent.AnalyzerEngine/ # Core analysis engine ([README](src/Lintelligent.AnalyzerEngine/README.md))
+tests/
+    Lintelligent.AnalyzerEngine.Tests/
+    Lintelligent.Cli.Tests/
+LICENSE
+LICENSE-PRO.md
+README.md
+.github/
+    workflows/
+```
+
+---
+
+## Installation
+
+### CLI Tool
+```bash
+dotnet build
+```
+
+### Roslyn Analyzer (NuGet)
+```bash
+dotnet add package Lintelligent.Analyzers
+```
+
+### CodeFixes (Pro)
+```bash
+dotnet add package Lintelligent.CodeFixes
+# Requires license for advanced features
+```
+
+---
+
 ## Quick Start
 
-### Basic Usage
-
-Analyze a C# project or file:
-
+Analyze a project:
 ```bash
 cd src/Lintelligent.Cli
 dotnet run -- scan /path/to/project
 ```
 
-Analyze with severity filtering (show only errors):
-
-```bash
-dotnet run -- scan /path/to/project --severity Error
-```
-
-Analyze with multiple severity levels:
-
+Filter by severity:
 ```bash
 dotnet run -- scan /path/to/project --severity Error,Warning
 ```
 
-Group results by category for organized reports:
-
+Group by category:
 ```bash
 dotnet run -- scan /path/to/project --group-by category
 ```
 
-Combine filtering and grouping:
-
+Output as JSON:
 ```bash
-dotnet run -- scan /path/to/project --severity Error,Warning --group-by category
+dotnet run -- scan /path/to/project --output json
 ```
 
-Analyze a single file:
+---
 
-```bash
-dotnet run -- scan /path/to/file.cs
-```
+## Extending & Contributing
 
-Detect code duplication (whole files and sub-blocks within methods):
+Lintelligent is designed for extensibility. Add new rules, formatters, or CLI commands by following the architecture in each component. See CONTRIBUTING.md for guidelines.
 
-```bash
-dotnet run -- scan /path/to/project  # LNT100 warnings show duplicated code
-```
+---
+
+## License
+
+MIT License for analyzers, CLI, and reporting. Commercial license required for advanced code-fix features (see LICENSE-PRO.md).
+
+---
+
+## Support
+
+- Community: [GitHub Discussions](https://github.com/alexm15/Lintelligent/discussions)
+
 
 ### Code Duplication Detection
 
@@ -313,275 +359,6 @@ Lintelligent uses the **Strategy Pattern** to decouple code analysis from code s
 - **FilteringCodeProvider**: Decorator for selective analysis (predicate-based filtering)
 - **AnalyzerManager**: Manages registered analyzer rules
 - **IAnalyzerRule**: Interface for implementing custom analysis rules
-
-## Migration Guide
-
-### From v1.x to v2.0 (Enhanced Rule Contract)
-
-**Version 2.0 introduces breaking changes to the IAnalyzerRule interface.** This migration guide helps you update your custom rules and usage code.
-
-#### Breaking Change 1: Analyze() Return Type
-
-**Before (v1.x)**:
-```csharp
-public DiagnosticResult? Analyze(SyntaxTree tree)
-{
-    var violation = FindFirstViolation(tree);
-    return violation != null ? CreateResult(violation) : null;
-}
-```
-
-**After (v2.0)**:
-```csharp
-public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)
-{
-    var violations = FindAllViolations(tree); // Find ALL, not just first
-    
-    foreach (var violation in violations)
-    {
-        yield return CreateResult(violation);
-    }
-    
-    // Return empty collection instead of null
-    // No explicit return needed - method naturally returns empty if no violations
-}
-```
-
-**Migration Steps**:
-1. Change return type from `DiagnosticResult?` to `IEnumerable<DiagnosticResult>`
-2. Use `yield return` for each finding (enables lazy evaluation)
-3. Find **all** violations, not just the first one
-4. Remove null returns - empty collection is implicit
-
-#### Breaking Change 2: New Required Properties
-
-**Before (v1.x)**:
-```csharp
-public class MyRule : IAnalyzerRule
-{
-    public string Id => "MY001";
-    public string Description => "My custom rule";
-    
-    public DiagnosticResult? Analyze(SyntaxTree tree) { /* ... */ }
-}
-```
-
-**After (v2.0)**:
-```csharp
-using Lintelligent.AnalyzerEngine.Abstractions;
-using Lintelligent.AnalyzerEngine.Results;
-
-public class MyRule : IAnalyzerRule
-{
-    public string Id => "MY001";
-    public string Description => "My custom rule";
-    public Severity Severity => Severity.Warning;  // NEW - Required
-    public string Category => DiagnosticCategories.Maintainability;  // NEW - Required
-    
-    public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree) { /* ... */ }
-}
-```
-
-**Migration Steps**:
-1. Add `Severity` property - choose from `Error`, `Warning`, or `Info`
-2. Add `Category` property - use `DiagnosticCategories` constants or custom string
-3. Update `Analyze()` signature per Breaking Change 1
-
-**Severity Guidelines**:
-- `Severity.Error`: Critical bugs, security vulnerabilities, correctness issues that **must** be fixed
-- `Severity.Warning`: Code smells, maintainability problems, **should** be fixed but non-blocking
-- `Severity.Info`: Style suggestions, optional improvements, informational only
-
-**Category Options**:
-- `DiagnosticCategories.Maintainability` - Code structure, readability, complexity
-- `DiagnosticCategories.Performance` - Performance issues, inefficiencies
-- `DiagnosticCategories.Security` - Security vulnerabilities, risks
-- `DiagnosticCategories.Style` - Formatting, naming conventions
-- `DiagnosticCategories.Design` - Architecture, design patterns
-- `DiagnosticCategories.General` - General code quality
-- Custom string: `"MyCustomCategory"` for domain-specific categorization
-
-#### Breaking Change 3: DiagnosticResult Constructor
-
-**Before (v1.x)**:
-```csharp
-yield return new DiagnosticResult(
-    tree.FilePath,
-    Id,
-    "Method is too long",
-    lineNumber
-);
-```
-
-**After (v2.0)**:
-```csharp
-yield return new DiagnosticResult(
-    tree.FilePath,
-    Id,
-    "Method is too long",
-    lineNumber,
-    Severity,      // NEW - Pass rule's severity
-    Category       // NEW - Pass rule's category
-);
-```
-
-**Migration Steps**:
-1. Add `Severity` parameter (pass `this.Severity`)
-2. Add `Category` parameter (pass `this.Category`)
-
-#### Complete Migration Example
-
-**Before (v1.x)**:
-```csharp
-public class LongMethodRule : IAnalyzerRule
-{
-    public string Id => "LNT001";
-    public string Description => "Method exceeds recommended length";
-
-    public DiagnosticResult? Analyze(SyntaxTree tree)
-    {
-        var root = tree.GetRoot();
-        var longMethod = root.DescendantNodes()
-            .OfType<MethodDeclarationSyntax>()
-            .FirstOrDefault(m => m.Body?.Statements.Count > 20);
-
-        if (longMethod != null)
-        {
-            var line = longMethod.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-            return new DiagnosticResult(tree.FilePath, Id, "Method is too long", line);
-        }
-
-        return null;
-    }
-}
-```
-
-**After (v2.0)**:
-```csharp
-using Lintelligent.AnalyzerEngine.Abstractions;
-using Lintelligent.AnalyzerEngine.Results;
-
-public class LongMethodRule : IAnalyzerRule
-{
-    public string Id => "LNT001";
-    public string Description => "Method exceeds recommended length";
-    public Severity Severity => Severity.Warning;                    // ADDED
-    public string Category => DiagnosticCategories.Maintainability;  // ADDED
-
-    public IEnumerable<DiagnosticResult> Analyze(SyntaxTree tree)    // CHANGED return type
-    {
-        var root = tree.GetRoot();
-        var longMethods = root.DescendantNodes()                     // CHANGED to find ALL
-            .OfType<MethodDeclarationSyntax>()
-            .Where(m => m.Body?.Statements.Count > 20);              // CHANGED to Where()
-
-        foreach (var method in longMethods)                          // ADDED loop
-        {
-            var line = method.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-            yield return new DiagnosticResult(                       // CHANGED to yield return
-                tree.FilePath,
-                Id,
-                "Method is too long",
-                line,
-                Severity,                                            // ADDED
-                Category                                             // ADDED
-            );
-        }
-        // No explicit return - empty collection is implicit
-    }
-}
-```
-
-#### New CLI Features
-
-**Severity Filtering**:
-```bash
-# Show only errors
-dotnet run -- scan /path/to/project --severity Error
-
-# Show errors and warnings
-dotnet run -- scan /path/to/project --severity Error,Warning
-
-# Show all (default behavior)
-dotnet run -- scan /path/to/project --severity Error,Warning,Info
-```
-
-**Category Grouping**:
-```bash
-# Group findings by category in reports
-dotnet run -- scan /path/to/project --group-by category
-
-# Output organized with headers like:
-# ## Maintainability
-# LNT001: Method is too long (Controller.cs:45)
-# 
-# ## Performance
-# PERF001: Inefficient LINQ usage (Service.cs:102)
-```
-
-**Combined**:
-```bash
-# Show only errors, grouped by category
-dotnet run -- scan /path/to/project --severity Error --group-by category
-```
-
-#### Why This Change?
-
-1. **Multiple Findings**: Old API (`DiagnosticResult?`) could only return one finding or null, missing subsequent violations in the same file
-2. **Severity Filtering**: Users needed a way to focus on critical issues (errors) vs informational messages
-3. **Better Reporting**: Categories enable organized reports, metrics by type, team-specific workflows
-4. **Constitutional Alignment**: Principle III requires comprehensive findings and metadata
-
-#### Migration Checklist
-
-- [ ] Update all custom IAnalyzerRule implementations:
-  - [ ] Change `Analyze()` return type to `IEnumerable<DiagnosticResult>`
-  - [ ] Add `Severity` property
-  - [ ] Add `Category` property
-  - [ ] Use `yield return` for findings
-  - [ ] Find ALL violations, not just first
-  - [ ] Pass severity and category to DiagnosticResult constructor
-- [ ] Update tests that expect single results to handle collections
-- [ ] Update code that calls `Analyze()` to enumerate results
-- [ ] Test with `--severity` and `--group-by` CLI options
-- [ ] Review [CHANGELOG.md](CHANGELOG.md) for full list of changes
-
-### From v1.x (Direct File System Access)
-
-**Old API** (before IO boundary refactor):
-```csharp
-var engine = new AnalyzerEngine(manager);
-var results = engine.Analyze("/path/to/project"); // REMOVED
-```
-
-**New API** (after IO boundary refactor):
-```csharp
-var provider = new FileSystemCodeProvider("/path/to/project");
-var engine = new AnalyzerEngine(manager);
-var results = engine.Analyze(provider.GetSyntaxTrees()); // NEW
-```
-
-### Key Changes
-
-1. **AnalyzerEngine.Analyze() signature changed**:
-   - **Before**: `Analyze(string path)` - accepted file path
-   - **After**: `Analyze(IEnumerable<SyntaxTree> syntaxTrees)` - accepts parsed trees
-
-2. **File system access moved to CLI layer**:
-   - **Before**: AnalyzerEngine directly read files
-   - **After**: FileSystemCodeProvider handles IO, AnalyzerEngine processes trees
-
-3. **Testing is now in-memory**:
-   - **Before**: Tests created temporary files on disk
-   - **After**: Tests use `CSharpSyntaxTree.ParseText()` directly
-
-### Benefits of Migration
-
-✅ **50x faster tests** - no disk IO overhead  
-✅ **Isolated tests** - no file cleanup, no race conditions  
-✅ **IDE integration ready** - analyze unsaved buffers  
-✅ **Constitutional compliance** - layered architecture enforced  
-✅ **Same performance** - CLI usage has ±5% execution time  
 
 ## Creating Custom Code Providers
 
@@ -876,13 +653,6 @@ dotnet test tests/Lintelligent.AnalyzerEngine.Tests
 dotnet test tests/Lintelligent.Cli.Tests
 ```
 
-### Current Test Coverage
-
-- **Total Tests**: 84 (100% passing)
-- **AnalyzerEngine.Tests**: 62 tests (core engine, providers, integration, performance, validation)
-- **Cli.Tests**: 22 tests (CLI commands, file system integration, filtering, grouping)
-- **Code Coverage**: ≥95% for rule contract, ≥90% for AnalyzerEngine core
-
 ## Performance
 
 Designed for large codebases:
@@ -891,32 +661,6 @@ Designed for large codebases:
 - ✅ **Lazy evaluation**: Syntax trees parsed on-demand during enumeration
 - ✅ **Memory efficient**: Tested with 10,000+ file projects, no memory exhaustion
 - ✅ **Fast execution**: ±5% performance vs pre-refactor implementation
-
-## Project Structure
-
-```
-Lintelligent/
-├── src/
-│   ├── Lintelligent.AnalyzerEngine/    # Core analysis engine (no IO dependencies)
-│   │   ├── Abstractions/               # ICodeProvider interface
-│   │   ├── Analysis/                   # AnalyzerEngine, AnalyzerManager
-│   │   ├── Rules/                      # IAnalyzerRule, LongMethodRule
-│   │   └── Results/                    # DiagnosticResult
-│   ├── Lintelligent.Cli/               # CLI application (handles IO)
-│   │   ├── Commands/                   # ScanCommand
-│   │   └── Providers/                  # FileSystemCodeProvider
-│   └── Lintelligent.Reporting/         # Report generation
-└── tests/
-    ├── Lintelligent.AnalyzerEngine.Tests/
-    │   ├── TestUtilities/              # InMemoryCodeProvider, FilteringCodeProvider
-    │   ├── AnalyzerEngineTests.cs
-    │   ├── InMemoryCodeProviderTests.cs
-    │   ├── FilteringCodeProviderTests.cs
-    │   └── CodeProviderIntegrationTests.cs
-    └── Lintelligent.Cli.Tests/
-        ├── Providers/                  # FileSystemCodeProviderTests
-        └── ScanCommandTests.cs
-```
 
 ## Contributing
 
@@ -934,5 +678,4 @@ Lintelligent/
 [Add license information]
 
 ## Support
-
-For issues, questions, or contributions, please [open an issue](https://github.com/yourorg/lintelligent/issues).
+For issues, questions, or contributions, please [open an issue](https://github.com/alexm15/Lintelligent/issues).

@@ -163,7 +163,7 @@ If you see `LNT999: Internal Analyzer Error`, this indicates a bug in the analyz
 
 1. Note the rule ID mentioned in the error message
 2. Capture the code that triggered the error
-3. Report to: [GitHub Issues](https://github.com/YourOrg/Lintelligent/issues)
+3. Report to: [GitHub Issues](https://github.com/alexm15/Lintelligent/issues)
 
 ## FAQ
 
@@ -197,5 +197,5 @@ A: Yes! The analyzer targets .NET Standard 2.0 and works with:
 ## Support
 
 For issues or questions:
-- GitHub: [Lintelligent Issues](https://github.com/YourOrg/Lintelligent/issues)
+- GitHub: [Lintelligent Issues](https://github.com/alexm15/Lintelligent/issues)
 - Documentation: [specs/019-roslyn-analyzer-bridge/](.)

@@ -125,13 +125,13 @@ dotnet build  # Diagnostics appear automatically
 
 ## Documentation
 
-- [Analyzer Guide](https://github.com/YourOrg/Lintelligent/blob/main/specs/019-roslyn-analyzer-bridge/ANALYZER_GUIDE.md) - Configuration and usage
-- [Rule Documentation](https://github.com/YourOrg/Lintelligent/blob/main/specs/005-core-rule-library/rules-documentation.md) - Detailed rule descriptions
-- [Feature Specification](https://github.com/YourOrg/Lintelligent/blob/main/specs/019-roslyn-analyzer-bridge/FEATURE_SPEC.md) - Technical implementation
+- [Analyzer Guide](https://github.com/alexm15/Lintelligent/blob/main/specs/019-roslyn-analyzer-bridge/ANALYZER_GUIDE.md) - Configuration and usage
+- [Rule Documentation](https://github.com/alexm15/Lintelligent/blob/main/specs/005-core-rule-library/rules-documentation.md) - Detailed rule descriptions
+- [Feature Specification](https://github.com/alexm15/Lintelligent/blob/main/specs/019-roslyn-analyzer-bridge/spec.md) - Technical implementation
 
 ## Support
 
-- GitHub Issues: [Lintelligent/issues](https://github.com/YourOrg/Lintelligent/issues)
+- GitHub Issues: [Lintelligent/issues](https://github.com/alexm15/Lintelligent/issues)
 - Bug Reports: Label with `analyzer` tag
 - Feature Requests: Label with `enhancement` + `analyzer`
 

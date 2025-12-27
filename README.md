@@ -11,20 +11,6 @@ A static code analysis CLI tool for C# projects that detects code quality issues
 ## Features
 
 
-## Free vs Pro
-
-| Feature                | Free (MIT) | Pro (License) |
-|------------------------|:----------:|:-------------:|
-| Diagnostics            |     ✅      |      ✅       |
-| Code Fixes             |     ❌      |      ✅       |
-| CLI                    |     ✅      |      ✅       |
-| Intelligence Dashboard |     ❌      |      ✅       |
-
-## How to Upgrade to Pro
-1. Purchase a license at https://lintelligent.dev/pricing
-2. Enter your license key in your IDE or set the environment variable `LINTELLIGENT_LICENSE_KEY`
-3. Pro features (code fixes, dashboard) will be enabled automatically
-
 ## Licensing
 - Free features: MIT License (see LICENSE)
 

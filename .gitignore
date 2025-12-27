@@ -59,6 +59,7 @@ bld/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 docs/MONETIZATION.md
+docs/POC-CODE-FIXES.md
 *.trx
 *.coverage
 *.coveragexml

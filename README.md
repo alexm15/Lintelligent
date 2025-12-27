@@ -678,4 +678,4 @@ Designed for large codebases:
 [Add license information]
 
 ## Support
-For issues, questions, or contributions, please [open an issue](https://github.com/alexm15/lintelligent/issues).
+For issues, questions, or contributions, please [open an issue](https://github.com/alexm15/Lintelligent/issues).

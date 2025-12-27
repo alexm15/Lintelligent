@@ -351,7 +351,7 @@ ESLint provides **two JSON formatters**: `json` and `json-with-metadata`.
   "tool": {
     "name": "Lintelligent",
     "version": "1.2.3",
-    "informationUri": "https://github.com/alexm15/lintelligent"
+    "informationUri": "https://github.com/alexm15/Lintelligent"
   },
   "invocation": {
     "executionSuccessful": true,
@@ -951,7 +951,7 @@ $json.results | ForEach-Object {
   "tool": {
     "name": "Lintelligent",
     "version": "1.2.3",
-    "informationUri": "https://github.com/alexm15/lintelligent"
+    "informationUri": "https://github.com/alexm15/Lintelligent"
   },
   "invocation": {
     "executionSuccessful": true,

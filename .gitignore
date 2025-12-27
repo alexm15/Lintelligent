@@ -58,6 +58,7 @@ bld/
 # Test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
+docs/MONETIZATION.md
 *.trx
 *.coverage
 *.coveragexml

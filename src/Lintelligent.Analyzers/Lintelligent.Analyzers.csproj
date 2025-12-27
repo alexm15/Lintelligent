@@ -18,6 +18,10 @@
         <Version>1.2.0</Version>
         <Authors>Lintelligent Team</Authors>
         <Description>Roslyn analyzer integration for Lintelligent code quality rules (LNT001-LNT008, LNT100 duplication detection, LNT200-LNT202 monad detection for language-ext)</Description>
+            <PackageLicenseExpression>MIT</PackageLicenseExpression>
+            <PackageProjectUrl>https://github.com/alexm15/Lintelligent</PackageProjectUrl>
+            <RepositoryUrl>https://github.com/alexm15/Lintelligent</RepositoryUrl>
+            <RepositoryType>git</RepositoryType>
         <PackageTags>roslyn analyzer code-quality static-analysis duplication-detection functional-programming monad language-ext</PackageTags>
     </PropertyGroup>
 

@@ -1,21 +1,57 @@
 # Lintelligent
 
+[![NuGet](https://img.shields.io/nuget/v/Lintelligent.Analyzers?label=Analyzers)](https://www.nuget.org/packages/Lintelligent.Analyzers)
+[![NuGet](https://img.shields.io/nuget/v/Lintelligent.Cli?label=CLI)](https://www.nuget.org/packages/Lintelligent.Cli)
+[![NuGet](https://img.shields.io/nuget/v/Lintelligent.Reporting?label=Reporting)](https://www.nuget.org/packages/Lintelligent.Reporting)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Build Status](https://github.com/alexm15/Lintelligent/actions/workflows/ci.yml/badge.svg)](https://github.com/alexm15/Lintelligent/actions)
+
 A static code analysis CLI tool for C# projects that detects code quality issues and provides actionable insights.
 
 ## Features
 
-- 🔍 **Configurable Rules**: Analyze C# code with extensible analyzer rules
-- 🔄 **Code Duplication Detection**: Identify exact duplicated code blocks (whole files and sub-blocks within methods)
-- 🧬 **Monad Detection**: Suggest functional patterns (Option<T>, Either<L,R>, Validation<T>) for safer error handling
-- ⚡ **Severity Filtering**: Filter analysis results by Error/Warning/Info levels
-- 📊 **Category Grouping**: Organize findings by category (Maintainability, Security, Performance, etc.)
-- 🎯 **Multiple Findings**: Rules report all violations in a file, not just the first
-- 🚀 **High Performance**: Handles large codebases (10,000+ files) with streaming architecture
-- 🧪 **Testable Core**: Framework-agnostic engine with no file system dependencies
-- 🔌 **Extensible**: Plugin-friendly architecture for IDE integration and custom frontends
-- 🛡️ **Resilient**: Exception handling ensures one faulty rule doesn't crash entire analysis
-- 🔬 **Roslyn Analyzer**: Build-time analysis with instant IDE feedback (zero additional tools)
-- 🌐 **Workspace Analysis**: Cross-file analysis in Roslyn analyzer (duplication detection in IDE)
+
+## Free vs Pro
+
+| Feature                | Free (MIT) | Pro (License) |
+|------------------------|:----------:|:-------------:|
+| Diagnostics            |     ✅      |      ✅       |
+| Code Fixes             |     ❌      |      ✅       |
+| CLI                    |     ✅      |      ✅       |
+| Intelligence Dashboard |     ❌      |      ✅       |
+
+## How to Upgrade to Pro
+1. Purchase a license at https://lintelligent.dev/pricing
+2. Enter your license key in your IDE or set the environment variable `LINTELLIGENT_LICENSE_KEY`
+3. Pro features (code fixes, dashboard) will be enabled automatically
+
+## Licensing
+- Free features: MIT License (see LICENSE)
+- Pro features: Source-available, commercial use requires license (see LICENSE-PRO.md)
+
+## Repository Structure
+
+```
+src/
+    Lintelligent.Analyzers/      # Free, MIT
+    Lintelligent.CodeFixes/      # Pro, license required
+    Lintelligent.Cli/            # Free, MIT
+    Lintelligent.Reporting/      # Free, MIT
+docs/
+    MONETIZATION.md
+    POC-CODE-FIXES.md
+LICENSE
+LICENSE-PRO.md
+README.md
+.github/
+    ISSUE_TEMPLATE/
+    workflows/
+    FUNDING.yml
+```
+
+## Support
+- Community: GitHub Discussions
+- Pro: Priority support via email/Discord (see pricing page)
 
 ## Installation
 

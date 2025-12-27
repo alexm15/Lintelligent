@@ -1,0 +1,93 @@
+name: Publish to NuGet
+
+on:
+  release:
+    types: [published]
+  push:
+    tags:
+      - 'analyzers/v*'  # Trigger on analyzers/v1.2.0
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version to publish'
+        required: true
+        type: string
+
+permissions:
+  id-token: write  # Required for Trusted Publishing
+  contents: write  # For creating releases
+  pull-requests: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    
+    - name: Test
+      run: dotnet test --configuration Release --no-build --verbosity normal
+    
+    - name: Pack Lintelligent.Analyzers
+      run: dotnet pack src/Lintelligent.Analyzers/Lintelligent.Analyzers.csproj --configuration Release --no-build --output ./nupkgs
+    
+    - name: Publish to NuGet (Trusted Publishing)
+      run: dotnet nuget push ./nupkgs/Lintelligent.Analyzers.*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.NUGET_TOKEN }}
+    
+    - name: Extract release notes
+      id: release_notes
+      run: |
+        # Get version from tag (analyzers/v1.2.0 -> 1.2.0) or input
+        if [ "${{ github.event_name }}" == "push" ]; then
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#analyzers/v}"  # Remove 'analyzers/v' prefix
+        elif [ "${{ github.event_name }}" == "release" ]; then
+          VERSION="${{ github.event.release.tag_name }}"
+          VERSION="${VERSION#analyzers/v}"
+        else
+          VERSION="${{ inputs.version }}"
+        fi
+        
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        
+        # Extract section from package CHANGELOG
+        CHANGELOG_PATH="src/Lintelligent.Analyzers/CHANGELOG.md"
+        awk "/## \[$VERSION\]/,/## \[/" "$CHANGELOG_PATH" | head -n -1 | tail -n +2 > release-notes.txt || echo "No changelog entry found" > release-notes.txt
+        
+        # Set as output (escape newlines)
+        {
+          echo 'NOTES<<EOF'
+          cat release-notes.txt
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
+      shell: bash
+    
+    - name: Update release notes
+      if: github.event_name == 'release'
+      uses: softprops/action-gh-release@v1
+      with:
+        body: |
+          ## 📦 NuGet Package Published
+          
+          - [Lintelligent.Analyzers ${{ steps.release_notes.outputs.version }}](https://www.nuget.org/packages/Lintelligent.Analyzers/${{ steps.release_notes.outputs.version }})
+          
+          ---
+          
+          ${{ steps.release_notes.outputs.NOTES }}
+        append_body: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

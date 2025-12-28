@@ -76,8 +76,9 @@
 
     <Target Name="PackAnalyzer">
         <ItemGroup>
-            <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).dll" PackagePath="analyzers/dotnet/cs"/>
-            <TfmSpecificPackageFile Include="$(OutputPath)\Lintelligent.AnalyzerEngine.dll" PackagePath="analyzers/dotnet/cs"/>
+            <!-- Ensure analyzer assemblies are included in the package under analyzers/dotnet/cs -->
+            <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
+            <None Include="$(OutputPath)Lintelligent.AnalyzerEngine.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
         </ItemGroup>
     </Target>
 

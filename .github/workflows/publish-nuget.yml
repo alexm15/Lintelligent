@@ -41,10 +41,15 @@ jobs:
       run: dotnet test --configuration Release --no-build --verbosity normal
 
     - name: Generate PNG icon from SVG (for NuGet)
-      if: exists('src/Lintelligent.Analyzers/icon.svg')
       run: |
-        sudo apt-get update && sudo apt-get install -y librsvg2-bin
-        rsvg-convert -w 128 -h 128 src/Lintelligent.Analyzers/icon.svg -o src/Lintelligent.Analyzers/icon.png
+        if [ -f src/Lintelligent.Analyzers/icon.svg ]; then
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin
+          rsvg-convert -w 128 -h 128 src/Lintelligent.Analyzers/icon.svg -o src/Lintelligent.Analyzers/icon.png
+          echo "Generated src/Lintelligent.Analyzers/icon.png"
+        else
+          echo "No icon.svg found; skipping PNG generation"
+        fi
       shell: bash
     
     - name: Set Git commit

@@ -7,15 +7,17 @@
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 
         <!-- NuGet Packaging -->
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <!-- Disable pack during build; CI runs `dotnet pack` explicitly. This avoids pack-time nuspec mismatches during local builds. -->
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <!-- Include build output so the nupkg isn't empty (ensures analyzer DLLs are present) -->
+        <IncludeBuildOutput>true</IncludeBuildOutput>
         <DevelopmentDependency>true</DevelopmentDependency>
         <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
         <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackAnalyzer</TargetsForTfmSpecificContentInPackage>
 
         <!-- Package Metadata -->
         <PackageId>Lintelligent.Analyzers</PackageId>
-        <Version>1.2.0</Version>
+        <Version>1.2.2</Version>
         <Authors>Lintelligent Team</Authors>
         <Description>Roslyn analyzer integration for Lintelligent code quality rules (LNT001-LNT008, LNT100 duplication detection, LNT200-LNT202 monad detection for language-ext)</Description>
             <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -25,6 +27,22 @@
         <PackageTags>roslyn analyzer code-quality static-analysis duplication-detection functional-programming monad language-ext</PackageTags>
         <!-- Include package README for NuGet.org display -->
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <!-- Package icon: pack a PNG generated from icon.svg during CI -->
+        <PackageIcon>icon.png</PackageIcon>
+        <!-- Recommended metadata -->
+        <Summary>Roslyn analyzers for code quality, duplication detection and functional patterns (language-ext)</Summary>
+        <Copyright>Copyright (c) 2025 Lintelligent Team</Copyright>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PackageReleaseNotes>See CHANGELOG.md in the package or the GitHub release notes</PackageReleaseNotes>
+        <!-- Repository metadata (SourceLink / CI can populate commit/branch) -->
+        <RepositoryBranch>main</RepositoryBranch>
+        <RepositoryCommit>$(GitCommit)</RepositoryCommit>
+        <!-- Symbols / SourceLink -->
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <DebugType>portable</DebugType>
+        <!-- Suppress pack-time framework mismatch warning treated as error in CI/local pack -->
+        <NoWarn>NU5128</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
@@ -33,9 +51,18 @@
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all"/>
     </ItemGroup>
 
-        <!-- Ensure README is packed into the nupkg for NuGet.org display -->
+        <!-- SourceLink for repository provenance (privateassets to avoid flow to consumers) -->
+        <ItemGroup>
+            <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
+        </ItemGroup>
+
+        <!-- Ensure README and CHANGELOG are packed into the nupkg for NuGet.org display -->
         <ItemGroup>
             <None Include="README.md" Pack="true" PackagePath="" />
+            <None Include="CHANGELOG.md" Pack="true" PackagePath="" />
+            <!-- Keep svg as source; pack generated PNG as the package icon -->
+            <None Include="icon.svg" Pack="false" PackagePath="" />
+            <None Include="icon.png" Pack="true" PackagePath="" />
         </ItemGroup>
 
     <ItemGroup>
@@ -53,8 +80,9 @@
 
     <Target Name="PackAnalyzer">
         <ItemGroup>
-            <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).dll" PackagePath="analyzers/dotnet/cs"/>
-            <TfmSpecificPackageFile Include="$(OutputPath)\Lintelligent.AnalyzerEngine.dll" PackagePath="analyzers/dotnet/cs"/>
+            <!-- Ensure analyzer assemblies are included in the package under analyzers/dotnet/cs -->
+            <Analyzer Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
+            <Analyzer Include="$(OutputPath)Lintelligent.AnalyzerEngine.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
         </ItemGroup>
     </Target>
 

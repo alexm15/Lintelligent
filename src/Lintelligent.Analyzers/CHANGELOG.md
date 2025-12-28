@@ -8,7 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Include README, CHANGELOG and icon in package; enable SourceLink and snupkg symbol publishing
 
+### Changed
+
+### Fixed
+
+---
+
+## [1.2.2] - 2025-12-28
+
+### Added
+
+- Package README displayed on NuGet.org
+- Package icon included for NuGet listing
+- SourceLink and symbol package (.snupkg) support for improved debugging
+
+### Changed
+
+- Bumped package metadata and release notes packaging
+
+### Fixed
+
+- Minor packaging warnings addressed
+
+---
 ### Changed
 
 ### Fixed

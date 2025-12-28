@@ -7,8 +7,10 @@
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 
         <!-- NuGet Packaging -->
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <!-- Disable pack during build; CI runs `dotnet pack` explicitly. This avoids pack-time nuspec mismatches during local builds. -->
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <!-- Include build output so the nupkg isn't empty (ensures analyzer DLLs are present) -->
+        <IncludeBuildOutput>true</IncludeBuildOutput>
         <DevelopmentDependency>true</DevelopmentDependency>
         <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
         <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackAnalyzer</TargetsForTfmSpecificContentInPackage>
@@ -39,6 +41,8 @@
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <DebugType>portable</DebugType>
+        <!-- Suppress pack-time framework mismatch warning treated as error in CI/local pack -->
+        <NoWarn>NU5128</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

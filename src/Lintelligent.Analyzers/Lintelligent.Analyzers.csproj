@@ -23,6 +23,8 @@
             <RepositoryUrl>https://github.com/alexm15/Lintelligent</RepositoryUrl>
             <RepositoryType>git</RepositoryType>
         <PackageTags>roslyn analyzer code-quality static-analysis duplication-detection functional-programming monad language-ext</PackageTags>
+        <!-- Include package README for NuGet.org display -->
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -30,6 +32,11 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" PrivateAssets="all"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all"/>
     </ItemGroup>
+
+        <!-- Ensure README is packed into the nupkg for NuGet.org display -->
+        <ItemGroup>
+            <None Include="README.md" Pack="true" PackagePath="" />
+        </ItemGroup>
 
     <ItemGroup>
         <!-- Reference AnalyzerEngine (contains IAnalyzerRule implementations) -->

@@ -25,6 +25,20 @@
         <PackageTags>roslyn analyzer code-quality static-analysis duplication-detection functional-programming monad language-ext</PackageTags>
         <!-- Include package README for NuGet.org display -->
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <!-- Package icon displayed on NuGet.org -->
+        <PackageIcon>icon.svg</PackageIcon>
+        <!-- Recommended metadata -->
+        <Summary>Roslyn analyzers for code quality, duplication detection and functional patterns (language-ext)</Summary>
+        <Copyright>Copyright (c) 2025 Lintelligent Team</Copyright>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PackageReleaseNotes>See CHANGELOG.md in the package or the GitHub release notes</PackageReleaseNotes>
+        <!-- Repository metadata (SourceLink / CI can populate commit/branch) -->
+        <RepositoryBranch>main</RepositoryBranch>
+        <RepositoryCommit>$(GitCommit)</RepositoryCommit>
+        <!-- Symbols / SourceLink -->
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <DebugType>portable</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
@@ -33,9 +47,16 @@
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all"/>
     </ItemGroup>
 
-        <!-- Ensure README is packed into the nupkg for NuGet.org display -->
+        <!-- SourceLink for repository provenance (privateassets to avoid flow to consumers) -->
+        <ItemGroup>
+            <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.3.1" PrivateAssets="all" />
+        </ItemGroup>
+
+        <!-- Ensure README and CHANGELOG are packed into the nupkg for NuGet.org display -->
         <ItemGroup>
             <None Include="README.md" Pack="true" PackagePath="" />
+            <None Include="CHANGELOG.md" Pack="true" PackagePath="" />
+            <None Include="icon.svg" Pack="true" PackagePath="" />
         </ItemGroup>
 
     <ItemGroup>

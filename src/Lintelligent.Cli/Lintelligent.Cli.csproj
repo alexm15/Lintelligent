@@ -1,21 +1,55 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net10.0</TargetFramework>
-        <Version>1.1.0</Version>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>lintelligent</ToolCommandName>
+
+        <!-- NuGet Packaging -->
+        <!-- Disable pack during build; CI runs `dotnet pack` explicitly. This avoids pack-time nuspec mismatches during local builds. -->
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <!-- Include build output so the nupkg isn't empty (ensures analyzer DLLs are present) -->
+        <IncludeBuildOutput>true</IncludeBuildOutput>
+        <DevelopmentDependency>true</DevelopmentDependency>
+        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+
         <PackageId>Lintelligent.Cli</PackageId>
+        <Version>1.1.0</Version>
+        <RepositoryUrl>https://github.com/alexm15/Lintelligent</RepositoryUrl>
+        <Authors>Lintelligent Team</Authors>
+        <Description>CLI tool for running the analysis tooling of Lintelligent</Description>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/alexm15/Lintelligent</PackageProjectUrl>
         <RepositoryUrl>https://github.com/alexm15/Lintelligent</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-            <PackageLicenseExpression>MIT</PackageLicenseExpression>
-            <PackageProjectUrl>https://github.com/alexm15/Lintelligent</PackageProjectUrl>
-            <RepositoryUrl>https://github.com/alexm15/Lintelligent</RepositoryUrl>
-            <RepositoryType>git</RepositoryType>
+        <PackageTags>cli-tooling CLI code-quality static-analysis duplication-detection functional-programming monad language-ext</PackageTags>
+        <!-- Include package README for NuGet.org display -->
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+
+        <Title>Lintelligent CLI</Title>
+        <PackageReleaseNotes>Making documentation more complete</PackageReleaseNotes>
+        <NuGetAuditLevel>low</NuGetAuditLevel>
+        <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+
+        <!-- Package icon: pack a PNG generated from icon.svg during CI -->
+        <PackageIcon>icon.png</PackageIcon>
+        <!-- Recommended metadata -->
+        <Summary>CLI tool for running the analysis with Lintelligent. Useful for CI systems</Summary>
+        <Copyright>Copyright (c) 2025 Lintelligent Team</Copyright>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <!-- Repository metadata (SourceLink / CI can populate commit/branch) -->
+        <RepositoryBranch>main</RepositoryBranch>
+        <RepositoryCommit>$(GitCommit)</RepositoryCommit>
+        <!-- Symbols / SourceLink -->
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <DebugType>portable</DebugType>
+
         <!-- Suppress NuGet security warnings from Buildalyzer transitive dependencies -->
         <!-- These are runtime-only dependencies not exposed in our API surface -->
         <NoWarn>$(NoWarn);NU1608;NU1902;NU1903;NU1904</NoWarn>
@@ -25,13 +59,9 @@
 
 
     <ItemGroup>
-        <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-70" />
+        <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-70"/>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1"/>
         <PackageReference Include="Buildalyzer" Version="8.0.0"/>
-        
-        <!-- Use local project references for analyzer and codefix during development -->
-        <ProjectReference Include="..\Lintelligent.Analyzers\Lintelligent.Analyzers.csproj" />
-        <ProjectReference Include="..\Lintelligent.CodeFixes\Lintelligent.CodeFixes.csproj" />
     </ItemGroup>
 
 
@@ -39,6 +69,15 @@
         <ProjectReference Include="..\Lintelligent.AnalyzerEngine\Lintelligent.AnalyzerEngine.csproj"/>
         <ProjectReference Include="..\Lintelligent.Reporting\Lintelligent.Reporting.csproj"/>
 
+    </ItemGroup>
+
+    <!-- Ensure README and CHANGELOG are packed into the nupkg for NuGet.org display -->
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+        <None Update="icon.png" Pack="true" PackagePath=""/>
+        <None Update="icon.svg" Pack="false" PackagePath=""/>
+        <None Update="CHANGELOG.md" Pack="true" PackagePath=""/>
+        <!-- Keep svg as source; pack generated PNG as the package icon -->
     </ItemGroup>
 
 

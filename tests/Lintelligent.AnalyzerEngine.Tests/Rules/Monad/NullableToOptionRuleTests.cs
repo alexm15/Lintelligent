@@ -19,18 +19,20 @@ public class NullableToOptionRuleTests
     public void Analyze_MethodWithNullableReturnAnd3NullChecks_ProducesLNT200()
     {
         // Arrange
-        var testCode = @"
-class TestClass
-{
-    string? FindUser(int id)
-    {
-        if (id < 0) return null;
-        var user = Database.Find(id);
-        if (user == null) return null;
-        if (user.Name == null) return null;
-        return user.Name;
-    }
-}";
+        var testCode = """
+
+                       class TestClass
+                       {
+                           string? FindUser(int id)
+                           {
+                               if (id < 0) return null;
+                               var user = Database.Find(id);
+                               if (user == null) return null;
+                               if (user.Name == null) return null;
+                               return user.Name;
+                           }
+                       }
+                       """;
         var tree = CSharpSyntaxTree.ParseText(testCode, path: "Test.cs");
 
         // Act
@@ -49,16 +51,18 @@ class TestClass
     public void Analyze_MethodWithNullableReturnButLessThan3NullOps_NoResultProduct()
     {
         // Arrange: Only 2 null operations (below threshold)
-        var testCode = @"
-class TestClass
-{
-    string? FindUser(int id)
-    {
-        if (id < 0) return null;
-        var user = Database.Find(id);
-        return user?.Name;
-    }
-}";
+        var testCode = """
+
+                       class TestClass
+                       {
+                           string? FindUser(int id)
+                           {
+                               if (id < 0) return null;
+                               var user = Database.Find(id);
+                               return user?.Name;
+                           }
+                       }
+                       """;
         var tree = CSharpSyntaxTree.ParseText(testCode, path: TestFilePath);
 
         // Act
@@ -72,16 +76,18 @@ class TestClass
     public void Analyze_MethodAlreadyReturningOptionT_NoDiagnostic()
     {
         // Arrange
-        var testCode = @"
-class TestClass
-{
-    Option<string> FindUser(int id)
-    {
-        if (id < 0) return Option<string>.None;
-        var user = Database.Find(id);
-        return user != null ? Option<string>.Some(user.Name) : Option<string>.None;
-    }
-}";
+        var testCode = """
+
+                       class TestClass
+                       {
+                           Option<string> FindUser(int id)
+                           {
+                               if (id < 0) return Option<string>.None;
+                               var user = Database.Find(id);
+                               return user != null ? Option<string>.Some(user.Name) : Option<string>.None;
+                           }
+                       }
+                       """;
         var tree = CSharpSyntaxTree.ParseText(testCode, path: TestFilePath);
 
         // Act
@@ -95,15 +101,17 @@ class TestClass
     public void Analyze_NonNullableMethod_NoDiagnostic()
     {
         // Arrange
-        var testCode = @"
-class TestClass
-{
-    string GetUser(int id)
-    {
-        if (id < 0) return string.Empty;
-        return Database.Find(id).Name ?? string.Empty;
-    }
-}";
+        var testCode = """
+
+                       class TestClass
+                       {
+                           string GetUser(int id)
+                           {
+                               if (id < 0) return string.Empty;
+                               return Database.Find(id).Name ?? string.Empty;
+                           }
+                       }
+                       """;
         var tree = CSharpSyntaxTree.ParseText(testCode, path: TestFilePath);
 
         // Act
@@ -117,16 +125,18 @@ class TestClass
     public void Analyze_NullableWithNullConditionalOperators_CountsComplexity()
     {
         // Arrange: 3 null-conditional operators (?.)
-        var testCode = @"
-class TestClass
-{
-    string? GetAddress(int id)
-    {
-        var user = Database.Find(id);
-        var city = user?.Address?.City?.Name;
-        return city;
-    }
-}";
+        var testCode = """
+
+                       class TestClass
+                       {
+                           string? GetAddress(int id)
+                           {
+                               var user = Database.Find(id);
+                               var city = user?.Address?.City?.Name;
+                               return city;
+                           }
+                       }
+                       """;
         var tree = CSharpSyntaxTree.ParseText(testCode, path: TestFilePath);
 
         // Act
@@ -141,16 +151,18 @@ class TestClass
     public void Analyze_NullableWithNullCoalescingOperators_CountsComplexity()
     {
         // Arrange: 3 null-coalescing operators (??)
-        var testCode = @"
-class TestClass
-{
-    string? GetName(int id)
-    {
-        var user = Database.Find(id);
-        var name = user?.FirstName ?? user?.LastName ?? string.Empty;
-        return name ?? null;
-    }
-}";
+        var testCode = """
+
+                       class TestClass
+                       {
+                           string? GetName(int id)
+                           {
+                               var user = Database.Find(id);
+                               var name = user?.FirstName ?? user?.LastName ?? string.Empty;
+                               return name ?? null;
+                           }
+                       }
+                       """;
         var tree = CSharpSyntaxTree.ParseText(testCode, path: TestFilePath);
 
         // Act
@@ -165,19 +177,21 @@ class TestClass
     {
         // Arrange: Task<string?> detection requires semantic analysis (beyond MVP scope)
         // Future enhancement: Implement semantic analysis for generic nullable type arguments
-        var testCode = @"
-using System.Threading.Tasks;
-class TestClass
-{
-    async Task<string?> FindUserAsync(int id)
-    {
-        if (id < 0) return null;
-        var user = await Database.FindAsync(id);
-        if (user == null) return null;
-        if (user.Name == null) return null;
-        return user.Name;
-    }
-}";
+        var testCode = """
+
+                       using System.Threading.Tasks;
+                       class TestClass
+                       {
+                           async Task<string?> FindUserAsync(int id)
+                           {
+                               if (id < 0) return null;
+                               var user = await Database.FindAsync(id);
+                               if (user == null) return null;
+                               if (user.Name == null) return null;
+                               return user.Name;
+                           }
+                       }
+                       """;
         var tree = CSharpSyntaxTree.ParseText(testCode, path: TestFilePath);
 
         // Act
@@ -191,16 +205,18 @@ class TestClass
     public void Analyze_DiagnosticMessageIncludesEducationalContent()
     {
         // Arrange
-        var testCode = @"
-class TestClass
-{
-    string? FindUser(int id)
-    {
-        if (id < 0) return null;
-        if (id > 1000) return null;
-        return null;
-    }
-}";
+        var testCode = """
+
+                       class TestClass
+                       {
+                           string? FindUser(int id)
+                           {
+                               if (id < 0) return null;
+                               if (id > 1000) return null;
+                               return null;
+                           }
+                       }
+                       """;
         var tree = CSharpSyntaxTree.ParseText(testCode, path: TestFilePath);
 
         // Act
@@ -226,18 +242,20 @@ class TestClass
     public void Analyze_DiagnosticProperties_ContainMonadTypeAndComplexityScore()
     {
         // Arrange
-        var testCode = @"
-class TestClass
-{
-    string? FindUser(int id)
-    {
-        if (id < 0) return null;
-        var user = Database.Find(id);
-        if (user == null) return null;
-        if (user.Name == null) return null;
-        return user.Name;
-    }
-}";
+        var testCode = """
+
+                       class TestClass
+                       {
+                           string? FindUser(int id)
+                           {
+                               if (id < 0) return null;
+                               var user = Database.Find(id);
+                               if (user == null) return null;
+                               if (user.Name == null) return null;
+                               return user.Name;
+                           }
+                       }
+                       """;
         var tree = CSharpSyntaxTree.ParseText(testCode, path: TestFilePath);
 
         // Act

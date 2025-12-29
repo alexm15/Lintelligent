@@ -8,7 +8,7 @@
 
         <!-- NuGet Packaging -->
         <!-- Disable pack during build; CI runs `dotnet pack` explicitly. This avoids pack-time nuspec mismatches during local builds. -->
-        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <!-- Include build output so the nupkg isn't empty (ensures analyzer DLLs are present) -->
         <IncludeBuildOutput>true</IncludeBuildOutput>
         <DevelopmentDependency>true</DevelopmentDependency>
@@ -17,13 +17,13 @@
 
         <!-- Package Metadata -->
         <PackageId>Lintelligent.Analyzers</PackageId>
-        <Version>1.2.2</Version>
+        <Version>1.2.3</Version>
         <Authors>Lintelligent Team</Authors>
         <Description>Roslyn analyzer integration for Lintelligent code quality rules (LNT001-LNT008, LNT100 duplication detection, LNT200-LNT202 monad detection for language-ext)</Description>
-            <PackageLicenseExpression>MIT</PackageLicenseExpression>
-            <PackageProjectUrl>https://github.com/alexm15/Lintelligent</PackageProjectUrl>
-            <RepositoryUrl>https://github.com/alexm15/Lintelligent</RepositoryUrl>
-            <RepositoryType>git</RepositoryType>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/alexm15/Lintelligent</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/alexm15/Lintelligent</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
         <PackageTags>roslyn analyzer code-quality static-analysis duplication-detection functional-programming monad language-ext</PackageTags>
         <!-- Include package README for NuGet.org display -->
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -33,7 +33,6 @@
         <Summary>Roslyn analyzers for code quality, duplication detection and functional patterns (language-ext)</Summary>
         <Copyright>Copyright (c) 2025 Lintelligent Team</Copyright>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-        <PackageReleaseNotes>See CHANGELOG.md in the package or the GitHub release notes</PackageReleaseNotes>
         <!-- Repository metadata (SourceLink / CI can populate commit/branch) -->
         <RepositoryBranch>main</RepositoryBranch>
         <RepositoryCommit>$(GitCommit)</RepositoryCommit>
@@ -43,27 +42,39 @@
         <DebugType>portable</DebugType>
         <!-- Suppress pack-time framework mismatch warning treated as error in CI/local pack -->
         <NoWarn>NU5128</NoWarn>
+        <Title>Lintelligent Analyzers</Title>
+        <PackageReleaseNotes>Making documentation more complete</PackageReleaseNotes>
+        <NuGetAuditLevel>low</NuGetAuditLevel>
+        <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>
         <!-- Roslyn Analyzer APIs -->
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" PrivateAssets="all"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />
     </ItemGroup>
 
-        <!-- SourceLink for repository provenance (privateassets to avoid flow to consumers) -->
-        <ItemGroup>
-            <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
-        </ItemGroup>
+    <!-- SourceLink for repository provenance (privateassets to avoid flow to consumers) -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
+    </ItemGroup>
 
-        <!-- Ensure README and CHANGELOG are packed into the nupkg for NuGet.org display -->
-        <ItemGroup>
-            <None Include="README.md" Pack="true" PackagePath="" />
-            <None Include="CHANGELOG.md" Pack="true" PackagePath="" />
-            <!-- Keep svg as source; pack generated PNG as the package icon -->
-            <None Include="icon.svg" Pack="false" PackagePath="" />
-            <None Include="icon.png" Pack="true" PackagePath="" />
-        </ItemGroup>
+    <!-- Ensure README and CHANGELOG are packed into the nupkg for NuGet.org display -->
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="" />
+        <None Include="CHANGELOG.md" Pack="true" PackagePath="" />
+        <!-- Keep svg as source; pack generated PNG as the package icon -->
+        <None Include="icon.svg" Pack="false" PackagePath="" />
+        <None Include="icon.png" Pack="true" PackagePath="" />
+    </ItemGroup>
 
     <ItemGroup>
         <!-- Reference AnalyzerEngine (contains IAnalyzerRule implementations) -->
@@ -85,5 +96,10 @@
             <Analyzer Include="$(OutputPath)Lintelligent.AnalyzerEngine.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
         </ItemGroup>
     </Target>
+
+    <ItemGroup>
+        <EditorConfigFiles Remove="C:\Users\alexa\RiderProjects\Lintelligent\src\Lintelligent.Analyzers\.editorconfig" />
+        <EditorConfigFiles Remove=".editorconfig" />
+    </ItemGroup>
 
 </Project>

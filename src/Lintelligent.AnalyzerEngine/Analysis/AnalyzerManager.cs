@@ -1,5 +1,4 @@
-﻿using Lintelligent.AnalyzerEngine.Results;
-using Lintelligent.AnalyzerEngine.Rules;
+﻿using Lintelligent.AnalyzerEngine.Rules;
 
 namespace Lintelligent.AnalyzerEngine.Analysis;
 
@@ -30,10 +29,5 @@ public sealed class AnalyzerManager
     public void RegisterRules(IEnumerable<IAnalyzerRule> rules)
     {
         foreach (IAnalyzerRule rule in rules) RegisterRule(rule);
-    }
-
-    public IEnumerable<DiagnosticResult> Analyze(SyntaxTree syntaxTree)
-    {
-        return _rules.SelectMany(rule => rule.Analyze(syntaxTree));
     }
 }

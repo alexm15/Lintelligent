@@ -50,21 +50,21 @@ public class ExceptionSwallowingRuleTests
     public void ReturnsDiagnostic_WhenCatchBlockIsEmpty()
     {
         // Arrange
-        var code = """
-                   public class TestClass
-                   {
-                       public void Method()
-                       {
-                           try
-                           {
-                               DoSomething();
-                           }
-                           catch
-                           {
-                           }
-                       }
-                   }
-                   """;
+        const string code = """
+                            public class TestClass
+                            {
+                                public void Method()
+                                {
+                                    try
+                                    {
+                                        DoSomething();
+                                    }
+                                    catch
+                                    {
+                                    }
+                                }
+                            }
+                            """;
         SyntaxTree tree = CreateSyntaxTree(code);
 
         // Act
@@ -76,7 +76,7 @@ public class ExceptionSwallowingRuleTests
             {
                 RuleId = "LNT007",
                 Severity = Severity.Warning,
-                Category = DiagnosticCategories.CodeSmell
+                Category = DiagnosticCategories.CodeSmell,
             }, options => options.ExcludingMissingMembers());
 
         diagnostics.First().Message.Should().Contain("Empty catch block suppresses exceptions");

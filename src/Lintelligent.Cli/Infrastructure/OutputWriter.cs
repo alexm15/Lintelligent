@@ -55,7 +55,9 @@ public class OutputWriter
     {
         // Check if directory exists (not path traversal validation per Clarification #4)
         var directory = Path.GetDirectoryName(Path.GetFullPath(path));
+#pragma warning disable RS1035
         if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory))
+#pragma warning restore RS1035
         {
             throw new IOException(
                 $"Output directory does not exist: {directory}. " +

@@ -81,7 +81,7 @@ public static class ExactDuplicationFinder
                 var sequenceTokenCount = sequenceTokens.Count;
 
                 // Reconstruct source text from statements
-                var sequenceSource = string.Join(Environment.NewLine,
+                var sequenceSource = string.Join("\n",
                     sequence.Statements.Select(s => s.ToFullString()));
 
                 var sequenceInstance = new DuplicationInstance(
